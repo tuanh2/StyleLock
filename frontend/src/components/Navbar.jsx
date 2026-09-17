@@ -1,7 +1,7 @@
 import React from 'react';
 import { CONTRACT_ADDRESS, addressExplorerUrl } from '../config';
 
-export default function Navbar({ activeTab, setActiveTab, account, onConnect, isConnecting }) {
+export default function Navbar({ activeTab, setActiveTab, account, onConnect, onDisconnect, isConnecting }) {
   const shortAddr = (a) => a ? `${a.slice(0, 6)}...${a.slice(-4)}` : '';
 
   return (
@@ -78,15 +78,27 @@ export default function Navbar({ activeTab, setActiveTab, account, onConnect, is
           </a>
 
           {account ? (
-            <div className="flex items-center gap-2 bg-zinc-100 border border-zinc-200 px-3 py-1.5 rounded-lg text-xs font-mono text-zinc-800">
-              <span className="w-2 h-2 rounded-full bg-purple-600"></span>
-              <span className="font-medium">{shortAddr(account)}</span>
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 bg-zinc-100 border border-zinc-200 px-3 py-1.5 rounded-lg text-xs font-mono text-zinc-800">
+                <span className="w-2 h-2 rounded-full bg-purple-600"></span>
+                <span className="font-medium">{shortAddr(account)}</span>
+              </div>
+              <button
+                onClick={onDisconnect}
+                className="bg-zinc-100 hover:bg-red-50 hover:text-red-600 hover:border-red-200 border border-zinc-200 text-zinc-500 font-medium text-xs px-2.5 py-1.5 rounded-lg transition-all shadow-xs cursor-pointer flex items-center gap-1.5 active:scale-95"
+                title="Disconnect wallet"
+              >
+                <svg className="w-3.5 h-3.5 text-zinc-400 group-hover:text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+                <span>Disconnect</span>
+              </button>
             </div>
           ) : (
             <button
               onClick={onConnect}
               disabled={isConnecting}
-              className="bg-purple-600 hover:bg-purple-700 active:scale-95 text-white font-medium text-xs px-4 py-2 rounded-lg transition-all shadow-xs disabled:opacity-50"
+              className="bg-purple-600 hover:bg-purple-700 active:scale-95 text-white font-medium text-xs px-4 py-2 rounded-lg transition-all shadow-xs disabled:opacity-50 cursor-pointer"
             >
               {isConnecting ? 'Connecting...' : 'Connect Wallet'}
             </button>

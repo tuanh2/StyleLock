@@ -169,6 +169,29 @@ export default function App() {
     }
   };
 
+  // 2b. Disconnect Wallet
+  const handleDisconnect = () => {
+    setAccount('');
+    setClaimableReward('0');
+  };
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.ethereum) {
+      const handleAccountsChanged = (accounts) => {
+        if (!accounts || accounts.length === 0) {
+          setAccount('');
+          setClaimableReward('0');
+        } else {
+          setAccount(accounts[0]);
+        }
+      };
+      window.ethereum.on?.('accountsChanged', handleAccountsChanged);
+      return () => {
+        window.ethereum.removeListener?.('accountsChanged', handleAccountsChanged);
+      };
+    }
+  }, []);
+
   // 3. Open Report View
   const handleOpenSubmit = (style = null) => {
     const target = style || styles[0];
@@ -389,6 +412,7 @@ export default function App() {
         setActiveTab={changeTab}
         account={account}
         onConnect={handleConnect}
+        onDisconnect={handleDisconnect}
         isConnecting={isConnecting}
       />
 

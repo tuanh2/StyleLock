@@ -12,7 +12,7 @@ export default function DemoMarketView({ onReportPreset }) {
         </span>
         <h1 className="text-2xl font-bold text-zinc-950 tracking-tight">Test Listings & Storefronts</h1>
         <p className="text-xs text-zinc-600 mt-1">
-          Preconfigured sample listings. Click "Run Evaluation" to submit directly for consensus.
+          Real sample storefront pages hosted on-chain/locally. Click "Run Evaluation" to auto-fill and submit directly for consensus.
         </p>
       </div>
 
@@ -64,8 +64,9 @@ export default function DemoMarketView({ onReportPreset }) {
               </div>
 
               <button
+                type="button"
                 onClick={() => onReportPreset(item)}
-                className="w-full py-2.5 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-semibold text-xs transition-all text-center"
+                className="w-full py-2.5 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-semibold text-xs transition-all text-center shadow-xs active:scale-95"
               >
                 Run Evaluation
               </button>

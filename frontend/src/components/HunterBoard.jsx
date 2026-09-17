@@ -20,7 +20,7 @@ export default function HunterBoard({ styles, onSelectStyle, onOpenSubmit, claim
         {/* Claimable Rewards */}
         <div className="p-3.5 rounded-xl bg-purple-50/70 border border-purple-200 flex items-center gap-4">
           <div>
-            <span className="text-[10px] font-mono text-purple-700 block uppercase font-medium">Claimable Balance</span>
+            <span className="text-[10px] font-mono text-purple-700 block uppercase font-medium">Your Claimable Balance</span>
             <span className="text-lg font-bold text-purple-950 font-mono">{weiToGen(claimableReward || '0')} GEN</span>
           </div>
           <button
@@ -44,11 +44,17 @@ export default function HunterBoard({ styles, onSelectStyle, onOpenSubmit, claim
               <img
                 src={s.reference_collage_url}
                 alt={s.style_name}
-                className="w-14 h-14 rounded-lg object-cover bg-zinc-100 shrink-0 border border-zinc-200"
+                className="w-14 h-14 rounded-lg object-cover bg-zinc-100 shrink-0 border border-zinc-200 cursor-pointer"
+                onClick={() => onSelectStyle && onSelectStyle(s)}
               />
               <div>
                 <div className="flex items-center gap-2">
-                  <h3 className="text-base font-bold text-zinc-950">{s.style_name}</h3>
+                  <h3 
+                    onClick={() => onSelectStyle && onSelectStyle(s)}
+                    className="text-base font-bold text-zinc-950 cursor-pointer hover:text-purple-600 transition-colors"
+                  >
+                    {s.style_name}
+                  </h3>
                   <span className="text-[11px] font-mono text-zinc-500">by {s.artist_display_name}</span>
                 </div>
                 <p className="text-xs text-zinc-600 line-clamp-1 mt-0.5 max-w-lg">
@@ -57,20 +63,20 @@ export default function HunterBoard({ styles, onSelectStyle, onOpenSubmit, claim
                 <div className="flex items-center gap-3 text-[11px] font-mono text-zinc-500 mt-1">
                   <span>Threshold: <strong className="text-zinc-800">{s.similarity_threshold}%</strong></span>
                   <span>•</span>
-                  <span>Pool: <strong className="text-purple-600">{weiToGen(s.available_bounty_pool)} GEN</strong></span>
+                  <span>Escrow Pool: <strong className="text-purple-600">{weiToGen(s.available_bounty_pool)} GEN</strong></span>
                 </div>
               </div>
             </div>
 
             <div className="flex items-center gap-4 shrink-0 w-full sm:w-auto justify-between sm:justify-end">
               <div className="text-right sm:block hidden">
-                <span className="text-[10px] font-mono text-zinc-400 uppercase block">Reward</span>
+                <span className="text-[10px] font-mono text-zinc-400 uppercase block">Reward per Case</span>
                 <span className="text-sm font-bold text-zinc-950 font-mono">{weiToGen(s.bounty_per_case_wei)} GEN</span>
               </div>
 
               <button
                 onClick={() => onOpenSubmit(s)}
-                className="bg-purple-600 hover:bg-purple-700 text-white font-medium text-xs px-4 py-2 rounded-lg transition-all"
+                className="bg-purple-600 hover:bg-purple-700 text-white font-medium text-xs px-4 py-2 rounded-lg transition-all shadow-xs active:scale-95"
               >
                 Submit URL
               </button>

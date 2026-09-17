@@ -32,7 +32,7 @@ export default function StyleCard({ style, onSelect, onReport }) {
 
         {/* Bounty Tag */}
         <div className="absolute top-3 right-3">
-          <span className="px-2 py-0.5 rounded text-[11px] font-mono font-semibold bg-purple-600 text-white backdrop-blur-sm">
+          <span className="px-2 py-0.5 rounded text-[11px] font-mono font-semibold bg-purple-600 text-white backdrop-blur-sm shadow-xs">
             {weiToGen(style.bounty_per_case_wei)} GEN Bounty
           </span>
         </div>
@@ -70,12 +70,13 @@ export default function StyleCard({ style, onSelect, onReport }) {
         {/* Metrics */}
         <div className="pt-3 border-t border-zinc-100 flex items-center justify-between text-xs font-mono text-zinc-500 mb-3">
           <span>Threshold: <strong className="text-zinc-800">{style.similarity_threshold}%</strong></span>
-          <span>Detections: <strong className="text-purple-600">{style.confirmed_cases || 0}</strong></span>
+          <span>Pool: <strong className="text-purple-600">{weiToGen(style.available_bounty_pool)} GEN</strong></span>
         </div>
 
-        {/* Actions */}
+        {/* Actions - View Details opens StyleDetailsModal; Report Copy opens SubmitModal */}
         <div className="grid grid-cols-2 gap-2 pt-1">
           <button
+            type="button"
             onClick={() => onSelect(style)}
             className="w-full text-xs font-medium py-2 rounded-lg bg-zinc-100 hover:bg-zinc-200 text-zinc-800 transition-colors text-center"
           >
@@ -83,8 +84,9 @@ export default function StyleCard({ style, onSelect, onReport }) {
           </button>
 
           <button
+            type="button"
             onClick={() => onReport(style)}
-            className="w-full text-xs font-semibold py-2 rounded-lg bg-purple-600 hover:bg-purple-700 text-white transition-colors text-center"
+            className="w-full text-xs font-semibold py-2 rounded-lg bg-purple-600 hover:bg-purple-700 text-white transition-colors text-center shadow-xs active:scale-95"
           >
             Report Copy
           </button>

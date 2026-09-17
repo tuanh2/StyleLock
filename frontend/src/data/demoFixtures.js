@@ -1,3 +1,11 @@
+// Real demo listings hosted statically in /demo-listings/
+const getListingUrl = (path) => {
+  if (typeof window !== 'undefined' && window.location && window.location.origin) {
+    return `${window.location.origin}${path}`;
+  }
+  return `http://localhost:3000${path}`;
+};
+
 export const DEMO_PRESETS = [
   {
     id: 'derivative-1',
@@ -5,7 +13,7 @@ export const DEMO_PRESETS = [
     type: 'DERIVATIVE',
     styleId: '1',
     styleName: 'Ink Nocturne',
-    url: 'https://raw.githubusercontent.com/genlayerlabs/genlayer-project-boilerplate/v2-dev/README.md#commercial-ai-art-pack-moody-watercolor-illustrations-price-14-usd',
+    url: getListingUrl('/demo-listings/moody-ink-artpack.html'),
     title: 'Moody Ink Noir AI Illustration Pack — $14.99',
     store: 'PromptMarket Hub',
     price: '$14.99 USD',
@@ -14,9 +22,9 @@ export const DEMO_PRESETS = [
     expectedVerdict: 'DERIVATIVE',
     expectedSimilarity: 88,
     expectedConfidence: 91,
-    claim: 'Commercial AI storefront selling 12 downloadable watercolor illustrations imitating Alice Kim\'s Ink Nocturne style with rough black contours and muted palettes.',
+    claim: "Commercial AI storefront selling 12 downloadable watercolor illustrations imitating Alice Kim's Ink Nocturne style with rough black contours, muted washes, and asymmetric framing.",
     image: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=800&q=80',
-    description: '12 high-resolution AI generated graphics featuring rough dark contour lines, atmospheric watercolor textures, and melancholic human silhouettes in sparse compositions. Perfect for game book covers, posters, and commercial merch.'
+    description: '12 high-resolution AI generated graphics featuring rough dark contour lines, atmospheric watercolor textures, and melancholic human silhouettes in sparse compositions. Perfect for commercial merch.'
   },
   {
     id: 'clean-1',
@@ -24,7 +32,7 @@ export const DEMO_PRESETS = [
     type: 'CLEAN',
     styleId: '1',
     styleName: 'Ink Nocturne',
-    url: 'https://raw.githubusercontent.com/genlayerlabs/genlayer-project-boilerplate/v2-dev/README.md#cyberpunk-neon-geometric-vectors-pack-price-8-usd',
+    url: getListingUrl('/demo-listings/neon-cyber-vectors.html'),
     title: 'Neon Cyber Grid Vector Bundle — $8.00',
     store: 'VectorForge Studio',
     price: '$8.00 USD',
@@ -43,7 +51,7 @@ export const DEMO_PRESETS = [
     type: 'AMBIGUOUS',
     styleId: '1',
     styleName: 'Ink Nocturne',
-    url: 'https://raw.githubusercontent.com/genlayerlabs/genlayer-project-boilerplate/v2-dev/README.md#free-student-sketch-practice-noncommercial-portfolio',
+    url: getListingUrl('/demo-listings/rough-ink-student-study.html'),
     title: 'Rough Ink Study (Student Portfolio Practice)',
     store: 'ArtCommunity Free Gallery',
     price: 'Free / Non-commercial',

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { genToWei } from '../config';
+import { genToWei, weiToGen } from '../config';
 
 export default function ArtistStudio({ styles, onCreateStyle, isCreating }) {
   const [activeTab, setActiveTab] = useState('register');
@@ -203,7 +203,9 @@ export default function ArtistStudio({ styles, onCreateStyle, isCreating }) {
             <div key={s.style_id} className="p-4 rounded-xl bg-white border border-zinc-200 flex items-center justify-between">
               <div>
                 <h3 className="font-bold text-zinc-950 text-base">Style #{s.style_id}: {s.style_name}</h3>
-                <p className="text-xs text-zinc-500 mt-0.5">Threshold: {s.similarity_threshold}% | Bounty: {bountyGen} GEN</p>
+                <p className="text-xs text-zinc-500 mt-0.5">
+                  Threshold: {s.similarity_threshold}% | Bounty: {weiToGen(s.bounty_per_case_wei)} GEN | Pool: {weiToGen(s.available_bounty_pool)} GEN
+                </p>
               </div>
               <span className="text-xs font-mono px-2 py-1 rounded bg-zinc-100 text-zinc-700 border border-zinc-200 font-medium">
                 Active

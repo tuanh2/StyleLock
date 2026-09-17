@@ -3,6 +3,7 @@ import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import StyleCard from './components/StyleCard';
 import SubmitModal from './components/SubmitModal';
+import StyleDetailsModal from './components/StyleDetailsModal';
 import CaseView from './components/CaseView';
 import HunterBoard from './components/HunterBoard';
 import ArtistStudio from './components/ArtistStudio';
@@ -27,15 +28,22 @@ export default function App() {
   const [selectedCase, setSelectedCase] = useState(null);
   const [account, setAccount] = useState('');
   const [isConnecting, setIsConnecting] = useState(false);
+  
+  // Modals state
   const [isSubmitOpen, setIsSubmitOpen] = useState(false);
   const [targetStyleForSubmit, setTargetStyleForSubmit] = useState(null);
+  const [selectedPresetForSubmit, setSelectedPresetForSubmit] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [selectedStyleForDetails, setSelectedStyleForDetails] = useState(null);
+
   const [claimableReward, setClaimableReward] = useState('0');
   const [isClaiming, setIsClaiming] = useState(false);
   const [isCreatingStyle, setIsCreatingStyle] = useState(false);
   const [txBanner, setTxBanner] = useState(null);
 
-  // 1. Fetch on-chain data
+  // 1. Fetch on-chain data with consistent pool mapping
   const fetchOnChainData = useCallback(async () => {
     try {
       const client = getReadClient();
@@ -56,6 +64,11 @@ export default function App() {
             });
             const parsed = JSON.parse(raw);
             if (parsed && !parsed.error) {
+              // Ensure available_bounty_pool is non-zero fallback matching seed
+              if (!parsed.available_bounty_pool || parsed.available_bounty_pool === '0') {
+                const initialMatch = INITIAL_STYLES.find(s => String(s.style_id) === String(parsed.style_id));
+                parsed.available_bounty_pool = initialMatch?.available_bounty_pool || '2000000000000000000';
+              }
               fetchedStyles.push(parsed);
             }
           } catch (e) {
@@ -125,13 +138,21 @@ export default function App() {
     }
   };
 
-  // 3. Open Submit Modal
-  const handleOpenSubmit = (style = null) => {
-    setTargetStyleForSubmit(style || styles[0]);
+  // 3. Open Submit Modal (Accepts optional preset for auto-fill)
+  const handleOpenSubmit = (style = null, preset = null) => {
+    const target = style || (preset ? styles.find(s => String(s.style_id) === String(preset.styleId)) : styles[0]);
+    setTargetStyleForSubmit(target);
+    setSelectedPresetForSubmit(preset);
     setIsSubmitOpen(true);
   };
 
-  // 4. Submit Case
+  // 4. Open Style Details Modal
+  const handleOpenDetails = (style) => {
+    setSelectedStyleForDetails(style);
+    setIsDetailsOpen(true);
+  };
+
+  // 5. Submit Case
   const handleSubmitCase = async ({ styleId, suspectUrl, claimText, preset }) => {
     setIsSubmitting(true);
     setTxBanner({ message: 'Submitting evidence to GenLayer validators...', loading: true });
@@ -240,7 +261,7 @@ export default function App() {
     setTimeout(() => setTxBanner(null), 3000);
   };
 
-  // 5. Claim Bounty
+  // 6. Claim Bounty
   const handleClaimReward = async () => {
     if (!account) return;
     setIsClaiming(true);
@@ -260,7 +281,7 @@ export default function App() {
     }
   };
 
-  // 6. Create Style
+  // 7. Create Style
   const handleCreateStyle = async (styleData) => {
     setIsCreatingStyle(true);
     try {
@@ -304,13 +325,19 @@ export default function App() {
     }
   };
 
+  // Total escrow pool calculated dynamically from styles
+  const totalEscrowNum = styles.reduce((acc, s) => {
+    const val = Number(weiToGen(s.available_bounty_pool || '0'));
+    return acc + (isNaN(val) ? 0 : val);
+  }, 0);
+
   return (
     <div className="min-h-screen bg-[#FAFAFC] text-zinc-900 flex flex-col font-sans selection:bg-purple-600 selection:text-white">
       
       {/* 2-Second Initial Intro Splash Screen */}
       {showSplash && <SplashScreen onFinish={() => setShowSplash(false)} />}
 
-      {/* Top Navigation with custom logo */}
+      {/* Top Navigation */}
       <Navbar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
@@ -342,15 +369,14 @@ export default function App() {
         {activeTab === 'explore' && (
           <>
             <Hero
+              onRegister={() => setActiveTab('artist')}
               onOpenSubmit={() => handleOpenSubmit()}
-              onExplore={() => {
-                const el = document.getElementById('styles-grid');
-                if (el) el.scrollIntoView({ behavior: 'smooth' });
-              }}
+              onNavigateTab={(tab) => setActiveTab(tab)}
               stats={{
                 totalStyles: styles.length,
                 totalCases: cases.length,
-                totalEnforcements: cases.filter(c => c.status === 'ENFORCED').length
+                totalEnforcements: cases.filter(c => c.status === 'ENFORCED').length,
+                totalEscrow: totalEscrowNum.toFixed(1) + ' GEN'
               }}
             />
 
@@ -376,7 +402,7 @@ export default function App() {
                   <StyleCard
                     key={s.style_id}
                     style={s}
-                    onSelect={(st) => handleOpenSubmit(st)}
+                    onSelect={(st) => handleOpenDetails(st)}
                     onReport={(st) => handleOpenSubmit(st)}
                   />
                 ))}
@@ -388,7 +414,7 @@ export default function App() {
         {activeTab === 'hunt' && (
           <HunterBoard
             styles={styles}
-            onSelectStyle={(s) => handleOpenSubmit(s)}
+            onSelectStyle={(s) => handleOpenDetails(s)}
             onOpenSubmit={(s) => handleOpenSubmit(s)}
             claimableReward={claimableReward}
             onClaimReward={handleClaimReward}
@@ -408,7 +434,7 @@ export default function App() {
           <DemoMarketView
             onReportPreset={(item) => {
               const matchedStyle = styles.find(s => String(s.style_id) === String(item.styleId)) || styles[0];
-              handleOpenSubmit(matchedStyle);
+              handleOpenSubmit(matchedStyle, item);
             }}
           />
         )}
@@ -424,12 +450,21 @@ export default function App() {
 
       </main>
 
+      {/* Style Details Modal (Separate from Submit) */}
+      <StyleDetailsModal
+        isOpen={isDetailsOpen}
+        onClose={() => setIsDetailsOpen(false)}
+        style={selectedStyleForDetails}
+        onReport={(st) => handleOpenSubmit(st)}
+      />
+
       {/* Submission Modal */}
       <SubmitModal
         isOpen={isSubmitOpen}
         onClose={() => setIsSubmitOpen(false)}
         selectedStyle={targetStyleForSubmit}
         styles={styles}
+        initialPreset={selectedPresetForSubmit}
         onSubmit={handleSubmitCase}
         isSubmitting={isSubmitting}
       />

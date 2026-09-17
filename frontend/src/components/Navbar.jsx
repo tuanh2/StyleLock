@@ -85,7 +85,7 @@ export default function Navbar({ activeTab, setActiveTab, account, onConnect, is
             title="View contract on GenLayer explorer"
           >
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-            <span>Studionet</span>
+            <span>Studio Next</span>
           </a>
 
           {account ? (

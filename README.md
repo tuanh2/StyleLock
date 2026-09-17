@@ -59,7 +59,7 @@ Creators need an autonomous, transparent mechanism: precommit style parameters o
 ```
 +---------------------+     +----------------------+     +---------------------+
 |   React Frontend    | --> |   GenLayer Network   | --> |   LLM Validators    |
-|  (Vite + Tailwind)  |     |     (Studionet)      |     |      (AI Jury)      |
+|  (Vite + Tailwind)  |     | (Studio Next: 61997) |     |      (AI Jury)      |
 +---------------------+     +----------------------+     +---------------------+
            │                           │                            │
       MetaMask                Intelligent Contract            Web Rendering
@@ -67,6 +67,9 @@ Creators need an autonomous, transparent mechanism: precommit style parameters o
                                Bounty Escrow                Consensus Engine
                                Style Registry               Enforcement Records
 ```
+
+> **Studio Next Verified Deployment**: [`0xbbbDa0a730e27C55Fd8F3CBC6862882d4f670ffc`](https://explorer-studio-dev.genlayer.com/address/0xbbbDa0a730e27C55Fd8F3CBC6862882d4f670ffc) (Chain ID `61997`)
+
 
 ---
 

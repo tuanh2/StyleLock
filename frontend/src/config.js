@@ -1,12 +1,12 @@
 import { createClient } from 'genlayer-js';
-import { studionet } from 'genlayer-js/chains';
+import { studioDevnet } from 'genlayer-js/chains';
 
 export const CONTRACT_ADDRESS =
-  (import.meta).env?.VITE_CONTRACT_ADDRESS || '0x63f0708BDd5C52e8f2A5f9308Aeb6057a09042FD';
+  (import.meta).env?.VITE_CONTRACT_ADDRESS || '0xbbbDa0a730e27C55Fd8F3CBC6862882d4f670ffc';
 
-export const STUDIONET_CHAIN = studionet;
-export const RPC_ENDPOINT = (import.meta).env?.VITE_GENLAYER_RPC || 'https://studio.genlayer.com/api';
-export const EXPLORER_URL = 'https://genlayer-explorer.vercel.app';
+export const STUDIONET_CHAIN = studioDevnet;
+export const RPC_ENDPOINT = (import.meta).env?.VITE_GENLAYER_RPC || 'https://studio-next.genlayer.com/api';
+export const EXPLORER_URL = 'https://explorer-studio-dev.genlayer.com';
 
 const CHAIN_ID_HEX = '0x' + STUDIONET_CHAIN.id.toString(16); // 0xF1EF
 
@@ -26,7 +26,7 @@ export async function connectWallet() {
         method: 'wallet_addEthereumChain',
         params: [{
           chainId: CHAIN_ID_HEX,
-          chainName: STUDIONET_CHAIN.name || 'Genlayer Studio Network',
+          chainName: 'GenLayer Studio Next',
           nativeCurrency: { name: 'GEN Token', symbol: 'GEN', decimals: 18 },
           rpcUrls: [RPC_ENDPOINT],
           blockExplorerUrls: [EXPLORER_URL],

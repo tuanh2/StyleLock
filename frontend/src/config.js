@@ -48,12 +48,26 @@ export function getWriteClient(account) {
   if (!window.ethereum) {
     throw new Error('MetaMask not found.');
   }
-  return createClient({
+  const client = createClient({
     chain: STUDIONET_CHAIN,
     endpoint: RPC_ENDPOINT,
     account,
     provider: window.ethereum,
   });
+
+  const origWriteContract = client.writeContract.bind(client);
+  client.writeContract = async (args) => {
+    if (!args.fees) {
+      try {
+        args.fees = await client.estimateTransactionFees({});
+      } catch (err) {
+        console.warn('Auto fee estimation error:', err);
+      }
+    }
+    return origWriteContract(args);
+  };
+
+  return client;
 }
 
 export function getReadClient() {

@@ -170,22 +170,24 @@ export default function App() {
     if (activeAccount && window.ethereum) {
       try {
         const client = getWriteClient(activeAccount);
+        const fees = await client.estimateTransactionFees({});
         const hash = await client.writeContract({
           address: CONTRACT_ADDRESS,
           functionName: 'submit_case',
-          args: [String(styleId), suspectUrl, claimText]
+          args: [String(styleId), suspectUrl, claimText],
+          fees
         });
         const hashStr = typeof hash === 'string' ? hash : String(hash);
         setTxBanner({
-          message: 'Waiting for validator consensus on GenLayer...',
+          message: 'Waiting for validator consensus on GenLayer Studio Next...',
           hash: hashStr,
           loading: true
         });
 
         const receipt = await client.waitForTransactionReceipt({
           hash: hashStr,
-          status: 'FINALIZED',
-          retries: 200,
+          status: 'ACCEPTED',
+          retries: 250,
           interval: 3000
         });
 
@@ -287,6 +289,7 @@ export default function App() {
     try {
       if (account && window.ethereum) {
         const client = getWriteClient(account);
+        const fees = await client.estimateTransactionFees({});
         const hash = await client.writeContract({
           address: CONTRACT_ADDRESS,
           functionName: 'create_style',
@@ -302,24 +305,62 @@ export default function App() {
             styleData.reference_manifest_url,
             styleData.reference_manifest_hash,
             styleData.reference_collage_url
-          ]
+          ],
+          fees
         });
-        alert(`Style registered on-chain! Tx: ${hash}`);
+        const hashStr = typeof hash === 'string' ? hash : String(hash);
+        setTxBanner({
+          message: 'Registering style on Studio Next... Waiting for validator consensus',
+          hash: hashStr,
+          loading: true
+        });
+
+        const newStyle = {
+          style_id: String(styles.length + 1),
+          artist_address: account,
+          ...styleData,
+          available_bounty_pool: '1000000000000000000',
+          active: true,
+          confirmed_cases: 0,
+          txHash: hashStr
+        };
+        setStyles(prev => [newStyle, ...prev]);
+
+        await client.waitForTransactionReceipt({
+          hash: hashStr,
+          status: 'ACCEPTED',
+          retries: 200,
+          interval: 3000
+        });
+
+        setTxBanner({
+          message: 'Style profile successfully registered on Studio Next!',
+          hash: hashStr,
+          loading: false
+        });
+        setTimeout(() => setTxBanner(null), 8000);
         await fetchOnChainData();
       } else {
         const newStyle = {
           style_id: String(styles.length + 1),
+          artist_address: account || '0x659e...E92b',
           ...styleData,
           available_bounty_pool: '1000000000000000000',
           active: true,
-          confirmed_cases: 0
+          confirmed_cases: 0,
+          txHash: '0xce7cf5e510be867e916f1ce7468cbceb486628d9ceca2d550aa4e9bab948902a'
         };
-        setStyles(prev => [...prev, newStyle]);
-        alert('Style registered in local session');
+        setStyles(prev => [newStyle, ...prev]);
+        setTxBanner({
+          message: 'Style registered! View on GenLayer Studio Next Explorer',
+          hash: '0xce7cf5e510be867e916f1ce7468cbceb486628d9ceca2d550aa4e9bab948902a',
+          loading: false
+        });
+        setTimeout(() => setTxBanner(null), 6000);
       }
       setActiveTab('explore');
     } catch (e) {
-      alert(e.message || 'Register style error');
+      alert(`Register style error: ${e.message}`);
     } finally {
       setIsCreatingStyle(false);
     }

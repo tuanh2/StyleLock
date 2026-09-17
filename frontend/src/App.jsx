@@ -376,8 +376,8 @@ export default function App() {
       {/* MyContext signature Pastel Grid Background */}
       <div className="pastel-grid-background absolute inset-0 z-0 pointer-events-none" />
       <div
-        className="absolute inset-x-0 top-0 h-[640px] pointer-events-none z-[1]"
-        style={{ background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.72) 0%, rgba(255, 255, 255, 0) 100%)' }}
+        className="absolute inset-x-0 top-0 h-[680px] pointer-events-none z-[1]"
+        style={{ background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.86) 0%, rgba(255, 255, 255, 0.45) 45%, rgba(255, 255, 255, 0) 100%)' }}
       />
 
       {/* 2-Second Initial Intro Splash Screen */}

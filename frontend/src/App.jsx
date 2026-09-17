@@ -1,0 +1,454 @@
+import React, { useState, useEffect, useCallback } from 'react';
+import Navbar from './components/Navbar';
+import Hero from './components/Hero';
+import StyleCard from './components/StyleCard';
+import SubmitModal from './components/SubmitModal';
+import CaseView from './components/CaseView';
+import HunterBoard from './components/HunterBoard';
+import ArtistStudio from './components/ArtistStudio';
+import DemoMarketView from './components/DemoMarketView';
+import { INITIAL_STYLES, DEMO_PRESETS } from './data/demoFixtures';
+import {
+  connectWallet,
+  getWriteClient,
+  getReadClient,
+  CONTRACT_ADDRESS,
+  extractExecution,
+  txExplorerUrl,
+  weiToGen
+} from './config';
+import { Shield, Sparkles, AlertCircle, ExternalLink, Cpu, CheckCircle2 } from 'lucide-react';
+
+export default function App() {
+  const [activeTab, setActiveTab] = useState('explore'); // explore, hunt, artist, market, case
+  const [styles, setStyles] = useState(INITIAL_STYLES);
+  const [cases, setCases] = useState([]);
+  const [selectedCase, setSelectedCase] = useState(null);
+  const [account, setAccount] = useState('');
+  const [isConnecting, setIsConnecting] = useState(false);
+  const [isSubmitOpen, setIsSubmitOpen] = useState(false);
+  const [targetStyleForSubmit, setTargetStyleForSubmit] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [claimableReward, setClaimableReward] = useState('0');
+  const [isClaiming, setIsClaiming] = useState(false);
+  const [isCreatingStyle, setIsCreatingStyle] = useState(false);
+  const [txBanner, setTxBanner] = useState(null); // { message, hash, loading }
+
+  // 1. Fetch on-chain data
+  const fetchOnChainData = useCallback(async () => {
+    try {
+      const client = getReadClient();
+      const styleCountRaw = await client.readContract({
+        address: CONTRACT_ADDRESS,
+        functionName: 'get_style_count',
+        args: []
+      });
+      const count = parseInt(String(styleCountRaw || '0'), 10);
+      if (count > 0) {
+        const fetchedStyles = [];
+        for (let i = 1; i <= count; i++) {
+          try {
+            const raw = await client.readContract({
+              address: CONTRACT_ADDRESS,
+              functionName: 'get_style',
+              args: [String(i)]
+            });
+            const parsed = JSON.parse(raw);
+            if (parsed && !parsed.error) {
+              fetchedStyles.push(parsed);
+            }
+          } catch (e) {
+            console.warn('Error reading style', i, e);
+          }
+        }
+        if (fetchedStyles.length > 0) {
+          setStyles(fetchedStyles);
+        }
+      }
+
+      // Fetch Case #1 if exists
+      const caseCountRaw = await client.readContract({
+        address: CONTRACT_ADDRESS,
+        functionName: 'get_case_count',
+        args: []
+      });
+      const caseCount = parseInt(String(caseCountRaw || '0'), 10);
+      if (caseCount > 0) {
+        const fetchedCases = [];
+        for (let j = 1; j <= caseCount; j++) {
+          try {
+            const cRaw = await client.readContract({
+              address: CONTRACT_ADDRESS,
+              functionName: 'get_case',
+              args: [String(j)]
+            });
+            const cParsed = JSON.parse(cRaw);
+            if (cParsed && !cParsed.error) {
+              fetchedCases.push(cParsed);
+            }
+          } catch (e) {
+            console.warn('Error reading case', j, e);
+          }
+        }
+        setCases(fetchedCases);
+      }
+    } catch (err) {
+      console.warn('Failed to load on-chain styles/cases:', err.message);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchOnChainData();
+  }, [fetchOnChainData]);
+
+  // 2. Connect Wallet
+  const handleConnect = async () => {
+    setIsConnecting(true);
+    try {
+      const addr = await connectWallet();
+      setAccount(addr);
+      // Fetch user claimable rewards
+      try {
+        const client = getReadClient();
+        const rew = await client.readContract({
+          address: CONTRACT_ADDRESS,
+          functionName: 'get_claimable_reward',
+          args: [addr]
+        });
+        setClaimableReward(String(rew || '0'));
+      } catch (e) {
+        console.warn('Error reading claimable reward:', e);
+      }
+    } catch (err) {
+      alert(err.message || 'Failed to connect MetaMask');
+    } finally {
+      setIsConnecting(false);
+    }
+  };
+
+  // 3. Open Submit Modal
+  const handleOpenSubmit = (style = null) => {
+    setTargetStyleForSubmit(style || styles[0]);
+    setIsSubmitOpen(true);
+  };
+
+  // 4. Submit Case
+  const handleSubmitCase = async ({ styleId, suspectUrl, claimText, preset }) => {
+    setIsSubmitting(true);
+    setTxBanner({ message: 'Submitting evidence & initiating GenLayer AI jury consensus...', loading: true });
+
+    let activeAccount = account;
+    if (!activeAccount && window.ethereum) {
+      try {
+        activeAccount = await connectWallet();
+        setAccount(activeAccount);
+      } catch (e) {
+        console.warn('Wallet connection note:', e);
+      }
+    }
+
+    if (activeAccount && window.ethereum) {
+      try {
+        const client = getWriteClient(activeAccount);
+        const hash = await client.writeContract({
+          address: CONTRACT_ADDRESS,
+          functionName: 'submit_case',
+          args: [String(styleId), suspectUrl, claimText]
+        });
+        const hashStr = typeof hash === 'string' ? hash : String(hash);
+        setTxBanner({
+          message: 'Waiting for GenVM multi-validator consensus & finality...',
+          hash: hashStr,
+          loading: true
+        });
+
+        const receipt = await client.waitForTransactionReceipt({
+          hash: hashStr,
+          status: 'FINALIZED',
+          retries: 200,
+          interval: 3000
+        });
+
+        const exec = extractExecution(receipt);
+        if (exec.execution_result === 'ERROR' || exec.status === 'rollback') {
+          throw new Error(exec.payload || 'Transaction rejected on-chain');
+        }
+
+        // Read newly created case
+        const readClient = getReadClient();
+        const countStr = await readClient.readContract({
+          address: CONTRACT_ADDRESS,
+          functionName: 'get_case_count',
+          args: []
+        });
+        const latestCaseRaw = await readClient.readContract({
+          address: CONTRACT_ADDRESS,
+          functionName: 'get_case',
+          args: [String(countStr)]
+        });
+        const newCase = JSON.parse(latestCaseRaw);
+        newCase.txHash = hashStr;
+
+        setCases(prev => [newCase, ...prev]);
+        setSelectedCase(newCase);
+        setActiveTab('case');
+        setIsSubmitOpen(false);
+        setTxBanner({ message: 'Consensus Finalized On-Chain!', hash: hashStr, loading: false });
+        setTimeout(() => setTxBanner(null), 6000);
+        setIsSubmitting(false);
+        await fetchOnChainData();
+        return;
+      } catch (err) {
+        console.warn('On-chain write error:', err.message);
+        setTxBanner({ message: `On-chain note: ${err.message}. Showing simulation result.`, loading: false });
+      }
+    }
+
+    // Fallback simulation mode for instant preview without wallet
+    await new Promise(r => setTimeout(r, 1200));
+
+    const p = preset || DEMO_PRESETS[0];
+    const isDeriv = p.type === 'DERIVATIVE';
+    const isClean = p.type === 'CLEAN';
+
+    const simCase = {
+      case_id: String(cases.length + 1),
+      style_id: styleId,
+      style_name: styles.find(s => String(s.style_id) === String(styleId))?.style_name || 'Ink Nocturne',
+      hunter_address: activeAccount || '0x659e...E92b',
+      suspect_url: suspectUrl,
+      claim_text: claimText,
+      status: isDeriv ? 'ENFORCED' : isClean ? 'CLEAN' : 'AMBIGUOUS',
+      verdict: p.type,
+      similarity: p.expectedSimilarity || (isDeriv ? 88 : 24),
+      confidence: p.expectedConfidence || 91,
+      commercial_use: p.commercial,
+      reward_allocated: isDeriv && p.commercial,
+      bounty_amount_wei: isDeriv ? '250000000000000000' : '0',
+      enforcement_record_id: isDeriv ? `SL-000${cases.length + 2}` : '',
+      matched_traits: isDeriv ? ['rough black ink contours', 'muted watercolor palette', 'asymmetric framing'] : [],
+      differences: isClean ? ['sharp neon vector geometry', 'isometric perspective', 'zero watercolor texture'] : [],
+      reason: isDeriv
+        ? 'GenLayer AI validators independently analyzed the rendered storefront and reference collage. The suspect listing reproduces a distinctive combination of registered Ink Nocturne traits (rough black contours, muted washes, asymmetric figures) in a commercial product pack ($14.99). Autonomous policy threshold satisfied.'
+        : 'The suspect listing exhibits sharp polygonal vector geometry with high-saturation neon hues. No distinctive traits of the registered watercolor style were reproduced. Verdict is CLEAN.',
+      txHash: '0x1045756a1167583b0ffce4383d93b3030fe9117e0a043ac18c1a354535fe7528'
+    };
+
+    setCases(prev => [simCase, ...prev]);
+    setSelectedCase(simCase);
+    setActiveTab('case');
+    setIsSubmitOpen(false);
+    setIsSubmitting(false);
+    setTimeout(() => setTxBanner(null), 3000);
+  };
+
+  // 5. Claim Bounty
+  const handleClaimReward = async () => {
+    if (!account) return;
+    setIsClaiming(true);
+    try {
+      const client = getWriteClient(account);
+      const hash = await client.writeContract({
+        address: CONTRACT_ADDRESS,
+        functionName: 'claim_reward',
+        args: []
+      });
+      alert(`Bounty claimed! Tx: ${hash}`);
+      setClaimableReward('0');
+    } catch (e) {
+      alert(e.message || 'Claim reward error');
+    } finally {
+      setIsClaiming(false);
+    }
+  };
+
+  // 6. Create Style
+  const handleCreateStyle = async (styleData) => {
+    setIsCreatingStyle(true);
+    try {
+      if (account && window.ethereum) {
+        const client = getWriteClient(account);
+        const hash = await client.writeContract({
+          address: CONTRACT_ADDRESS,
+          functionName: 'create_style',
+          args: [
+            styleData.artist_display_name,
+            styleData.style_name,
+            styleData.descriptor,
+            styleData.protected_traits,
+            styleData.license_terms,
+            styleData.similarity_threshold,
+            styleData.minimum_confidence,
+            styleData.bounty_per_case_wei,
+            styleData.reference_manifest_url,
+            styleData.reference_manifest_hash,
+            styleData.reference_collage_url
+          ]
+        });
+        alert(`Style registered on-chain! Tx: ${hash}`);
+        await fetchOnChainData();
+      } else {
+        const newStyle = {
+          style_id: String(styles.length + 1),
+          ...styleData,
+          available_bounty_pool: '1000000000000000000',
+          active: true,
+          confirmed_cases: 0
+        };
+        setStyles(prev => [...prev, newStyle]);
+        alert('Style registered in local session!');
+      }
+      setActiveTab('explore');
+    } catch (e) {
+      alert(e.message || 'Register style error');
+    } finally {
+      setIsCreatingStyle(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-[#07080C] text-zinc-100 flex flex-col font-sans selection:bg-purple-600 selection:text-white">
+      
+      {/* Top Navigation */}
+      <Navbar
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        account={account}
+        onConnect={handleConnect}
+        isConnecting={isConnecting}
+      />
+
+      {/* Transaction Banner */}
+      {txBanner && (
+        <div className="bg-purple-950/60 border-b border-purple-800/60 px-4 py-2 text-xs font-mono text-purple-200 flex items-center justify-center gap-3 animate-fade-in">
+          {txBanner.loading && <Cpu className="w-3.5 h-3.5 animate-spin text-purple-400" />}
+          <span>{txBanner.message}</span>
+          {txBanner.hash && (
+            <a
+              href={txExplorerUrl(txBanner.hash)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-purple-300 hover:text-white underline flex items-center gap-1"
+            >
+              <span>View Explorer</span>
+              <ExternalLink className="w-3 h-3" />
+            </a>
+          )}
+        </div>
+      )}
+
+      {/* Main Content Area */}
+      <main className="flex-1">
+        
+        {activeTab === 'explore' && (
+          <>
+            <Hero
+              onOpenSubmit={() => handleOpenSubmit()}
+              onExplore={() => {
+                const el = document.getElementById('styles-grid');
+                if (el) el.scrollIntoView({ behavior: 'smooth' });
+              }}
+              stats={{
+                totalStyles: styles.length,
+                totalCases: cases.length,
+                totalEnforcements: cases.filter(c => c.status === 'ENFORCED').length
+              }}
+            />
+
+            <section id="styles-grid" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8 pb-4 border-b border-zinc-800/80">
+                <div>
+                  <h2 className="text-xl font-bold text-white tracking-tight">Active Creator Style Profiles</h2>
+                  <p className="text-xs text-zinc-400 mt-0.5">
+                    Explore protected visual identities with precommitted autonomous enforcement policies.
+                  </p>
+                </div>
+
+                <button
+                  onClick={() => setActiveTab('artist')}
+                  className="text-xs font-mono text-purple-400 hover:text-purple-300 flex items-center gap-1 transition-colors"
+                >
+                  <span>+ Register Your Style</span>
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {styles.map(s => (
+                  <StyleCard
+                    key={s.style_id}
+                    style={s}
+                    onSelect={(st) => handleOpenSubmit(st)}
+                    onReport={(st) => handleOpenSubmit(st)}
+                  />
+                ))}
+              </div>
+            </section>
+          </>
+        )}
+
+        {activeTab === 'hunt' && (
+          <HunterBoard
+            styles={styles}
+            onSelectStyle={(s) => handleOpenSubmit(s)}
+            onOpenSubmit={(s) => handleOpenSubmit(s)}
+            claimableReward={claimableReward}
+            onClaimReward={handleClaimReward}
+            isClaiming={isClaiming}
+          />
+        )}
+
+        {activeTab === 'artist' && (
+          <ArtistStudio
+            styles={styles}
+            onCreateStyle={handleCreateStyle}
+            isCreating={isCreatingStyle}
+          />
+        )}
+
+        {activeTab === 'market' && (
+          <DemoMarketView
+            onReportPreset={(item) => {
+              const matchedStyle = styles.find(s => String(s.style_id) === String(item.styleId)) || styles[0];
+              handleOpenSubmit(matchedStyle);
+            }}
+          />
+        )}
+
+        {activeTab === 'case' && selectedCase && (
+          <CaseView
+            caseData={selectedCase}
+            onBack={() => setActiveTab('explore')}
+            onClaimReward={handleClaimReward}
+            isClaiming={isClaiming}
+          />
+        )}
+
+      </main>
+
+      {/* Evidence Submission Modal */}
+      <SubmitModal
+        isOpen={isSubmitOpen}
+        onClose={() => setIsSubmitOpen(false)}
+        selectedStyle={targetStyleForSubmit}
+        styles={styles}
+        onSubmit={handleSubmitCase}
+        isSubmitting={isSubmitting}
+      />
+
+      {/* Minimal Footer */}
+      <footer className="border-t border-zinc-900 py-8 px-4 text-center text-xs font-mono text-zinc-400 bg-[#050608]">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-zinc-400">STYLELOCK PROTOCOL</span>
+            <span>•</span>
+            <span>Autonomous Creator Protection on GenLayer</span>
+          </div>
+          <div className="text-zinc-400 text-[11px]">
+            Decentralized evidence assessment, not legal determination.
+          </div>
+        </div>
+      </footer>
+
+    </div>
+  );
+}

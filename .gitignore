@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.pytest_cache/
+__pycache__/
+*.pyc
+.env
+.env.local
+scratch/
+scratch_ref/
+DeathOfTheAuthor/
+genlayer-cli-mcp/

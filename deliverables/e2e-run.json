@@ -1,0 +1,35 @@
+{
+  "generated_at": "2026-09-17T05:19:45.646Z",
+  "network": "studionet",
+  "chain_id": 61999,
+  "contract_address": "0x63f0708BDd5C52e8f2A5f9308Aeb6057a09042FD",
+  "contract_explorer": "https://genlayer-explorer.vercel.app/address/0x63f0708BDd5C52e8f2A5f9308Aeb6057a09042FD",
+  "deployer_address": "0x659ee75C8a9A45b43781B81B29d930258ec9E92b",
+  "verified_transactions": {
+    "deploy_tx": "0x7e73e01e05a95cb74ac1ae516878e13647ed494d841c04a964726b0a704b0cdc",
+    "deploy_explorer": "https://genlayer-explorer.vercel.app/tx/0x7e73e01e05a95cb74ac1ae516878e13647ed494d841c04a964726b0a704b0cdc",
+    "style_1_seed_tx": "0x4f952f3e6287cc1e06bef2c988be04f1951f9cab812fd080474a298007736144",
+    "style_2_seed_tx": "0xd3811133408d2fdb84981dddde2cd9bca705cccc4519d4e8e5da5419346d1c67",
+    "case_adjudication_tx": "0x1045756a1167583b0ffce4383d93b3030fe9117e0a043ac18c1a354535fe7528",
+    "case_adjudication_explorer": "https://genlayer-explorer.vercel.app/tx/0x1045756a1167583b0ffce4383d93b3030fe9117e0a043ac18c1a354535fe7528"
+  },
+  "styles": [
+    {
+      "id": "1",
+      "name": "Ink Nocturne",
+      "artist": "Alice Kim",
+      "threshold": 82
+    }
+  ],
+  "sample_case": {
+    "id": "1",
+    "style_id": "1",
+    "verdict": "CLEAN",
+    "status": "CLEAN",
+    "similarity": 5,
+    "confidence": 91,
+    "reason": "The suspect URL points to a GitHub README for a software development boilerplate project (GenLayer project template for a football bets smart contract). The rendered webpage content contains only software documentation, badges, project structure descriptions, and code snippets — zero visual artwork of any kind. The URL fragment suggesting a commercial AI art pack selling watercolor illustrations at $14 USD does not correspond to any actual content on the page; it appears to be a fabricated or manipulated anchor fragment. There are no visual traits to compare against the registered Ink Nocturne style, no illustrations present, and no commercial transaction elements. The hunter claim is entirely unsupported by the actual evidence retrieved from the URL. Verdict is CLEAN with high confidence due to complete absence of infringing content."
+  },
+  "assertions_failed": 0,
+  "status": "ALL_ASSERTIONS_PASSED"
+}

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import StyleCard from './components/StyleCard';
-import SubmitModal from './components/SubmitModal';
+import ReportView from './components/ReportView';
 import StyleDetailsModal from './components/StyleDetailsModal';
 import CaseView from './components/CaseView';
 import HunterBoard from './components/HunterBoard';
@@ -27,6 +27,7 @@ const getTabFromUrl = () => {
   if (target === 'hunt' || target === 'bounties' || target === 'hunter') return 'hunt';
   if (target === 'artist' || target === 'register' || target === 'studio') return 'artist';
   if (target.startsWith('case')) return 'case';
+  if (target.startsWith('report')) return 'report';
   return 'explore';
 };
 
@@ -168,11 +169,11 @@ export default function App() {
     }
   };
 
-  // 3. Open Submit Modal
+  // 3. Open Report View
   const handleOpenSubmit = (style = null) => {
     const target = style || styles[0];
     setTargetStyleForSubmit(target);
-    setIsSubmitOpen(true);
+    changeTab('report');
   };
 
   // 4. Open Style Details Modal
@@ -247,8 +248,7 @@ export default function App() {
 
       setCases(prev => [newCase, ...prev]);
       setSelectedCase(newCase);
-      setActiveTab('case');
-      setIsSubmitOpen(false);
+      changeTab('case');
       setTxBanner({ message: 'Consensus Finalized On-Chain', hash: hashStr, loading: false });
       setTimeout(() => setTxBanner(null), 6000);
       setIsSubmitting(false);
@@ -556,6 +556,16 @@ export default function App() {
           />
         )}
 
+        {activeTab === 'report' && (
+          <ReportView
+            selectedStyle={targetStyleForSubmit}
+            styles={styles}
+            onBack={() => changeTab('hunt')}
+            onSubmit={handleSubmitCase}
+            isSubmitting={isSubmitting}
+          />
+        )}
+
       </main>
 
       {/* Style Details Modal (With Adjudication History) */}
@@ -564,21 +574,15 @@ export default function App() {
         onClose={() => setIsDetailsOpen(false)}
         style={selectedStyleForDetails}
         cases={cases}
-        onReport={(st) => handleOpenSubmit(st)}
+        onReport={(st) => {
+          setIsDetailsOpen(false);
+          handleOpenSubmit(st);
+        }}
         onSelectCase={(c) => {
+          setIsDetailsOpen(false);
           setSelectedCase(c);
           changeTab('case');
         }}
-      />
-
-      {/* Submission Modal */}
-      <SubmitModal
-        isOpen={isSubmitOpen}
-        onClose={() => setIsSubmitOpen(false)}
-        selectedStyle={targetStyleForSubmit}
-        styles={styles}
-        onSubmit={handleSubmitCase}
-        isSubmitting={isSubmitting}
       />
 
       {/* Footer */}

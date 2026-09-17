@@ -26,7 +26,7 @@ export default function Hero({ onRegister, onOpenSubmit, onNavigateTab, stats })
           </button>
 
           <button
-            onClick={() => onOpenSubmit()}
+            onClick={() => onNavigateTab && onNavigateTab('hunt')}
             className="bg-white/80 hover:bg-white text-[#211827] font-semibold text-sm px-7 py-3 rounded-full border border-[#eadfea] transition-all shadow-xs cursor-pointer active:scale-95"
           >
             Report Suspect Copy
@@ -49,7 +49,7 @@ export default function Hero({ onRegister, onOpenSubmit, onNavigateTab, stats })
             </div>
 
             <div 
-              onClick={() => onOpenSubmit()}
+              onClick={() => onNavigateTab && onNavigateTab('hunt')}
               className="p-3 rounded-2xl bg-white/90 border border-[#eadfea] hover:border-purple-300 hover:shadow-sm cursor-pointer transition-all"
             >
               <div className="font-bold text-zinc-950 font-mono mb-1">2. Submit URL</div>

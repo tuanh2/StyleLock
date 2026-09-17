@@ -16,6 +16,7 @@ export default function StyleCard({ style, onSelect, onReport }) {
         <img
           src={style.reference_collage_url}
           alt={style.style_name}
+          referrerPolicy="no-referrer"
           className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-300"
           onError={(e) => {
             e.target.src = '/images/ink-nocturne.jpg';

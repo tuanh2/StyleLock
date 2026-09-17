@@ -52,6 +52,7 @@ export default function StyleDetailsModal({ isOpen, onClose, style, onReport }) 
           <img
             src={style.reference_collage_url}
             alt={style.style_name}
+            referrerPolicy="no-referrer"
             className="w-full h-full object-cover"
             onError={(e) => {
               e.target.src = '/images/ink-nocturne.jpg';

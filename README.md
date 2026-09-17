@@ -2,8 +2,8 @@
 
 **Autonomous visual style protection and bounty protocol powered by GenLayer's AI-native consensus.**
 
-[![Live Demo](https://img.shields.io/badge/Live%20Demo-Vercel-success)](https://temporary-brisk-maroon-rpucffc.vercel.app)
-[![GenLayer Network](https://img.shields.io/badge/GenLayer-Studionet%20(61999)-8B5CF6)](https://explorer-next.studio.genlayer.com/address/0x63f0708BDd5C52e8f2A5f9308Aeb6057a09042FD)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Vercel-success)](https://style-lock-dusky.vercel.app)
+[![GenLayer Network](https://img.shields.io/badge/GenLayer-Studio%20Next%20(61997)-8B5CF6)](https://explorer-studio-dev.genlayer.com/address/0xbbbDa0a730e27C55Fd8F3CBC6862882d4f670ffc)
 [![Track](https://img.shields.io/badge/Track-Autonomous%20Protocols-blue)](https://portal.genlayer.foundation/agent-tank)
 [![E2E Tests](https://img.shields.io/badge/E2E%20Tests-6%2F6%20Passing-emerald)](./deliverables/e2e-run.json)
 [![Unit Tests](https://img.shields.io/badge/Unit%20Tests-16%2F16%20Passing-emerald)](./tests/test_stylelock.py)
@@ -92,7 +92,7 @@ Solidity cannot fetch web pages. Oracles cannot reason about aesthetics or comme
 - **Frontend**: React 18 + Vite + TailwindCSS
 - **Design System**: Technical minimalist aesthetic inspired by de1.ai (black text on crisp white background, subtle purple accents)
 - **Chain Integration**: genlayer-js SDK + MetaMask
-- **Network**: GenLayer Studionet (Chain ID: 61999) / Studio Next Compatible
+- **Network**: GenLayer Studio Next (Chain ID: 61997)
 - **Testing**: pytest (16/16 unit tests passed) + gltest + Node.js E2E automation
 
 ---
@@ -100,21 +100,22 @@ Solidity cannot fetch web pages. Oracles cannot reason about aesthetics or comme
 ## Contract Address & Verified Transactions
 
 ```
-Contract Address: 0x63f0708BDd5C52e8f2A5f9308Aeb6057a09042FD
-Network: GenLayer Studionet (Chain ID: 61999)
-RPC Endpoint: https://studio.genlayer.com/api
-Explorer: https://explorer-next.studio.genlayer.com/address/0x63f0708BDd5C52e8f2A5f9308Aeb6057a09042FD
-Live App: https://temporary-brisk-maroon-rpucffc.vercel.app
+Contract Address: 0xbbbDa0a730e27C55Fd8F3CBC6862882d4f670ffc
+Network: GenLayer Studio Next (Chain ID: 61997)
+RPC Endpoint: https://studio-next.genlayer.com/api
+Explorer: https://explorer-studio-dev.genlayer.com/address/0xbbbDa0a730e27C55Fd8F3CBC6862882d4f670ffc
+Live App: https://style-lock-dusky.vercel.app
 ```
 
-### Verified On-Chain Transactions
+### Verified On-Chain Transactions (Studio Next)
 
 | Action | Function | Transaction Hash | Result |
 | :--- | :--- | :--- | :--- |
-| **Contract Deploy** | `deployContract` | [`0x7e73e01e...0704b0cdc`](https://explorer-next.studio.genlayer.com/tx/0x7e73e01e05a95cb74ac1ae516878e13647ed494d841c04a964726b0a704b0cdc) | FINALIZED (SUCCESS) |
-| **Register Style #1** | `create_style` (*Ink Nocturne*) | [`0x4f952f3e...07736144`](https://explorer-next.studio.genlayer.com/tx/0x4f952f3e6287cc1e06bef2c988be04f1951f9cab812fd080474a298007736144) | FINALIZED (SUCCESS) |
-| **Register Style #2** | `create_style` (*Neon Geometry*) | [`0xd3811133...346d1c67`](https://explorer-next.studio.genlayer.com/tx/0xd3811133408d2fdb84981dddde2cd9bca705cccc4519d4e8e5da5419346d1c67) | FINALIZED (SUCCESS) |
-| **Case Adjudication** | `submit_case` | [`0x1045756a...35fe7528`](https://explorer-next.studio.genlayer.com/tx/0x1045756a1167583b0ffce4383d93b3030fe9117e0a043ac18c1a354535fe7528) | MAJORITY_AGREE (`status: CLEAN`) |
+| **Contract Deploy** | `deployContract` | [`0x19242ce7...be871861`](https://explorer-studio-dev.genlayer.com/tx/0x19242ce75519f4e9b023f72e20595608cec54137c16fc09b86965327be871861) | FINALIZED (SUCCESS) |
+| **Register Style #1** | `create_style` (*Ink Nocturne*) | [`0xce7cf5e5...b948902a`](https://explorer-studio-dev.genlayer.com/tx/0xce7cf5e510be867e916f1ce7468cbceb486628d9ceca2d550aa4e9bab948902a) | FINALIZED (SUCCESS) |
+| **Register Style #2** | `create_style` (*Neon Geometry*) | [`0xe257b4f4...f0d620b9`](https://explorer-studio-dev.genlayer.com/tx/0xe257b4f4e8f9b2fed2a6ccf9db012475a6eabeec3c42edf8d3285950f0d620b9) | FINALIZED (SUCCESS) |
+| **Register Style #3** | `create_style` (*standX by dezzy*) | [`0x2eba05f3...2cd77b8`](https://explorer-studio-dev.genlayer.com/tx/0x2eba05f3b3ef41255cb9a2c15fa1c389d0714569d97384721adf54dec2cd77b8) | FINALIZED (SUCCESS) |
+| **Case Adjudication** | `submit_case` | [`0xcb5d1476...3c7c5c19d`](https://explorer-studio-dev.genlayer.com/tx/0xcb5d147609b68e04a1fd6fea36b4e3985e5cc3fedfe543f64183fff3c7c5c19d) | MAJORITY_AGREE (`status: CLEAN`) |
 
 ---
 

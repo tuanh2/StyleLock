@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { genToWei, weiToGen } from '../config';
 
 export default function ArtistStudio({ styles, onCreateStyle, isCreating }) {
@@ -12,7 +12,72 @@ export default function ArtistStudio({ styles, onCreateStyle, isCreating }) {
   const [threshold, setThreshold] = useState(82);
   const [confidence, setConfidence] = useState(75);
   const [bountyGen, setBountyGen] = useState('0.25');
+
+  // Multi-source artwork support
+  const [uploadMode, setUploadMode] = useState('x_link'); // 'x_link' | 'upload' | 'url'
   const [collageUrl, setCollageUrl] = useState('/images/ink-nocturne.jpg');
+  const [xPostUrl, setXPostUrl] = useState('');
+  const [isResolvingX, setIsResolvingX] = useState(false);
+  const [xStatusMsg, setXStatusMsg] = useState('');
+  const [previewImage, setPreviewImage] = useState('/images/ink-nocturne.jpg');
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef(null);
+
+  // Auto-resolve X/Twitter post to high-res media URL
+  const handleXUrlChange = async (url) => {
+    setXPostUrl(url);
+    const trimmed = url.trim();
+    const match = trimmed.match(/(?:twitter\.com|x\.com)\/([a-zA-Z0-9_]+)\/status\/(\d+)/);
+    if (match) {
+      const [, user, id] = match;
+      setIsResolvingX(true);
+      setXStatusMsg('Đang trích xuất ảnh gốc từ bài viết X...');
+      try {
+        const res = await fetch(`https://api.fxtwitter.com/${user}/status/${id}`);
+        const data = await res.json();
+        const photo = data.tweet?.media?.photos?.[0]?.url || data.tweet?.media?.mosaic?.formats?.jpeg;
+        if (photo) {
+          setCollageUrl(photo);
+          setPreviewImage(photo);
+          setXStatusMsg('✓ Đã lấy thành công ảnh gốc từ X!');
+        } else {
+          setXStatusMsg('Không tìm thấy ảnh đính kèm trong bài viết này.');
+        }
+      } catch (err) {
+        console.warn('X fetch error:', err);
+        setXStatusMsg('Không thể tự lấy ảnh, bạn có thể dán link trực tiếp.');
+      } finally {
+        setIsResolvingX(false);
+      }
+    } else if (trimmed) {
+      setXStatusMsg('Vui lòng nhập đúng định dạng link bài viết X (https://x.com/username/status/...)');
+    } else {
+      setXStatusMsg('');
+    }
+  };
+
+  // Local file upload & preview
+  const handleFileProcess = (file) => {
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      alert('Vui lòng chọn file hình ảnh (.png, .jpg, .webp)');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const dataUrl = e.target.result;
+      setPreviewImage(dataUrl);
+      setCollageUrl(dataUrl);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    handleFileProcess(file);
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -58,18 +123,18 @@ export default function ArtistStudio({ styles, onCreateStyle, isCreating }) {
             Register Style
           </button>
           <button
-            onClick={() => setActiveTab('manage')}
+            onClick={() => setActiveTab('registered')}
             className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
-              activeTab === 'manage' ? 'bg-purple-600 text-white font-semibold' : 'text-zinc-600 hover:text-zinc-950'
+              activeTab === 'registered' ? 'bg-purple-600 text-white font-semibold' : 'text-zinc-600 hover:text-zinc-950'
             }`}
           >
-            Registered ({styles.length})
+            Registered Styles ({styles.length})
           </button>
         </div>
       </div>
 
       {activeTab === 'register' ? (
-        <form onSubmit={handleSubmit} className="space-y-6 bg-white border border-zinc-200 p-6 sm:p-8 rounded-2xl">
+        <form onSubmit={handleSubmit} className="space-y-6 bg-white border border-zinc-200 p-6 rounded-2xl relative shadow-xs">
           
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
@@ -82,13 +147,13 @@ export default function ArtistStudio({ styles, onCreateStyle, isCreating }) {
                 value={artistName}
                 onChange={(e) => setArtistName(e.target.value)}
                 placeholder="e.g. Alice Kim"
-                className="w-full bg-zinc-50 border border-zinc-300 rounded-lg px-3.5 py-2.5 text-xs text-zinc-950 outline-none focus:border-purple-600 focus:bg-white"
+                className="w-full bg-zinc-50 border border-zinc-300 rounded-lg px-3.5 py-2.5 text-xs text-zinc-950 outline-none focus:border-purple-600 focus:bg-white transition-colors"
               />
             </div>
 
             <div>
               <label className="block text-xs font-mono text-zinc-700 mb-1.5 font-medium">
-                Style Name
+                Style Designation
               </label>
               <input
                 type="text"
@@ -96,7 +161,7 @@ export default function ArtistStudio({ styles, onCreateStyle, isCreating }) {
                 value={styleName}
                 onChange={(e) => setStyleName(e.target.value)}
                 placeholder="e.g. Ink Nocturne"
-                className="w-full bg-zinc-50 border border-zinc-300 rounded-lg px-3.5 py-2.5 text-xs text-zinc-950 outline-none focus:border-purple-600 focus:bg-white"
+                className="w-full bg-zinc-50 border border-zinc-300 rounded-lg px-3.5 py-2.5 text-xs text-zinc-950 outline-none focus:border-purple-600 focus:bg-white transition-colors"
               />
             </div>
           </div>
@@ -106,12 +171,12 @@ export default function ArtistStudio({ styles, onCreateStyle, isCreating }) {
               Style Description
             </label>
             <textarea
-              rows={3}
               required
+              rows={3}
               value={descriptor}
               onChange={(e) => setDescriptor(e.target.value)}
-              placeholder="Describe your visual style: line weight, color palette, recurring composition patterns, brush strokes..."
-              className="w-full bg-zinc-50 border border-zinc-300 rounded-lg px-3.5 py-2.5 text-xs text-zinc-950 outline-none focus:border-purple-600 focus:bg-white"
+              placeholder="Comprehensive description of composition, color palette, medium, texture, and visual signatures..."
+              className="w-full bg-zinc-50 border border-zinc-300 rounded-lg p-3 text-xs text-zinc-950 outline-none focus:border-purple-600 focus:bg-white transition-colors leading-relaxed"
             />
           </div>
 
@@ -125,7 +190,7 @@ export default function ArtistStudio({ styles, onCreateStyle, isCreating }) {
               value={traits}
               onChange={(e) => setTraits(e.target.value)}
               placeholder="rough black ink contours; muted watercolor palette; asymmetric framing; sparse composition"
-              className="w-full bg-zinc-50 border border-zinc-300 rounded-lg px-3.5 py-2.5 text-xs text-zinc-950 outline-none focus:border-purple-600 focus:bg-white"
+              className="w-full bg-zinc-50 border border-zinc-300 rounded-lg px-3.5 py-2.5 text-xs text-zinc-950 outline-none focus:border-purple-600 focus:bg-white transition-colors"
             />
           </div>
 
@@ -140,7 +205,7 @@ export default function ArtistStudio({ styles, onCreateStyle, isCreating }) {
                 max="95"
                 value={threshold}
                 onChange={(e) => setThreshold(e.target.value)}
-                className="w-full bg-zinc-50 border border-zinc-300 rounded-lg px-3.5 py-2.5 text-xs text-zinc-950 outline-none focus:border-purple-600 focus:bg-white"
+                className="w-full bg-zinc-50 border border-zinc-300 rounded-lg px-3.5 py-2.5 text-xs text-zinc-950 outline-none focus:border-purple-600 focus:bg-white transition-colors"
               />
             </div>
 
@@ -154,7 +219,7 @@ export default function ArtistStudio({ styles, onCreateStyle, isCreating }) {
                 max="95"
                 value={confidence}
                 onChange={(e) => setConfidence(e.target.value)}
-                className="w-full bg-zinc-50 border border-zinc-300 rounded-lg px-3.5 py-2.5 text-xs text-zinc-950 outline-none focus:border-purple-600 focus:bg-white"
+                className="w-full bg-zinc-50 border border-zinc-300 rounded-lg px-3.5 py-2.5 text-xs text-zinc-950 outline-none focus:border-purple-600 focus:bg-white transition-colors"
               />
             </div>
 
@@ -167,30 +232,172 @@ export default function ArtistStudio({ styles, onCreateStyle, isCreating }) {
                 value={bountyGen}
                 onChange={(e) => setBountyGen(e.target.value)}
                 placeholder="0.25"
-                className="w-full bg-zinc-50 border border-zinc-300 rounded-lg px-3.5 py-2.5 text-xs text-zinc-950 outline-none focus:border-purple-600 focus:bg-white"
+                className="w-full bg-zinc-50 border border-zinc-300 rounded-lg px-3.5 py-2.5 text-xs text-zinc-950 outline-none focus:border-purple-600 focus:bg-white transition-colors"
               />
             </div>
           </div>
 
-          <div>
-            <label className="block text-xs font-mono text-zinc-700 mb-1.5 font-medium">
-              Reference Artwork Collage URL
-            </label>
-            <input
-              type="url"
-              required
-              value={collageUrl}
-              onChange={(e) => setCollageUrl(e.target.value)}
-              placeholder="https://..."
-              className="w-full bg-zinc-50 border border-zinc-300 rounded-lg px-3.5 py-2.5 text-xs text-zinc-950 outline-none focus:border-purple-600 focus:bg-white"
-            />
+          {/* Reference Artwork Selection */}
+          <div className="border border-zinc-200 rounded-xl p-4 bg-zinc-50/70">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+              <label className="block text-xs font-mono text-zinc-800 font-bold uppercase tracking-wide">
+                Reference Artwork Collage
+              </label>
+
+              {/* Mode Selector */}
+              <div className="flex items-center gap-1 bg-zinc-200/70 p-0.5 rounded-lg text-[11px] font-mono">
+                <button
+                  type="button"
+                  onClick={() => setUploadMode('x_link')}
+                  className={`px-2.5 py-1 rounded-md transition-all ${
+                    uploadMode === 'x_link' ? 'bg-white text-zinc-900 font-bold shadow-xs' : 'text-zinc-600 hover:text-zinc-900'
+                  }`}
+                >
+                  𝕏 Post Link (Tự lấy ảnh)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setUploadMode('upload')}
+                  className={`px-2.5 py-1 rounded-md transition-all ${
+                    uploadMode === 'upload' ? 'bg-white text-zinc-900 font-bold shadow-xs' : 'text-zinc-600 hover:text-zinc-900'
+                  }`}
+                >
+                  📁 Upload từ máy
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setUploadMode('url')}
+                  className={`px-2.5 py-1 rounded-md transition-all ${
+                    uploadMode === 'url' ? 'bg-white text-zinc-900 font-bold shadow-xs' : 'text-zinc-600 hover:text-zinc-900'
+                  }`}
+                >
+                  🔗 Dán URL ảnh
+                </button>
+              </div>
+            </div>
+
+            {/* Mode 1: X / Twitter Post Link */}
+            {uploadMode === 'x_link' && (
+              <div className="space-y-2">
+                <p className="text-xs text-zinc-600">
+                  Dán link bài viết trên X/Twitter (ví dụ: <code className="text-purple-700 bg-purple-50 px-1 py-0.5 rounded">https://x.com/dezzyyy_eth/status/...</code>), hệ thống sẽ tự động bóc tách ảnh gốc sắc nét nhất!
+                </p>
+                <div className="flex gap-2">
+                  <input
+                    type="url"
+                    value={xPostUrl}
+                    onChange={(e) => handleXUrlChange(e.target.value)}
+                    placeholder="https://x.com/username/status/123456789..."
+                    className="flex-1 bg-white border border-zinc-300 rounded-lg px-3.5 py-2.5 text-xs text-zinc-950 outline-none focus:border-purple-600 font-mono"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleXUrlChange(xPostUrl)}
+                    disabled={isResolvingX || !xPostUrl}
+                    className="px-4 py-2.5 bg-zinc-900 hover:bg-zinc-800 text-white rounded-lg text-xs font-semibold shrink-0 disabled:opacity-50"
+                  >
+                    {isResolvingX ? 'Đang lấy ảnh...' : 'Lấy ảnh'}
+                  </button>
+                </div>
+                {xStatusMsg && (
+                  <p className={`text-xs font-mono ${xStatusMsg.startsWith('✓') ? 'text-emerald-600 font-semibold' : 'text-zinc-500'}`}>
+                    {xStatusMsg}
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* Mode 2: Local File Upload */}
+            {uploadMode === 'upload' && (
+              <div className="space-y-2">
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  accept="image/png, image/jpeg, image/webp"
+                  onChange={(e) => handleFileProcess(e.target.files?.[0])}
+                  className="hidden"
+                />
+                <div
+                  onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+                  onDragLeave={() => setIsDragging(false)}
+                  onDrop={handleDrop}
+                  onClick={() => fileInputRef.current?.click()}
+                  className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all ${
+                    isDragging ? 'border-purple-600 bg-purple-50/50' : 'border-zinc-300 hover:border-purple-500 bg-white'
+                  }`}
+                >
+                  <div className="w-10 h-10 mx-auto rounded-full bg-purple-100 flex items-center justify-center text-purple-600 mb-2">
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                  <p className="text-xs font-semibold text-zinc-900">
+                    Bấm để chọn file ảnh từ máy tính hoặc kéo thả ảnh vào đây
+                  </p>
+                  <p className="text-[11px] text-zinc-500 mt-1">
+                    Hỗ trợ PNG, JPG, WebP. Ảnh được xử lý trực tiếp không cần backend server.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Mode 3: Direct URL */}
+            {uploadMode === 'url' && (
+              <div className="space-y-2">
+                <input
+                  type="url"
+                  required
+                  value={collageUrl}
+                  onChange={(e) => {
+                    setCollageUrl(e.target.value);
+                    setPreviewImage(e.target.value);
+                  }}
+                  placeholder="https://..."
+                  className="w-full bg-white border border-zinc-300 rounded-lg px-3.5 py-2.5 text-xs text-zinc-950 outline-none focus:border-purple-600 font-mono"
+                />
+              </div>
+            )}
+
+            {/* Image Preview Box */}
+            {previewImage && (
+              <div className="mt-4 pt-3 border-t border-zinc-200/80 flex items-center gap-4 bg-white p-3 rounded-lg border border-zinc-200">
+                <img
+                  src={previewImage}
+                  alt="Reference Preview"
+                  className="w-20 h-20 rounded-lg object-cover border border-zinc-200 bg-zinc-100 shrink-0"
+                  onError={(e) => { e.target.src = '/images/ink-nocturne.jpg'; }}
+                />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="inline-flex items-center gap-1 text-[11px] font-mono text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded font-semibold border border-emerald-200">
+                      ✓ Đã có ảnh artwork
+                    </span>
+                  </div>
+                  <p className="text-[11px] font-mono text-zinc-500 truncate mt-1 max-w-md">
+                    {collageUrl.startsWith('data:') ? 'Local Image File (Data URI)' : collageUrl}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCollageUrl('');
+                      setPreviewImage('');
+                      setXPostUrl('');
+                      setXStatusMsg('');
+                    }}
+                    className="text-[11px] text-red-600 hover:text-red-700 hover:underline mt-1 font-medium"
+                  >
+                    Đổi ảnh khác
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="pt-2">
             <button
               type="submit"
-              disabled={isCreating}
-              className="w-full bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white font-semibold text-sm py-3 rounded-lg transition-all shadow-sm active:scale-95"
+              disabled={isCreating || !collageUrl}
+              className="w-full bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white font-semibold text-sm py-3 rounded-lg transition-all shadow-sm active:scale-95 cursor-pointer"
             >
               {isCreating ? 'Registering On-Chain...' : 'Register Style on GenLayer'}
             </button>

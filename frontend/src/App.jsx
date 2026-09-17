@@ -250,7 +250,7 @@ export default function App() {
       reason: isDeriv
         ? 'GenLayer validators analyzed the suspect listing and reference collage. The suspect listing reproduces registered Ink Nocturne traits (rough black contours, muted washes, asymmetric figures) in a commercial product pack ($14.99).'
         : 'The suspect listing exhibits sharp polygonal vector geometry with high-saturation neon hues. No distinctive traits of the registered watercolor style were reproduced.',
-      txHash: '0x1045756a1167583b0ffce4383d93b3030fe9117e0a043ac18c1a354535fe7528'
+      txHash: '0xcb5d147609b68e04a1fd6fea36b4e3985e5cc3fedfe543f64183fff3c7c5c19d'
     };
 
     setCases(prev => [simCase, ...prev]);

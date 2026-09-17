@@ -23,7 +23,7 @@ export const DEMO_PRESETS = [
     expectedSimilarity: 88,
     expectedConfidence: 91,
     claim: "Commercial AI storefront selling 12 downloadable watercolor illustrations imitating Alice Kim's Ink Nocturne style with rough black contours, muted washes, and asymmetric framing.",
-    image: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=800&q=80',
+    image: '/images/ink-nocturne.jpg',
     description: '12 high-resolution AI generated graphics featuring rough dark contour lines, atmospheric watercolor textures, and melancholic human silhouettes in sparse compositions. Perfect for commercial merch.'
   },
   {
@@ -42,7 +42,7 @@ export const DEMO_PRESETS = [
     expectedSimilarity: 24,
     expectedConfidence: 94,
     claim: 'Checking whether this digital vector bundle violates the Ink Nocturne style profile.',
-    image: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=800&q=80',
+    image: '/images/neon-geometry.jpg',
     description: 'High-tech isometric vector polygons with electric cyan and magenta gradients, sharp hard edges, and clean modern grid geometry.'
   },
   {
@@ -61,7 +61,7 @@ export const DEMO_PRESETS = [
     expectedSimilarity: 72,
     expectedConfidence: 86,
     claim: 'Personal art student experiment practicing ink drawing techniques. No commercial sale or monetization detected.',
-    image: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&w=800&q=80',
+    image: '/images/student-sketch.jpg',
     description: 'A student study exploring watercolor washes and contour sketching. Shared for peer feedback and educational practice only.'
   }
 ];
@@ -81,7 +81,7 @@ export const INITIAL_STYLES = [
     available_bounty_pool: '2500000000000000000', // 2.5 GEN
     reference_manifest_url: 'https://stylelock.art/manifests/ink-nocturne.json',
     reference_manifest_hash: '0x9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08',
-    reference_collage_url: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=1200&q=80',
+    reference_collage_url: '/images/ink-nocturne.jpg',
     active: true,
     confirmed_cases: 1
   },
@@ -99,7 +99,7 @@ export const INITIAL_STYLES = [
     available_bounty_pool: '1500000000000000000', // 1.5 GEN
     reference_manifest_url: 'https://stylelock.art/manifests/neon-geometry.json',
     reference_manifest_hash: '0x5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8',
-    reference_collage_url: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=1200&q=80',
+    reference_collage_url: '/images/neon-geometry.jpg',
     active: true,
     confirmed_cases: 0
   }

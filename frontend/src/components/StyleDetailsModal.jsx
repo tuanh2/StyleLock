@@ -54,7 +54,7 @@ export default function StyleDetailsModal({ isOpen, onClose, style, onReport }) 
             alt={style.style_name}
             className="w-full h-full object-cover"
             onError={(e) => {
-              e.target.src = 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=1200&q=80';
+              e.target.src = '/images/ink-nocturne.jpg';
             }}
           />
           <div className="absolute bottom-3 left-3 bg-white/90 backdrop-blur-sm px-2.5 py-1 rounded-md text-[11px] font-mono text-zinc-800 border border-zinc-200 shadow-xs">

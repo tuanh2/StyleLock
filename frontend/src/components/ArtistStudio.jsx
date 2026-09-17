@@ -12,7 +12,7 @@ export default function ArtistStudio({ styles, onCreateStyle, isCreating }) {
   const [threshold, setThreshold] = useState(82);
   const [confidence, setConfidence] = useState(75);
   const [bountyGen, setBountyGen] = useState('0.25');
-  const [collageUrl, setCollageUrl] = useState('https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=1200&q=80');
+  const [collageUrl, setCollageUrl] = useState('/images/ink-nocturne.jpg');
 
   const handleSubmit = (e) => {
     e.preventDefault();

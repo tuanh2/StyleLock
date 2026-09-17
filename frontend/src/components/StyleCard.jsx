@@ -18,7 +18,7 @@ export default function StyleCard({ style, onSelect, onReport }) {
           alt={style.style_name}
           className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-300"
           onError={(e) => {
-            e.target.src = 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=800&q=80';
+            e.target.src = '/images/ink-nocturne.jpg';
           }}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />

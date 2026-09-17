@@ -46,6 +46,7 @@ export default function HunterBoard({ styles, onSelectStyle, onOpenSubmit, claim
                 alt={s.style_name}
                 className="w-14 h-14 rounded-lg object-cover bg-zinc-100 shrink-0 border border-zinc-200 cursor-pointer"
                 onClick={() => onSelectStyle && onSelectStyle(s)}
+                onError={(e) => { e.target.src = '/images/ink-nocturne.jpg'; }}
               />
               <div>
                 <div className="flex items-center gap-2">

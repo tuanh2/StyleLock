@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
-import { weiToGen } from '../config';
+import { weiToGen, txExplorerUrl } from '../config';
 
-export default function StyleDetailsModal({ isOpen, onClose, style, onReport }) {
+export default function StyleDetailsModal({ isOpen, onClose, style, cases = [], onReport, onSelectCase }) {
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
@@ -17,6 +17,7 @@ export default function StyleDetailsModal({ isOpen, onClose, style, onReport }) 
   if (!isOpen || !style) return null;
 
   const traits = (style.protected_traits || '').split(';').map(t => t.trim()).filter(Boolean);
+  const styleCases = (cases || []).filter(c => String(c.style_id) === String(style.style_id));
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-fade-in">
@@ -112,6 +113,129 @@ export default function StyleDetailsModal({ isOpen, onClose, style, onReport }) 
             <span className="text-lg font-bold text-purple-950 font-mono mt-0.5 block">{weiToGen(style.available_bounty_pool)} GEN</span>
             <span className="text-[10px] text-purple-700 font-mono">Funded pool</span>
           </div>
+        </div>
+
+        {/* Adjudication & Check History */}
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-xs font-mono uppercase tracking-wider text-zinc-500 font-semibold flex items-center gap-2">
+              <span>Case Adjudication & Check History</span>
+              <span className="px-2 py-0.5 rounded-full text-[10px] bg-purple-100 text-purple-700 font-bold font-mono">
+                {styleCases.length} {styleCases.length === 1 ? 'Report' : 'Reports'}
+              </span>
+            </h3>
+            <span className="text-[11px] font-mono text-zinc-400">
+              On-Chain AI Verdicts
+            </span>
+          </div>
+
+          {styleCases.length === 0 ? (
+            <div className="p-4 rounded-xl bg-zinc-50 border border-zinc-200 text-center">
+              <p className="text-xs text-zinc-600 mb-2">
+                No suspect listings have been submitted against this style yet.
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  if (onReport) onReport(style);
+                }}
+                className="text-xs font-semibold text-purple-600 hover:text-purple-700 hover:underline cursor-pointer"
+              >
+                + Be the first to report an infringement ({weiToGen(style.bounty_per_case_wei)} GEN Bounty)
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {styleCases.map((c) => {
+                const isDeriv = c.verdict === 'DERIVATIVE';
+                const isClean = c.verdict === 'CLEAN';
+                return (
+                  <div
+                    key={c.case_id}
+                    className="p-3.5 rounded-xl border border-zinc-200 bg-zinc-50 hover:bg-white hover:border-purple-300 transition-all text-xs"
+                  >
+                    <div className="flex items-center justify-between gap-2 mb-2">
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono font-bold text-zinc-900">
+                          Case #{c.case_id}
+                        </span>
+                        <span
+                          className={`font-mono text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                            isDeriv
+                              ? 'bg-red-100 text-red-700 border border-red-200'
+                              : isClean
+                              ? 'bg-emerald-100 text-emerald-700 border border-emerald-200'
+                              : 'bg-amber-100 text-amber-800 border border-amber-200'
+                          }`}
+                        >
+                          {c.verdict || 'AMBIGUOUS'}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 text-[11px] font-mono text-zinc-500">
+                        <span>Similarity: <strong className="text-zinc-900">{c.similarity}%</strong></span>
+                        <span>•</span>
+                        <span>Commercial: <strong className="text-zinc-900">{c.commercial_use ? 'Yes' : 'No'}</strong></span>
+                      </div>
+                    </div>
+
+                    <div className="mb-2">
+                      <span className="text-[11px] font-mono text-zinc-400 block mb-0.5">Suspect Evidence URL:</span>
+                      <a
+                        href={c.suspect_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-mono text-[11px] text-purple-600 hover:text-purple-800 hover:underline truncate block max-w-full"
+                      >
+                        {c.suspect_url} ↗
+                      </a>
+                    </div>
+
+                    {c.claim_text && (
+                      <p className="text-zinc-600 text-[11px] mb-2 bg-white/80 p-2 rounded border border-zinc-200/80">
+                        <strong className="text-zinc-800 font-mono text-[10px] uppercase">Hunter Claim:</strong> {c.claim_text}
+                      </p>
+                    )}
+
+                    {c.reason && (
+                      <p className="text-zinc-700 text-[11px] leading-relaxed bg-white p-2.5 rounded-lg border border-zinc-200">
+                        <strong className="text-purple-700 font-mono text-[10px] uppercase block mb-0.5">AI Jury Consensus Reason:</strong>
+                        {c.reason}
+                      </p>
+                    )}
+
+                    <div className="mt-2 pt-2 border-t border-zinc-200/60 flex items-center justify-between">
+                      {c.txHash ? (
+                        <a
+                          href={txExplorerUrl(c.txHash)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[10px] font-mono text-zinc-400 hover:text-purple-600 transition-colors"
+                        >
+                          Tx: {c.txHash.slice(0, 10)}...{c.txHash.slice(-6)} ↗
+                        </a>
+                      ) : (
+                        <span className="text-[10px] font-mono text-zinc-400">On-Chain Finalized</span>
+                      )}
+
+                      {onSelectCase && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            onClose();
+                            onSelectCase(c);
+                          }}
+                          className="text-[11px] font-semibold text-purple-600 hover:text-purple-800 hover:underline cursor-pointer"
+                        >
+                          View Full Dossier →
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* License Terms */}

@@ -2,39 +2,39 @@ import React from 'react';
 
 export default function Hero({ onRegister, onOpenSubmit, onNavigateTab, stats }) {
   return (
-    <section className="relative pt-16 pb-14 px-4 sm:px-6 lg:px-8 border-b border-zinc-200 bg-white de1-grid overflow-hidden">
+    <section className="relative pt-16 pb-14 px-4 sm:px-6 lg:px-8 border-b border-[#eadfea] bg-transparent overflow-hidden">
       
       <div className="max-w-4xl mx-auto text-center relative z-10">
         
         {/* Main Headline */}
-        <h1 className="text-4xl sm:text-6xl font-extrabold text-zinc-950 tracking-tight leading-tight font-sans mb-5">
+        <h1 className="text-4xl sm:text-6xl font-extrabold text-[#211827] tracking-tight leading-tight font-sans mb-5">
           Protect the style you built.
         </h1>
 
-        <p className="text-base sm:text-lg text-zinc-600 max-w-2xl mx-auto font-sans leading-relaxed mb-8">
+        <p className="text-base sm:text-lg text-[#594d63] max-w-2xl mx-auto font-sans leading-relaxed mb-8">
           Artists register their visual style once on-chain. When unauthorized commercial copies appear on the web, 
           GenLayer AI validators independently inspect the evidence and release bounties automatically.
         </p>
 
-        {/* Action CTAs: Register Your Style as PRIMARY; Report Suspect Copy as SECONDARY */}
+        {/* Action CTAs */}
         <div className="flex flex-wrap items-center justify-center gap-3 mb-10">
           <button
             onClick={onRegister}
-            className="bg-purple-600 hover:bg-purple-700 active:scale-95 text-white font-semibold text-sm px-6 py-3 rounded-lg transition-all shadow-sm"
+            className="bg-[#302738] hover:bg-[#493d53] active:scale-95 text-white font-semibold text-sm px-7 py-3 rounded-full transition-all shadow-[0_10px_30px_rgba(48,39,56,0.22)] cursor-pointer"
           >
             Register Your Style
           </button>
 
           <button
             onClick={() => onOpenSubmit()}
-            className="bg-zinc-100 hover:bg-zinc-200 text-zinc-900 font-medium text-sm px-6 py-3 rounded-lg border border-zinc-200 transition-all"
+            className="bg-white/80 hover:bg-white text-[#211827] font-semibold text-sm px-7 py-3 rounded-full border border-[#eadfea] transition-all shadow-xs cursor-pointer active:scale-95"
           >
             Report Suspect Copy
           </button>
         </div>
 
         {/* 4-Step Quick Workflow Explainer */}
-        <div className="mb-12 p-4 sm:p-5 rounded-2xl bg-zinc-50/80 border border-zinc-200/90 max-w-3xl mx-auto text-left shadow-xs">
+        <div className="mb-12 p-4 sm:p-6 rounded-3xl bg-white/70 backdrop-blur-md border border-[#eadfea] max-w-3xl mx-auto text-left shadow-[0_12px_42px_rgba(116,78,133,0.06)]">
           <div className="text-[11px] font-mono uppercase tracking-wider text-purple-700 font-semibold mb-3">
             Autonomous Protocol Workflow
           </div>
@@ -42,7 +42,7 @@ export default function Hero({ onRegister, onOpenSubmit, onNavigateTab, stats })
             
             <div 
               onClick={onRegister}
-              className="p-2.5 rounded-xl bg-white border border-zinc-200 hover:border-purple-300 cursor-pointer transition-colors"
+              className="p-3 rounded-2xl bg-white/90 border border-[#eadfea] hover:border-purple-300 hover:shadow-sm cursor-pointer transition-all"
             >
               <div className="font-bold text-zinc-950 font-mono mb-1">1. Register Policy</div>
               <p className="text-[11px] text-zinc-500 leading-snug">Artist locks style traits and funds bounty escrow.</p>
@@ -50,15 +50,15 @@ export default function Hero({ onRegister, onOpenSubmit, onNavigateTab, stats })
 
             <div 
               onClick={() => onOpenSubmit()}
-              className="p-2.5 rounded-xl bg-white border border-zinc-200 hover:border-purple-300 cursor-pointer transition-colors"
+              className="p-3 rounded-2xl bg-white/90 border border-[#eadfea] hover:border-purple-300 hover:shadow-sm cursor-pointer transition-all"
             >
               <div className="font-bold text-zinc-950 font-mono mb-1">2. Submit URL</div>
               <p className="text-[11px] text-zinc-500 leading-snug">Hunters spot unauthorized commercial listings.</p>
             </div>
 
             <div 
-              onClick={() => onNavigateTab && onNavigateTab('market')}
-              className="p-2.5 rounded-xl bg-white border border-zinc-200 hover:border-purple-300 cursor-pointer transition-colors"
+              onClick={() => onNavigateTab && onNavigateTab('explore')}
+              className="p-3 rounded-2xl bg-white/90 border border-[#eadfea] hover:border-purple-300 hover:shadow-sm cursor-pointer transition-all"
             >
               <div className="font-bold text-zinc-950 font-mono mb-1">3. AI Consensus</div>
               <p className="text-[11px] text-zinc-500 leading-snug">Validators crawl page & verify trait similarity.</p>
@@ -66,7 +66,7 @@ export default function Hero({ onRegister, onOpenSubmit, onNavigateTab, stats })
 
             <div 
               onClick={() => onNavigateTab && onNavigateTab('hunt')}
-              className="p-2.5 rounded-xl bg-purple-50/80 border border-purple-200 hover:border-purple-300 cursor-pointer transition-colors"
+              className="p-3 rounded-2xl bg-purple-50/90 border border-purple-200 hover:border-purple-300 hover:shadow-sm cursor-pointer transition-all"
             >
               <div className="font-bold text-purple-950 font-mono mb-1">4. Settlement</div>
               <p className="text-[11px] text-purple-700 leading-snug">Enforcement recorded & bounty released to wallet.</p>
@@ -78,27 +78,27 @@ export default function Hero({ onRegister, onOpenSubmit, onNavigateTab, stats })
         {/* Technical Metrics Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto text-left">
           
-          <div className="p-4 rounded-xl bg-white border border-zinc-200 shadow-xs">
+          <div className="p-4 rounded-2xl bg-white/80 backdrop-blur-sm border border-[#eadfea] shadow-[0_6px_24px_rgba(72,48,84,0.04)]">
             <span className="text-[11px] text-zinc-400 font-mono block uppercase tracking-wider">Active Styles</span>
-            <span className="text-2xl font-bold text-zinc-950 font-mono mt-1 block">{stats.totalStyles || '2'}</span>
+            <span className="text-2xl font-bold text-zinc-950 font-mono mt-1 block">{stats.totalStyles || '3'}</span>
             <span className="text-[11px] text-zinc-500 font-mono mt-1 block">Registered on-chain</span>
           </div>
 
-          <div className="p-4 rounded-xl bg-white border border-zinc-200 shadow-xs">
+          <div className="p-4 rounded-2xl bg-white/80 backdrop-blur-sm border border-[#eadfea] shadow-[0_6px_24px_rgba(72,48,84,0.04)]">
             <span className="text-[11px] text-zinc-400 font-mono block uppercase tracking-wider">Cases Reviewed</span>
-            <span className="text-2xl font-bold text-zinc-950 font-mono mt-1 block">{stats.totalCases || '1'}</span>
+            <span className="text-2xl font-bold text-zinc-950 font-mono mt-1 block">{stats.totalCases || '2'}</span>
             <span className="text-[11px] text-zinc-500 font-mono mt-1 block">Consensus reached</span>
           </div>
 
-          <div className="p-4 rounded-xl bg-white border border-zinc-200 shadow-xs">
+          <div className="p-4 rounded-2xl bg-white/80 backdrop-blur-sm border border-[#eadfea] shadow-[0_6px_24px_rgba(72,48,84,0.04)]">
             <span className="text-[11px] text-zinc-400 font-mono block uppercase tracking-wider">Enforcements</span>
             <span className="text-2xl font-bold text-zinc-950 font-mono mt-1 block">{stats.totalEnforcements || '0'}</span>
             <span className="text-[11px] text-zinc-500 font-mono mt-1 block">Public records</span>
           </div>
 
-          <div className="p-4 rounded-xl bg-purple-50/70 border border-purple-200 shadow-xs">
-            <span className="text-[11px] text-purple-700 font-mono block uppercase tracking-wider">Total Escrow Pool</span>
-            <span className="text-2xl font-bold text-purple-950 font-mono mt-1 block">{stats.totalEscrow || '4.0 GEN'}</span>
+          <div className="p-4 rounded-2xl bg-purple-50/80 backdrop-blur-sm border border-purple-200 shadow-[0_6px_24px_rgba(72,48,84,0.04)]">
+            <span className="text-[11px] text-purple-700 font-mono block uppercase tracking-wider font-medium">Total Escrow Pool</span>
+            <span className="text-2xl font-bold text-purple-950 font-mono mt-1 block">{stats.totalEscrow || '6.0 GEN'}</span>
             <span className="text-[11px] text-purple-700 font-mono mt-1 block">Funded balances</span>
           </div>
 

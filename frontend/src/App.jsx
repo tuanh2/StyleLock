@@ -7,9 +7,8 @@ import StyleDetailsModal from './components/StyleDetailsModal';
 import CaseView from './components/CaseView';
 import HunterBoard from './components/HunterBoard';
 import ArtistStudio from './components/ArtistStudio';
-import DemoMarketView from './components/DemoMarketView';
 import SplashScreen from './components/SplashScreen';
-import { INITIAL_STYLES, DEMO_PRESETS } from './data/demoFixtures';
+import { INITIAL_STYLES, INITIAL_CASES } from './data/demoFixtures';
 import {
   connectWallet,
   getWriteClient,
@@ -20,19 +19,29 @@ import {
   weiToGen
 } from './config';
 
+const getTabFromUrl = () => {
+  if (typeof window === 'undefined') return 'explore';
+  const path = window.location.pathname.toLowerCase().replace(/^\/+|\/+$/g, '');
+  const hash = window.location.hash.toLowerCase().replace(/^#\/?/, '');
+  const target = path || hash;
+  if (target === 'hunt' || target === 'bounties' || target === 'hunter') return 'hunt';
+  if (target === 'artist' || target === 'register' || target === 'studio') return 'artist';
+  if (target.startsWith('case')) return 'case';
+  return 'explore';
+};
+
 export default function App() {
   const [showSplash, setShowSplash] = useState(true);
-  const [activeTab, setActiveTab] = useState('explore');
+  const [activeTab, setActiveTab] = useState(getTabFromUrl);
   const [styles, setStyles] = useState(INITIAL_STYLES);
-  const [cases, setCases] = useState([]);
-  const [selectedCase, setSelectedCase] = useState(null);
+  const [cases, setCases] = useState(INITIAL_CASES);
+  const [selectedCase, setSelectedCase] = useState(INITIAL_CASES[0] || null);
   const [account, setAccount] = useState('');
   const [isConnecting, setIsConnecting] = useState(false);
   
   // Modals state
   const [isSubmitOpen, setIsSubmitOpen] = useState(false);
   const [targetStyleForSubmit, setTargetStyleForSubmit] = useState(null);
-  const [selectedPresetForSubmit, setSelectedPresetForSubmit] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
@@ -114,6 +123,27 @@ export default function App() {
     fetchOnChainData();
   }, [fetchOnChainData]);
 
+  // Tab Navigation with URL sync
+  const changeTab = (tab, pushHistory = true) => {
+    setActiveTab(tab);
+    if (pushHistory && typeof window !== 'undefined') {
+      const urlPath = tab === 'explore' ? '/' : `/${tab}`;
+      if (window.location.pathname !== urlPath) {
+        window.history.pushState({ tab }, '', urlPath);
+      }
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    const handlePopState = () => {
+      const tab = getTabFromUrl();
+      setActiveTab(tab);
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
   // 2. Connect Wallet
   const handleConnect = async () => {
     setIsConnecting(true);
@@ -138,11 +168,10 @@ export default function App() {
     }
   };
 
-  // 3. Open Submit Modal (Accepts optional preset for auto-fill)
-  const handleOpenSubmit = (style = null, preset = null) => {
-    const target = style || (preset ? styles.find(s => String(s.style_id) === String(preset.styleId)) : styles[0]);
+  // 3. Open Submit Modal
+  const handleOpenSubmit = (style = null) => {
+    const target = style || styles[0];
     setTargetStyleForSubmit(target);
-    setSelectedPresetForSubmit(preset);
     setIsSubmitOpen(true);
   };
 
@@ -152,8 +181,8 @@ export default function App() {
     setIsDetailsOpen(true);
   };
 
-  // 5. Submit Case
-  const handleSubmitCase = async ({ styleId, suspectUrl, claimText, preset }) => {
+  // 5. Submit Case (Direct to GenLayer on-chain validators)
+  const handleSubmitCase = async ({ styleId, suspectUrl, claimText }) => {
     setIsSubmitting(true);
     setTxBanner({ message: 'Submitting evidence to GenLayer validators...', loading: true });
 
@@ -167,100 +196,70 @@ export default function App() {
       }
     }
 
-    if (activeAccount && window.ethereum) {
-      try {
-        const client = getWriteClient(activeAccount);
-        const fees = await client.estimateTransactionFees({});
-        const hash = await client.writeContract({
-          address: CONTRACT_ADDRESS,
-          functionName: 'submit_case',
-          args: [String(styleId), suspectUrl, claimText],
-          fees
-        });
-        const hashStr = typeof hash === 'string' ? hash : String(hash);
-        setTxBanner({
-          message: 'Waiting for validator consensus on GenLayer Studio Next...',
-          hash: hashStr,
-          loading: true
-        });
-
-        const receipt = await client.waitForTransactionReceipt({
-          hash: hashStr,
-          status: 'ACCEPTED',
-          retries: 250,
-          interval: 3000
-        });
-
-        const exec = extractExecution(receipt);
-        if (exec.execution_result === 'ERROR' || exec.status === 'rollback') {
-          throw new Error(exec.payload || 'Transaction rejected on-chain');
-        }
-
-        const readClient = getReadClient();
-        const countStr = await readClient.readContract({
-          address: CONTRACT_ADDRESS,
-          functionName: 'get_case_count',
-          args: []
-        });
-        const latestCaseRaw = await readClient.readContract({
-          address: CONTRACT_ADDRESS,
-          functionName: 'get_case',
-          args: [String(countStr)]
-        });
-        const newCase = JSON.parse(latestCaseRaw);
-        newCase.txHash = hashStr;
-
-        setCases(prev => [newCase, ...prev]);
-        setSelectedCase(newCase);
-        setActiveTab('case');
-        setIsSubmitOpen(false);
-        setTxBanner({ message: 'Consensus Finalized On-Chain', hash: hashStr, loading: false });
-        setTimeout(() => setTxBanner(null), 6000);
-        setIsSubmitting(false);
-        await fetchOnChainData();
-        return;
-      } catch (err) {
-        console.warn('On-chain write error:', err.message);
-        setTxBanner({ message: `Note: ${err.message}. Showing simulated result.`, loading: false });
-      }
+    if (!activeAccount) {
+      setIsSubmitting(false);
+      setTxBanner(null);
+      alert('Please connect your MetaMask wallet to submit reports to GenLayer validators.');
+      return;
     }
 
-    // Fallback simulation
-    await new Promise(r => setTimeout(r, 1200));
+    try {
+      const client = getWriteClient(activeAccount);
+      const fees = await client.estimateTransactionFees({});
+      const hash = await client.writeContract({
+        address: CONTRACT_ADDRESS,
+        functionName: 'submit_case',
+        args: [String(styleId), suspectUrl, claimText],
+        fees
+      });
+      const hashStr = typeof hash === 'string' ? hash : String(hash);
+      setTxBanner({
+        message: 'Waiting for AI validator consensus on GenLayer Studio Next...',
+        hash: hashStr,
+        loading: true
+      });
 
-    const p = preset || DEMO_PRESETS[0];
-    const isDeriv = p.type === 'DERIVATIVE';
-    const isClean = p.type === 'CLEAN';
+      const receipt = await client.waitForTransactionReceipt({
+        hash: hashStr,
+        status: 'ACCEPTED',
+        retries: 250,
+        interval: 3000
+      });
 
-    const simCase = {
-      case_id: String(cases.length + 1),
-      style_id: styleId,
-      style_name: styles.find(s => String(s.style_id) === String(styleId))?.style_name || 'Ink Nocturne',
-      hunter_address: activeAccount || '0x659e...E92b',
-      suspect_url: suspectUrl,
-      claim_text: claimText,
-      status: isDeriv ? 'ENFORCED' : isClean ? 'CLEAN' : 'AMBIGUOUS',
-      verdict: p.type,
-      similarity: p.expectedSimilarity || (isDeriv ? 88 : 24),
-      confidence: p.expectedConfidence || 91,
-      commercial_use: p.commercial,
-      reward_allocated: isDeriv && p.commercial,
-      bounty_amount_wei: isDeriv ? '250000000000000000' : '0',
-      enforcement_record_id: isDeriv ? `SL-000${cases.length + 2}` : '',
-      matched_traits: isDeriv ? ['rough black ink contours', 'muted watercolor palette', 'asymmetric framing'] : [],
-      differences: isClean ? ['sharp neon vector geometry', 'isometric perspective', 'zero watercolor texture'] : [],
-      reason: isDeriv
-        ? 'GenLayer validators analyzed the suspect listing and reference collage. The suspect listing reproduces registered Ink Nocturne traits (rough black contours, muted washes, asymmetric figures) in a commercial product pack ($14.99).'
-        : 'The suspect listing exhibits sharp polygonal vector geometry with high-saturation neon hues. No distinctive traits of the registered watercolor style were reproduced.',
-      txHash: '0xcb5d147609b68e04a1fd6fea36b4e3985e5cc3fedfe543f64183fff3c7c5c19d'
-    };
+      const exec = extractExecution(receipt);
+      if (exec.execution_result === 'ERROR' || exec.status === 'rollback') {
+        throw new Error(exec.payload || 'Transaction rejected on-chain');
+      }
 
-    setCases(prev => [simCase, ...prev]);
-    setSelectedCase(simCase);
-    setActiveTab('case');
-    setIsSubmitOpen(false);
-    setIsSubmitting(false);
-    setTimeout(() => setTxBanner(null), 3000);
+      const readClient = getReadClient();
+      const countStr = await readClient.readContract({
+        address: CONTRACT_ADDRESS,
+        functionName: 'get_case_count',
+        args: []
+      });
+      const latestCaseRaw = await readClient.readContract({
+        address: CONTRACT_ADDRESS,
+        functionName: 'get_case',
+        args: [String(countStr)]
+      });
+      const newCase = JSON.parse(latestCaseRaw);
+      newCase.txHash = hashStr;
+
+      setCases(prev => [newCase, ...prev]);
+      setSelectedCase(newCase);
+      setActiveTab('case');
+      setIsSubmitOpen(false);
+      setTxBanner({ message: 'Consensus Finalized On-Chain', hash: hashStr, loading: false });
+      setTimeout(() => setTxBanner(null), 6000);
+      setIsSubmitting(false);
+      await fetchOnChainData();
+    } catch (err) {
+      console.error('On-chain write error:', err);
+      setIsSubmitting(false);
+      setTxBanner({ message: `Submission failed: ${err.message}`, loading: false });
+      setTimeout(() => setTxBanner(null), 5000);
+      alert(`GenLayer Submission Error: ${err.message}`);
+    }
   };
 
   // 6. Claim Bounty
@@ -373,15 +372,21 @@ export default function App() {
   }, 0);
 
   return (
-    <div className="min-h-screen bg-[#FAFAFC] text-zinc-900 flex flex-col font-sans selection:bg-purple-600 selection:text-white">
-      
+    <div className="min-h-screen relative overflow-hidden bg-[#f8f8fa] text-[#211827] flex flex-col font-sans selection:bg-purple-600 selection:text-white">
+      {/* MyContext signature Pastel Grid Background */}
+      <div className="pastel-grid-background absolute inset-0 z-0 pointer-events-none" />
+      <div
+        className="absolute inset-x-0 top-0 h-[640px] pointer-events-none z-[1]"
+        style={{ background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.72) 0%, rgba(255, 255, 255, 0) 100%)' }}
+      />
+
       {/* 2-Second Initial Intro Splash Screen */}
       {showSplash && <SplashScreen onFinish={() => setShowSplash(false)} />}
 
       {/* Top Navigation */}
       <Navbar
         activeTab={activeTab}
-        setActiveTab={setActiveTab}
+        setActiveTab={changeTab}
         account={account}
         onConnect={handleConnect}
         isConnecting={isConnecting}
@@ -389,7 +394,7 @@ export default function App() {
 
       {/* Transaction Banner */}
       {txBanner && (
-        <div className="bg-purple-50 border-b border-purple-200 px-4 py-2 text-xs font-mono text-purple-900 flex items-center justify-center gap-3 animate-fade-in">
+        <div className="relative z-10 bg-purple-50/90 backdrop-blur-md border-b border-purple-200 px-4 py-2 text-xs font-mono text-purple-900 flex items-center justify-center gap-3 animate-fade-in">
           <span>{txBanner.message}</span>
           {txBanner.hash && (
             <a
@@ -405,14 +410,14 @@ export default function App() {
       )}
 
       {/* Main Content Area */}
-      <main className="flex-1">
+      <main className="flex-1 relative z-10">
         
         {activeTab === 'explore' && (
           <>
             <Hero
-              onRegister={() => setActiveTab('artist')}
+              onRegister={() => changeTab('artist')}
               onOpenSubmit={() => handleOpenSubmit()}
-              onNavigateTab={(tab) => setActiveTab(tab)}
+              onNavigateTab={(tab) => changeTab(tab)}
               stats={{
                 totalStyles: styles.length,
                 totalCases: cases.length,
@@ -421,8 +426,8 @@ export default function App() {
               }}
             />
 
-            <section id="styles-grid" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8 pb-4 border-b border-zinc-200">
+            <section id="styles-grid" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-[#eadfea]">
                 <div>
                   <h2 className="text-xl font-bold text-zinc-950 tracking-tight">Active Protected Styles</h2>
                   <p className="text-xs text-zinc-600 mt-0.5">
@@ -431,7 +436,7 @@ export default function App() {
                 </div>
 
                 <button
-                  onClick={() => setActiveTab('artist')}
+                  onClick={() => changeTab('artist')}
                   className="text-xs font-mono text-purple-700 hover:text-purple-900 font-semibold transition-colors bg-purple-50 hover:bg-purple-100 px-3 py-1.5 rounded-lg border border-purple-200"
                 >
                   + Register Style
@@ -446,6 +451,77 @@ export default function App() {
                     onSelect={(st) => handleOpenDetails(st)}
                     onReport={(st) => handleOpenSubmit(st)}
                   />
+                ))}
+              </div>
+            </section>
+
+            {/* Active Style Bounties Section Visible to All Visitors */}
+            <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+              <div className="flex items-center justify-between gap-4 mb-6 pb-4 border-b border-[#eadfea]">
+                <div>
+                  <h2 className="text-xl font-bold text-zinc-950 tracking-tight">Active Style Bounties</h2>
+                  <p className="text-xs text-zinc-600 mt-0.5">
+                    Available reward pools funded by creators. Spot an unauthorized commercial copy and submit URL evidence to earn payouts.
+                  </p>
+                </div>
+                <button
+                  onClick={() => changeTab('hunt')}
+                  className="text-xs font-mono text-purple-700 hover:text-purple-900 font-semibold hover:underline"
+                >
+                  Hunter Board →
+                </button>
+              </div>
+
+              <div className="space-y-3">
+                {styles.map((s) => (
+                  <div
+                    key={s.style_id}
+                    className="p-4 rounded-2xl bg-white/85 backdrop-blur-md border border-[#eadfea] shadow-[0_4px_20px_rgba(72,48,84,0.04)] hover:shadow-[0_8px_30px_rgba(72,48,84,0.08)] transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+                  >
+                    <div className="flex items-center gap-4">
+                      <img
+                        src={s.reference_collage_url}
+                        alt={s.style_name}
+                        referrerPolicy="no-referrer"
+                        className="w-14 h-14 rounded-xl object-cover bg-zinc-100 shrink-0 border border-zinc-200 cursor-pointer"
+                        onClick={() => handleOpenDetails(s)}
+                        onError={(e) => { e.target.src = '/images/ink-nocturne.jpg'; }}
+                      />
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h3 
+                            onClick={() => handleOpenDetails(s)}
+                            className="text-base font-bold text-zinc-950 cursor-pointer hover:text-purple-600 transition-colors"
+                          >
+                            {s.style_name}
+                          </h3>
+                          <span className="text-[11px] font-mono text-zinc-500">by {s.artist_display_name}</span>
+                        </div>
+                        <p className="text-xs text-zinc-600 line-clamp-1 mt-0.5 max-w-lg">
+                          {s.descriptor}
+                        </p>
+                        <div className="flex items-center gap-3 text-[11px] font-mono text-zinc-500 mt-1">
+                          <span>Threshold: <strong className="text-zinc-800">{s.similarity_threshold}%</strong></span>
+                          <span>•</span>
+                          <span>Escrow Pool: <strong className="text-purple-600">{weiToGen(s.available_bounty_pool)} GEN</strong></span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-4 shrink-0 w-full sm:w-auto justify-between sm:justify-end">
+                      <div className="text-right sm:block hidden">
+                        <span className="text-[10px] font-mono text-zinc-400 uppercase block">Reward per Case</span>
+                        <span className="text-sm font-bold text-zinc-950 font-mono">{weiToGen(s.bounty_per_case_wei)} GEN</span>
+                      </div>
+
+                      <button
+                        onClick={() => handleOpenSubmit(s)}
+                        className="bg-[#302738] hover:bg-[#493d53] text-white font-medium text-xs px-4 py-2 rounded-xl transition-all shadow-xs active:scale-95 cursor-pointer"
+                      >
+                        Report Copy
+                      </button>
+                    </div>
+                  </div>
                 ))}
               </div>
             </section>
@@ -471,19 +547,10 @@ export default function App() {
           />
         )}
 
-        {activeTab === 'market' && (
-          <DemoMarketView
-            onReportPreset={(item) => {
-              const matchedStyle = styles.find(s => String(s.style_id) === String(item.styleId)) || styles[0];
-              handleOpenSubmit(matchedStyle, item);
-            }}
-          />
-        )}
-
         {activeTab === 'case' && selectedCase && (
           <CaseView
             caseData={selectedCase}
-            onBack={() => setActiveTab('explore')}
+            onBack={() => changeTab('explore')}
             onClaimReward={handleClaimReward}
             isClaiming={isClaiming}
           />
@@ -491,12 +558,17 @@ export default function App() {
 
       </main>
 
-      {/* Style Details Modal (Separate from Submit) */}
+      {/* Style Details Modal (With Adjudication History) */}
       <StyleDetailsModal
         isOpen={isDetailsOpen}
         onClose={() => setIsDetailsOpen(false)}
         style={selectedStyleForDetails}
+        cases={cases}
         onReport={(st) => handleOpenSubmit(st)}
+        onSelectCase={(c) => {
+          setSelectedCase(c);
+          changeTab('case');
+        }}
       />
 
       {/* Submission Modal */}
@@ -505,13 +577,12 @@ export default function App() {
         onClose={() => setIsSubmitOpen(false)}
         selectedStyle={targetStyleForSubmit}
         styles={styles}
-        initialPreset={selectedPresetForSubmit}
         onSubmit={handleSubmitCase}
         isSubmitting={isSubmitting}
       />
 
       {/* Footer */}
-      <footer className="border-t border-zinc-200 py-8 px-4 text-center text-xs font-mono text-zinc-500 bg-white">
+      <footer className="border-t border-[#eadfea] py-8 px-4 text-center text-xs font-mono text-zinc-500 bg-white/70 backdrop-blur-md relative z-10">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <span className="font-bold text-zinc-950">STYLELOCK</span>

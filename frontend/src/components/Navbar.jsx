@@ -5,7 +5,7 @@ export default function Navbar({ activeTab, setActiveTab, account, onConnect, is
   const shortAddr = (a) => a ? `${a.slice(0, 6)}...${a.slice(-4)}` : '';
 
   return (
-    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-zinc-200">
+    <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-[#eadfea]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         
         {/* Brand Logo with the uploaded StyleLock ribbon S */}
@@ -61,17 +61,6 @@ export default function Navbar({ activeTab, setActiveTab, account, onConnect, is
             }`}
           >
             Register Style
-          </button>
-
-          <button
-            onClick={() => setActiveTab('market')}
-            className={`px-3.5 py-2 rounded-lg transition-colors ${
-              activeTab === 'market' 
-                ? 'bg-zinc-950 text-white font-semibold' 
-                : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100'
-            }`}
-          >
-            Demo Market
           </button>
         </nav>
 

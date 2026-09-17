@@ -2,23 +2,84 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --background: #f8f8fa;
+  --surface: hsla(0, 0%, 100%, 0.85);
+  --surface-solid: #fff;
+  --surface-soft: #fdf5fa;
+  --text-primary: #211827;
+  --text-secondary: #594d63;
+  --text-muted: #9e93a6;
+  --border-soft: #eadfea;
+  --shadow-soft: 0 12px 42px rgba(116, 78, 133, 0.08);
+  --shadow-card: 0 8px 28px rgba(115, 82, 128, 0.07);
+  --shadow-floating: 0 24px 70px rgba(109, 73, 128, 0.12);
+}
+
 @layer base {
   body {
-    @apply bg-[#FAFAFC] text-zinc-900 antialiased font-sans;
+    background-color: #f8f8fa;
+    color: #211827;
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
   }
 }
 
-/* de1.ai inspired technical grid & crosshair motifs */
-.de1-grid {
-  background-size: 32px 32px;
-  background-image: 
-    linear-gradient(to right, rgba(147, 51, 234, 0.04) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(147, 51, 234, 0.04) 1px, transparent 1px);
+/* MyContext signature Pastel Grid Background */
+.pastel-grid-background {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  opacity: 0.82;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255, 183, 77, 0.85) 0, rgba(255, 213, 128, 0.55) 18%, transparent 40%),
+    radial-gradient(circle at 12% 10%, rgba(235, 170, 250, 0.82) 0, transparent 44%),
+    radial-gradient(circle at 88% 10%, rgba(230, 160, 248, 0.82) 0, transparent 44%),
+    linear-gradient(180deg, #e8b0ed, #f0ceee 45%, #f8f8fa);
+  pointer-events: none;
 }
 
-.de1-dots {
-  background-image: radial-gradient(rgba(147, 51, 234, 0.12) 1px, transparent 1px);
+.pastel-grid-background:before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(hsla(0, 0%, 100%, 0.72) 1px, transparent 0),
+    linear-gradient(90deg, hsla(0, 0%, 100%, 0.72) 1px, transparent 0);
   background-size: 20px 20px;
+  -webkit-mask-image: linear-gradient(180deg, #000 0, #000 48%, rgba(0, 0, 0, 0.35) 72%, transparent);
+  mask-image: linear-gradient(180deg, #000 0, #000 48%, rgba(0, 0, 0, 0.35) 72%, transparent);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.pastel-grid-background:after {
+  content: "";
+  position: absolute;
+  inset: 38% 0 0;
+  background: linear-gradient(180deg, rgba(248, 248, 250, 0), rgba(248, 248, 250, 0.85) 45%, #f8f8fa);
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Glassmorphic cards with soft pastel glow */
+.glass-card {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid #eadfea;
+  box-shadow: 0 10px 30px rgba(116, 78, 133, 0.05);
+}
+
+.glass-card-hover {
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-card-hover:hover {
+  transform: translateY(-2px);
+  border-color: #d8c3df;
+  box-shadow: 0 18px 45px rgba(116, 78, 133, 0.1);
 }
 
 /* Corner markers */

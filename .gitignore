@@ -9,3 +9,11 @@ scratch/
 scratch_ref/
 DeathOfTheAuthor/
 genlayer-cli-mcp/
+
+# Prompt reference notes
+00-*.md
+01-*.md
+02-*.md
+03-*.md
+04-*.md
+05-*.md

@@ -17,10 +17,10 @@ import {
   txExplorerUrl,
   weiToGen
 } from './config';
-import { Shield, Sparkles, AlertCircle, ExternalLink, Cpu, CheckCircle2 } from 'lucide-react';
+import { ExternalLink, Cpu } from 'lucide-react';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('explore'); // explore, hunt, artist, market, case
+  const [activeTab, setActiveTab] = useState('explore');
   const [styles, setStyles] = useState(INITIAL_STYLES);
   const [cases, setCases] = useState([]);
   const [selectedCase, setSelectedCase] = useState(null);
@@ -32,7 +32,7 @@ export default function App() {
   const [claimableReward, setClaimableReward] = useState('0');
   const [isClaiming, setIsClaiming] = useState(false);
   const [isCreatingStyle, setIsCreatingStyle] = useState(false);
-  const [txBanner, setTxBanner] = useState(null); // { message, hash, loading }
+  const [txBanner, setTxBanner] = useState(null);
 
   // 1. Fetch on-chain data
   const fetchOnChainData = useCallback(async () => {
@@ -66,7 +66,7 @@ export default function App() {
         }
       }
 
-      // Fetch Case #1 if exists
+      // Fetch Case count
       const caseCountRaw = await client.readContract({
         address: CONTRACT_ADDRESS,
         functionName: 'get_case_count',
@@ -107,7 +107,6 @@ export default function App() {
     try {
       const addr = await connectWallet();
       setAccount(addr);
-      // Fetch user claimable rewards
       try {
         const client = getReadClient();
         const rew = await client.readContract({
@@ -174,7 +173,6 @@ export default function App() {
           throw new Error(exec.payload || 'Transaction rejected on-chain');
         }
 
-        // Read newly created case
         const readClient = getReadClient();
         const countStr = await readClient.readContract({
           address: CONTRACT_ADDRESS,
@@ -204,7 +202,7 @@ export default function App() {
       }
     }
 
-    // Fallback simulation mode for instant preview without wallet
+    // Fallback simulation for fast preview
     await new Promise(r => setTimeout(r, 1200));
 
     const p = preset || DEMO_PRESETS[0];
@@ -307,7 +305,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#07080C] text-zinc-100 flex flex-col font-sans selection:bg-purple-600 selection:text-white">
+    <div className="min-h-screen bg-[#FAFAFC] text-zinc-900 flex flex-col font-sans selection:bg-purple-600 selection:text-white">
       
       {/* Top Navigation */}
       <Navbar
@@ -320,15 +318,15 @@ export default function App() {
 
       {/* Transaction Banner */}
       {txBanner && (
-        <div className="bg-purple-950/60 border-b border-purple-800/60 px-4 py-2 text-xs font-mono text-purple-200 flex items-center justify-center gap-3 animate-fade-in">
-          {txBanner.loading && <Cpu className="w-3.5 h-3.5 animate-spin text-purple-400" />}
+        <div className="bg-purple-50 border-b border-purple-200 px-4 py-2 text-xs font-mono text-purple-900 flex items-center justify-center gap-3 animate-fade-in shadow-xs">
+          {txBanner.loading && <Cpu className="w-3.5 h-3.5 animate-spin text-purple-600" />}
           <span>{txBanner.message}</span>
           {txBanner.hash && (
             <a
               href={txExplorerUrl(txBanner.hash)}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-purple-300 hover:text-white underline flex items-center gap-1"
+              className="text-purple-700 hover:text-purple-950 font-semibold underline flex items-center gap-1"
             >
               <span>View Explorer</span>
               <ExternalLink className="w-3 h-3" />
@@ -356,17 +354,17 @@ export default function App() {
             />
 
             <section id="styles-grid" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8 pb-4 border-b border-zinc-800/80">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8 pb-4 border-b border-zinc-200">
                 <div>
-                  <h2 className="text-xl font-bold text-white tracking-tight">Active Creator Style Profiles</h2>
-                  <p className="text-xs text-zinc-400 mt-0.5">
-                    Explore protected visual identities with precommitted autonomous enforcement policies.
+                  <h2 className="text-xl font-bold text-zinc-950 tracking-tight">Active Creator Style Profiles</h2>
+                  <p className="text-xs text-zinc-600 mt-0.5">
+                    Registered visual identities with precommitted autonomous enforcement thresholds.
                   </p>
                 </div>
 
                 <button
                   onClick={() => setActiveTab('artist')}
-                  className="text-xs font-mono text-purple-400 hover:text-purple-300 flex items-center gap-1 transition-colors"
+                  className="text-xs font-mono text-purple-700 hover:text-purple-900 font-semibold flex items-center gap-1 transition-colors bg-purple-50 hover:bg-purple-100 px-3 py-1.5 rounded-lg border border-purple-200"
                 >
                   <span>+ Register Your Style</span>
                 </button>
@@ -436,14 +434,14 @@ export default function App() {
       />
 
       {/* Minimal Footer */}
-      <footer className="border-t border-zinc-900 py-8 px-4 text-center text-xs font-mono text-zinc-400 bg-[#050608]">
+      <footer className="border-t border-zinc-200 py-8 px-4 text-center text-xs font-mono text-zinc-500 bg-white">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <span className="font-bold text-zinc-400">STYLELOCK PROTOCOL</span>
+            <span className="font-bold text-zinc-950">STYLELOCK PROTOCOL</span>
             <span>•</span>
             <span>Autonomous Creator Protection on GenLayer</span>
           </div>
-          <div className="text-zinc-400 text-[11px]">
+          <div className="text-zinc-500 text-[11px]">
             Decentralized evidence assessment, not legal determination.
           </div>
         </div>

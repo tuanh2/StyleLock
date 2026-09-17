@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShoppingBag, ExternalLink, ShieldCheck, Tag, Zap, ArrowRight } from 'lucide-react';
+import { ShoppingBag, Zap } from 'lucide-react';
 import { DEMO_PRESETS } from '../data/demoFixtures';
 
 export default function DemoMarketView({ onReportPreset }) {
@@ -7,14 +7,14 @@ export default function DemoMarketView({ onReportPreset }) {
     <div className="max-w-5xl mx-auto px-4 py-8 animate-fade-in">
       
       {/* Header */}
-      <div className="pb-6 border-b border-zinc-800 mb-8">
-        <div className="flex items-center gap-2 text-xs font-mono text-amber-400 mb-1">
+      <div className="pb-6 border-b border-zinc-200 mb-8">
+        <div className="flex items-center gap-2 text-xs font-mono text-purple-600 mb-1 font-semibold">
           <ShoppingBag className="w-4 h-4" />
           <span>Deterministic Test Environment</span>
         </div>
-        <h1 className="text-2xl font-bold text-white tracking-tight">Simulated AI Marketplaces & Storefronts</h1>
-        <p className="text-xs text-zinc-400 mt-1">
-          Public test fixtures for hackathon verification. Click "Test with StyleLock" to submit directly for AI consensus.
+        <h1 className="text-2xl font-bold text-zinc-950 tracking-tight">Simulated AI Marketplaces & Storefronts</h1>
+        <p className="text-xs text-zinc-600 mt-1">
+          Preconfigured test listings. Click "Test with StyleLock AI" to submit directly for on-chain consensus.
         </p>
       </div>
 
@@ -23,10 +23,10 @@ export default function DemoMarketView({ onReportPreset }) {
         {DEMO_PRESETS.map((item) => (
           <div
             key={item.id}
-            className="bg-zinc-900/90 border border-zinc-800 rounded-xl overflow-hidden flex flex-col justify-between hover:border-zinc-700 transition-all"
+            className="bg-white border border-zinc-200 rounded-xl overflow-hidden flex flex-col justify-between hover:border-purple-300 hover:shadow-md transition-all shadow-xs"
           >
             <div>
-              <div className="relative h-44 w-full bg-zinc-950 overflow-hidden">
+              <div className="relative h-44 w-full bg-zinc-100 overflow-hidden">
                 <img
                   src={item.image}
                   alt={item.title}
@@ -35,10 +35,10 @@ export default function DemoMarketView({ onReportPreset }) {
                 <div className="absolute top-2.5 right-2.5">
                   <span className={`text-[10px] font-mono px-2 py-0.5 rounded font-semibold ${
                     item.type === 'DERIVATIVE'
-                      ? 'bg-rose-950/80 text-rose-300 border border-rose-800'
+                      ? 'bg-rose-100 text-rose-800 border border-rose-200'
                       : item.type === 'CLEAN'
-                      ? 'bg-emerald-950/80 text-emerald-300 border border-emerald-800'
-                      : 'bg-amber-950/80 text-amber-300 border border-amber-800'
+                      ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                      : 'bg-amber-100 text-amber-800 border border-amber-200'
                   }`}>
                     Expected: {item.expectedVerdict}
                   </span>
@@ -48,26 +48,26 @@ export default function DemoMarketView({ onReportPreset }) {
               <div className="p-4">
                 <div className="flex items-center justify-between text-xs text-zinc-500 font-mono mb-1">
                   <span>{item.store}</span>
-                  <span className="text-zinc-300 font-bold">{item.price}</span>
+                  <span className="text-zinc-900 font-bold">{item.price}</span>
                 </div>
-                <h3 className="text-sm font-bold text-white line-clamp-2 leading-snug mb-2">
+                <h3 className="text-sm font-bold text-zinc-950 line-clamp-2 leading-snug mb-2">
                   {item.title}
                 </h3>
-                <p className="text-xs text-zinc-400 line-clamp-3 leading-relaxed mb-3">
+                <p className="text-xs text-zinc-600 line-clamp-3 leading-relaxed mb-3">
                   {item.description}
                 </p>
               </div>
             </div>
 
             <div className="p-4 pt-0">
-              <div className="p-2 rounded bg-zinc-950 border border-zinc-800 text-[11px] font-mono text-zinc-400 mb-3">
-                <span className="block text-zinc-500">License:</span>
-                <span className="text-zinc-300">{item.license}</span>
+              <div className="p-2 rounded bg-zinc-50 border border-zinc-200 text-[11px] font-mono text-zinc-600 mb-3">
+                <span className="block text-zinc-400">License:</span>
+                <span className="text-zinc-800 font-medium">{item.license}</span>
               </div>
 
               <button
                 onClick={() => onReportPreset(item)}
-                className="w-full py-2 rounded-lg bg-purple-600 hover:bg-purple-500 text-white font-semibold text-xs border border-purple-400/40 flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-95"
+                className="w-full py-2 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-semibold text-xs border border-purple-500/20 flex items-center justify-center gap-1.5 transition-all shadow-xs active:scale-95"
               >
                 <Zap className="w-3.5 h-3.5" />
                 <span>Test with StyleLock AI</span>

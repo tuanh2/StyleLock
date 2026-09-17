@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
-import { PlusCircle, Shield, Upload, DollarSign, ArrowRight, Zap, CheckCircle2 } from 'lucide-react';
+import { PlusCircle, Shield, ArrowRight, Zap, CheckCircle2 } from 'lucide-react';
 import { genToWei } from '../config';
 
-export default function ArtistStudio({ styles, onCreateStyle, isCreating, onFundStyle }) {
-  const [activeTab, setActiveTab] = useState('register'); // 'register' or 'manage'
+export default function ArtistStudio({ styles, onCreateStyle, isCreating }) {
+  const [activeTab, setActiveTab] = useState('register');
   
-  // Registration Form
   const [artistName, setArtistName] = useState('');
   const [styleName, setStyleName] = useState('');
   const [descriptor, setDescriptor] = useState('');
@@ -39,23 +38,23 @@ export default function ArtistStudio({ styles, onCreateStyle, isCreating, onFund
     <div className="max-w-4xl mx-auto px-4 py-8 animate-fade-in">
       
       {/* Header Tabs */}
-      <div className="flex items-center justify-between pb-6 border-b border-zinc-800 mb-8">
+      <div className="flex items-center justify-between pb-6 border-b border-zinc-200 mb-8">
         <div>
-          <div className="flex items-center gap-2 text-xs font-mono text-purple-400 mb-1">
+          <div className="flex items-center gap-2 text-xs font-mono text-purple-600 mb-1 font-semibold">
             <Shield className="w-4 h-4" />
             <span>Artist Identity Studio</span>
           </div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">Register & Protect Visual Style</h1>
-          <p className="text-xs text-zinc-400 mt-1">
-            Define your visual identity once. GenLayer AI validators enforce it autonomously across the web.
+          <h1 className="text-2xl font-bold text-zinc-950 tracking-tight">Register & Protect Visual Style</h1>
+          <p className="text-xs text-zinc-600 mt-1">
+            Commit your style parameters to the blockchain. GenLayer AI validators evaluate matching commercial derivatives autonomously.
           </p>
         </div>
 
-        <div className="flex items-center gap-1 bg-zinc-900 p-1 rounded-lg border border-zinc-800">
+        <div className="flex items-center gap-1 bg-zinc-100 p-1 rounded-lg border border-zinc-200">
           <button
             onClick={() => setActiveTab('register')}
             className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
-              activeTab === 'register' ? 'bg-purple-600 text-white font-semibold' : 'text-zinc-400 hover:text-white'
+              activeTab === 'register' ? 'bg-purple-600 text-white font-semibold' : 'text-zinc-600 hover:text-zinc-950'
             }`}
           >
             Register Style
@@ -63,7 +62,7 @@ export default function ArtistStudio({ styles, onCreateStyle, isCreating, onFund
           <button
             onClick={() => setActiveTab('manage')}
             className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
-              activeTab === 'manage' ? 'bg-purple-600 text-white font-semibold' : 'text-zinc-400 hover:text-white'
+              activeTab === 'manage' ? 'bg-purple-600 text-white font-semibold' : 'text-zinc-600 hover:text-zinc-950'
             }`}
           >
             Manage Profiles ({styles.length})
@@ -72,11 +71,11 @@ export default function ArtistStudio({ styles, onCreateStyle, isCreating, onFund
       </div>
 
       {activeTab === 'register' ? (
-        <form onSubmit={handleSubmit} className="space-y-6 bg-zinc-900/80 border border-zinc-800 p-6 sm:p-8 rounded-2xl">
+        <form onSubmit={handleSubmit} className="space-y-6 bg-white border border-zinc-200 p-6 sm:p-8 rounded-2xl shadow-xs">
           
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-mono text-zinc-300 mb-1.5 font-medium">
+              <label className="block text-xs font-mono text-zinc-700 mb-1.5 font-medium">
                 Artist Public Pseudonym
               </label>
               <input
@@ -85,12 +84,12 @@ export default function ArtistStudio({ styles, onCreateStyle, isCreating, onFund
                 value={artistName}
                 onChange={(e) => setArtistName(e.target.value)}
                 placeholder="e.g. Alice Kim"
-                className="w-full bg-zinc-950 border border-zinc-700/80 rounded-lg px-3.5 py-2.5 text-xs text-white outline-none focus:border-purple-500"
+                className="w-full bg-zinc-50 border border-zinc-300 rounded-lg px-3.5 py-2.5 text-xs text-zinc-950 outline-none focus:border-purple-600 focus:bg-white"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-mono text-zinc-300 mb-1.5 font-medium">
+              <label className="block text-xs font-mono text-zinc-700 mb-1.5 font-medium">
                 Style Profile Name
               </label>
               <input
@@ -99,27 +98,27 @@ export default function ArtistStudio({ styles, onCreateStyle, isCreating, onFund
                 value={styleName}
                 onChange={(e) => setStyleName(e.target.value)}
                 placeholder="e.g. Ink Nocturne"
-                className="w-full bg-zinc-950 border border-zinc-700/80 rounded-lg px-3.5 py-2.5 text-xs text-white outline-none focus:border-purple-500"
+                className="w-full bg-zinc-50 border border-zinc-300 rounded-lg px-3.5 py-2.5 text-xs text-zinc-950 outline-none focus:border-purple-600 focus:bg-white"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-mono text-zinc-300 mb-1.5 font-medium">
-              Detailed Visual Style Descriptor
+            <label className="block text-xs font-mono text-zinc-700 mb-1.5 font-medium">
+              Visual Style Descriptor
             </label>
             <textarea
               rows={3}
               required
               value={descriptor}
               onChange={(e) => setDescriptor(e.target.value)}
-              placeholder="Describe your visual style in detail: line behavior, palettes, negative space, recurring composition habits, brush strokes..."
-              className="w-full bg-zinc-950 border border-zinc-700/80 rounded-lg px-3.5 py-2.5 text-xs text-white outline-none focus:border-purple-500"
+              placeholder="Describe your visual style: line behavior, palettes, negative space, recurring composition patterns, brush strokes..."
+              className="w-full bg-zinc-50 border border-zinc-300 rounded-lg px-3.5 py-2.5 text-xs text-zinc-950 outline-none focus:border-purple-600 focus:bg-white"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-mono text-zinc-300 mb-1.5 font-medium">
+            <label className="block text-xs font-mono text-zinc-700 mb-1.5 font-medium">
               Protected Traits (Semicolon separated)
             </label>
             <input
@@ -128,13 +127,13 @@ export default function ArtistStudio({ styles, onCreateStyle, isCreating, onFund
               value={traits}
               onChange={(e) => setTraits(e.target.value)}
               placeholder="rough black ink contours; muted watercolor palette; asymmetric framing; sparse composition"
-              className="w-full bg-zinc-950 border border-zinc-700/80 rounded-lg px-3.5 py-2.5 text-xs text-white outline-none focus:border-purple-500"
+              className="w-full bg-zinc-50 border border-zinc-300 rounded-lg px-3.5 py-2.5 text-xs text-zinc-950 outline-none focus:border-purple-600 focus:bg-white"
             />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-              <label className="block text-xs font-mono text-zinc-300 mb-1.5 font-medium">
+              <label className="block text-xs font-mono text-zinc-700 mb-1.5 font-medium">
                 Similarity Threshold (70–95%)
               </label>
               <input
@@ -143,12 +142,12 @@ export default function ArtistStudio({ styles, onCreateStyle, isCreating, onFund
                 max="95"
                 value={threshold}
                 onChange={(e) => setThreshold(e.target.value)}
-                className="w-full bg-zinc-950 border border-zinc-700/80 rounded-lg px-3.5 py-2.5 text-xs text-white outline-none focus:border-purple-500"
+                className="w-full bg-zinc-50 border border-zinc-300 rounded-lg px-3.5 py-2.5 text-xs text-zinc-950 outline-none focus:border-purple-600 focus:bg-white"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-mono text-zinc-300 mb-1.5 font-medium">
+              <label className="block text-xs font-mono text-zinc-700 mb-1.5 font-medium">
                 Min. Confidence (60–95%)
               </label>
               <input
@@ -157,12 +156,12 @@ export default function ArtistStudio({ styles, onCreateStyle, isCreating, onFund
                 max="95"
                 value={confidence}
                 onChange={(e) => setConfidence(e.target.value)}
-                className="w-full bg-zinc-950 border border-zinc-700/80 rounded-lg px-3.5 py-2.5 text-xs text-white outline-none focus:border-purple-500"
+                className="w-full bg-zinc-50 border border-zinc-300 rounded-lg px-3.5 py-2.5 text-xs text-zinc-950 outline-none focus:border-purple-600 focus:bg-white"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-mono text-zinc-300 mb-1.5 font-medium">
+              <label className="block text-xs font-mono text-zinc-700 mb-1.5 font-medium">
                 Hunter Bounty (GEN)
               </label>
               <input
@@ -170,13 +169,13 @@ export default function ArtistStudio({ styles, onCreateStyle, isCreating, onFund
                 value={bountyGen}
                 onChange={(e) => setBountyGen(e.target.value)}
                 placeholder="0.25"
-                className="w-full bg-zinc-950 border border-zinc-700/80 rounded-lg px-3.5 py-2.5 text-xs text-white outline-none focus:border-purple-500"
+                className="w-full bg-zinc-50 border border-zinc-300 rounded-lg px-3.5 py-2.5 text-xs text-zinc-950 outline-none focus:border-purple-600 focus:bg-white"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-mono text-zinc-300 mb-1.5 font-medium">
+            <label className="block text-xs font-mono text-zinc-700 mb-1.5 font-medium">
               Reference Artwork Collage URL
             </label>
             <input
@@ -185,7 +184,7 @@ export default function ArtistStudio({ styles, onCreateStyle, isCreating, onFund
               value={collageUrl}
               onChange={(e) => setCollageUrl(e.target.value)}
               placeholder="https://..."
-              className="w-full bg-zinc-950 border border-zinc-700/80 rounded-lg px-3.5 py-2.5 text-xs text-white outline-none focus:border-purple-500"
+              className="w-full bg-zinc-50 border border-zinc-300 rounded-lg px-3.5 py-2.5 text-xs text-zinc-950 outline-none focus:border-purple-600 focus:bg-white"
             />
           </div>
 
@@ -193,7 +192,7 @@ export default function ArtistStudio({ styles, onCreateStyle, isCreating, onFund
             <button
               type="submit"
               disabled={isCreating}
-              className="w-full bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white font-semibold text-sm py-3 rounded-lg border border-purple-400/40 flex items-center justify-center gap-2 transition-all shadow-md active:scale-95"
+              className="w-full bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white font-semibold text-sm py-3 rounded-lg border border-purple-500/20 flex items-center justify-center gap-2 transition-all shadow-sm active:scale-95"
             >
               <PlusCircle className="w-4 h-4" />
               <span>{isCreating ? 'Registering On-Chain...' : 'Register Style on GenLayer'}</span>
@@ -204,12 +203,12 @@ export default function ArtistStudio({ styles, onCreateStyle, isCreating, onFund
       ) : (
         <div className="space-y-4">
           {styles.map(s => (
-            <div key={s.style_id} className="p-4 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-between">
+            <div key={s.style_id} className="p-4 rounded-xl bg-white border border-zinc-200 flex items-center justify-between shadow-xs">
               <div>
-                <h3 className="font-bold text-white text-base">Style #{s.style_id}: {s.style_name}</h3>
-                <p className="text-xs text-zinc-400 mt-0.5">Threshold: {s.similarity_threshold}% | Bounty: {bountyGen} GEN</p>
+                <h3 className="font-bold text-zinc-950 text-base">Style #{s.style_id}: {s.style_name}</h3>
+                <p className="text-xs text-zinc-500 mt-0.5">Threshold: {s.similarity_threshold}% | Bounty: {bountyGen} GEN</p>
               </div>
-              <span className="text-xs font-mono px-2 py-1 rounded bg-purple-950 text-purple-300 border border-purple-800">
+              <span className="text-xs font-mono px-2 py-1 rounded bg-purple-50 text-purple-700 border border-purple-200 font-semibold">
                 Active Policy
               </span>
             </div>

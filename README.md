@@ -2,6 +2,7 @@
 
 **Autonomous visual style protection and bounty protocol powered by GenLayer's AI-native consensus.**
 
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Vercel-success)](https://temporary-brisk-maroon-rpucffc.vercel.app)
 [![GenLayer Network](https://img.shields.io/badge/GenLayer-Studionet%20(61999)-8B5CF6)](https://explorer-next.studio.genlayer.com/address/0x63f0708BDd5C52e8f2A5f9308Aeb6057a09042FD)
 [![Track](https://img.shields.io/badge/Track-Autonomous%20Protocols-blue)](https://portal.genlayer.foundation/agent-tank)
 [![E2E Tests](https://img.shields.io/badge/E2E%20Tests-6%2F6%20Passing-emerald)](./deliverables/e2e-run.json)
@@ -100,6 +101,7 @@ Contract Address: 0x63f0708BDd5C52e8f2A5f9308Aeb6057a09042FD
 Network: GenLayer Studionet (Chain ID: 61999)
 RPC Endpoint: https://studio.genlayer.com/api
 Explorer: https://explorer-next.studio.genlayer.com/address/0x63f0708BDd5C52e8f2A5f9308Aeb6057a09042FD
+Live App: https://temporary-brisk-maroon-rpucffc.vercel.app
 ```
 
 ### Verified On-Chain Transactions

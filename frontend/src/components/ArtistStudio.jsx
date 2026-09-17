@@ -31,7 +31,7 @@ export default function ArtistStudio({ styles, onCreateStyle, isCreating }) {
     if (match) {
       const [, user, id] = match;
       setIsResolvingX(true);
-      setXStatusMsg('Đang trích xuất ảnh gốc từ bài viết X...');
+      setXStatusMsg('Extracting original artwork from X post...');
       try {
         const res = await fetch(`https://api.fxtwitter.com/${user}/status/${id}`);
         const data = await res.json();
@@ -39,18 +39,18 @@ export default function ArtistStudio({ styles, onCreateStyle, isCreating }) {
         if (photo) {
           setCollageUrl(photo);
           setPreviewImage(photo);
-          setXStatusMsg('✓ Đã lấy thành công ảnh gốc từ X!');
+          setXStatusMsg('✓ Successfully loaded original image from X!');
         } else {
-          setXStatusMsg('Không tìm thấy ảnh đính kèm trong bài viết này.');
+          setXStatusMsg('No image found attached to this post.');
         }
       } catch (err) {
         console.warn('X fetch error:', err);
-        setXStatusMsg('Không thể tự lấy ảnh, bạn có thể dán link trực tiếp.');
+        setXStatusMsg('Could not fetch image automatically. You can paste the direct image URL.');
       } finally {
         setIsResolvingX(false);
       }
     } else if (trimmed) {
-      setXStatusMsg('Vui lòng nhập đúng định dạng link bài viết X (https://x.com/username/status/...)');
+      setXStatusMsg('Please enter a valid X post URL (https://x.com/username/status/...)');
     } else {
       setXStatusMsg('');
     }
@@ -60,7 +60,7 @@ export default function ArtistStudio({ styles, onCreateStyle, isCreating }) {
   const handleFileProcess = (file) => {
     if (!file) return;
     if (!file.type.startsWith('image/')) {
-      alert('Vui lòng chọn file hình ảnh (.png, .jpg, .webp)');
+      alert('Please select an image file (.png, .jpg, .webp)');
       return;
     }
     const reader = new FileReader();
@@ -253,7 +253,7 @@ export default function ArtistStudio({ styles, onCreateStyle, isCreating }) {
                     uploadMode === 'x_link' ? 'bg-white text-zinc-900 font-bold shadow-xs' : 'text-zinc-600 hover:text-zinc-900'
                   }`}
                 >
-                  𝕏 Post Link (Tự lấy ảnh)
+                  𝕏 Post Link (Auto-fetch)
                 </button>
                 <button
                   type="button"
@@ -262,7 +262,7 @@ export default function ArtistStudio({ styles, onCreateStyle, isCreating }) {
                     uploadMode === 'upload' ? 'bg-white text-zinc-900 font-bold shadow-xs' : 'text-zinc-600 hover:text-zinc-900'
                   }`}
                 >
-                  📁 Upload từ máy
+                  📁 Upload File
                 </button>
                 <button
                   type="button"
@@ -271,7 +271,7 @@ export default function ArtistStudio({ styles, onCreateStyle, isCreating }) {
                     uploadMode === 'url' ? 'bg-white text-zinc-900 font-bold shadow-xs' : 'text-zinc-600 hover:text-zinc-900'
                   }`}
                 >
-                  🔗 Dán URL ảnh
+                  🔗 Paste Image URL
                 </button>
               </div>
             </div>
@@ -280,7 +280,7 @@ export default function ArtistStudio({ styles, onCreateStyle, isCreating }) {
             {uploadMode === 'x_link' && (
               <div className="space-y-2">
                 <p className="text-xs text-zinc-600">
-                  Dán link bài viết trên X/Twitter (ví dụ: <code className="text-purple-700 bg-purple-50 px-1 py-0.5 rounded">https://x.com/dezzyyy_eth/status/...</code>), hệ thống sẽ tự động bóc tách ảnh gốc sắc nét nhất!
+                  Paste link to an X/Twitter post (e.g. <code className="text-purple-700 bg-purple-50 px-1 py-0.5 rounded">https://x.com/dezzyyy_eth/status/...</code>) — original high-res artwork will be automatically extracted!
                 </p>
                 <div className="flex gap-2">
                   <input
@@ -296,7 +296,7 @@ export default function ArtistStudio({ styles, onCreateStyle, isCreating }) {
                     disabled={isResolvingX || !xPostUrl}
                     className="px-4 py-2.5 bg-zinc-900 hover:bg-zinc-800 text-white rounded-lg text-xs font-semibold shrink-0 disabled:opacity-50"
                   >
-                    {isResolvingX ? 'Đang lấy ảnh...' : 'Lấy ảnh'}
+                    {isResolvingX ? 'Fetching...' : 'Fetch Image'}
                   </button>
                 </div>
                 {xStatusMsg && (
@@ -332,10 +332,10 @@ export default function ArtistStudio({ styles, onCreateStyle, isCreating }) {
                     </svg>
                   </div>
                   <p className="text-xs font-semibold text-zinc-900">
-                    Bấm để chọn file ảnh từ máy tính hoặc kéo thả ảnh vào đây
+                    Click to choose image file or drag and drop here
                   </p>
                   <p className="text-[11px] text-zinc-500 mt-1">
-                    Hỗ trợ PNG, JPG, WebP. Ảnh được xử lý trực tiếp không cần backend server.
+                    Supports PNG, JPG, WebP. Processed locally in-browser without a backend server.
                   </p>
                 </div>
               </div>
@@ -364,13 +364,14 @@ export default function ArtistStudio({ styles, onCreateStyle, isCreating }) {
                 <img
                   src={previewImage}
                   alt="Reference Preview"
+                  referrerPolicy="no-referrer"
                   className="w-20 h-20 rounded-lg object-cover border border-zinc-200 bg-zinc-100 shrink-0"
                   onError={(e) => { e.target.src = '/images/ink-nocturne.jpg'; }}
                 />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <span className="inline-flex items-center gap-1 text-[11px] font-mono text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded font-semibold border border-emerald-200">
-                      ✓ Đã có ảnh artwork
+                      ✓ Artwork loaded
                     </span>
                   </div>
                   <p className="text-[11px] font-mono text-zinc-500 truncate mt-1 max-w-md">
@@ -386,7 +387,7 @@ export default function ArtistStudio({ styles, onCreateStyle, isCreating }) {
                     }}
                     className="text-[11px] text-red-600 hover:text-red-700 hover:underline mt-1 font-medium"
                   >
-                    Đổi ảnh khác
+                    Change image
                   </button>
                 </div>
               </div>

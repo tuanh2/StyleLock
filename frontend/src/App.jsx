@@ -17,7 +17,6 @@ import {
   txExplorerUrl,
   weiToGen
 } from './config';
-import { ExternalLink, Cpu } from 'lucide-react';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('explore');
@@ -66,7 +65,6 @@ export default function App() {
         }
       }
 
-      // Fetch Case count
       const caseCountRaw = await client.readContract({
         address: CONTRACT_ADDRESS,
         functionName: 'get_case_count',
@@ -134,7 +132,7 @@ export default function App() {
   // 4. Submit Case
   const handleSubmitCase = async ({ styleId, suspectUrl, claimText, preset }) => {
     setIsSubmitting(true);
-    setTxBanner({ message: 'Submitting evidence & initiating GenLayer AI jury consensus...', loading: true });
+    setTxBanner({ message: 'Submitting evidence to GenLayer validators...', loading: true });
 
     let activeAccount = account;
     if (!activeAccount && window.ethereum) {
@@ -156,7 +154,7 @@ export default function App() {
         });
         const hashStr = typeof hash === 'string' ? hash : String(hash);
         setTxBanner({
-          message: 'Waiting for GenVM multi-validator consensus & finality...',
+          message: 'Waiting for validator consensus on GenLayer...',
           hash: hashStr,
           loading: true
         });
@@ -191,18 +189,18 @@ export default function App() {
         setSelectedCase(newCase);
         setActiveTab('case');
         setIsSubmitOpen(false);
-        setTxBanner({ message: 'Consensus Finalized On-Chain!', hash: hashStr, loading: false });
+        setTxBanner({ message: 'Consensus Finalized On-Chain', hash: hashStr, loading: false });
         setTimeout(() => setTxBanner(null), 6000);
         setIsSubmitting(false);
         await fetchOnChainData();
         return;
       } catch (err) {
         console.warn('On-chain write error:', err.message);
-        setTxBanner({ message: `On-chain note: ${err.message}. Showing simulation result.`, loading: false });
+        setTxBanner({ message: `Note: ${err.message}. Showing simulated result.`, loading: false });
       }
     }
 
-    // Fallback simulation for fast preview
+    // Fallback simulation
     await new Promise(r => setTimeout(r, 1200));
 
     const p = preset || DEMO_PRESETS[0];
@@ -227,8 +225,8 @@ export default function App() {
       matched_traits: isDeriv ? ['rough black ink contours', 'muted watercolor palette', 'asymmetric framing'] : [],
       differences: isClean ? ['sharp neon vector geometry', 'isometric perspective', 'zero watercolor texture'] : [],
       reason: isDeriv
-        ? 'GenLayer AI validators independently analyzed the rendered storefront and reference collage. The suspect listing reproduces a distinctive combination of registered Ink Nocturne traits (rough black contours, muted washes, asymmetric figures) in a commercial product pack ($14.99). Autonomous policy threshold satisfied.'
-        : 'The suspect listing exhibits sharp polygonal vector geometry with high-saturation neon hues. No distinctive traits of the registered watercolor style were reproduced. Verdict is CLEAN.',
+        ? 'GenLayer validators analyzed the suspect listing and reference collage. The suspect listing reproduces registered Ink Nocturne traits (rough black contours, muted washes, asymmetric figures) in a commercial product pack ($14.99).'
+        : 'The suspect listing exhibits sharp polygonal vector geometry with high-saturation neon hues. No distinctive traits of the registered watercolor style were reproduced.',
       txHash: '0x1045756a1167583b0ffce4383d93b3030fe9117e0a043ac18c1a354535fe7528'
     };
 
@@ -254,7 +252,7 @@ export default function App() {
       alert(`Bounty claimed! Tx: ${hash}`);
       setClaimableReward('0');
     } catch (e) {
-      alert(e.message || 'Claim reward error');
+      alert(e.message || 'Claim error');
     } finally {
       setIsClaiming(false);
     }
@@ -294,7 +292,7 @@ export default function App() {
           confirmed_cases: 0
         };
         setStyles(prev => [...prev, newStyle]);
-        alert('Style registered in local session!');
+        alert('Style registered in local session');
       }
       setActiveTab('explore');
     } catch (e) {
@@ -307,7 +305,7 @@ export default function App() {
   return (
     <div className="min-h-screen bg-[#FAFAFC] text-zinc-900 flex flex-col font-sans selection:bg-purple-600 selection:text-white">
       
-      {/* Top Navigation */}
+      {/* Top Navigation with custom logo */}
       <Navbar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
@@ -318,18 +316,16 @@ export default function App() {
 
       {/* Transaction Banner */}
       {txBanner && (
-        <div className="bg-purple-50 border-b border-purple-200 px-4 py-2 text-xs font-mono text-purple-900 flex items-center justify-center gap-3 animate-fade-in shadow-xs">
-          {txBanner.loading && <Cpu className="w-3.5 h-3.5 animate-spin text-purple-600" />}
+        <div className="bg-purple-50 border-b border-purple-200 px-4 py-2 text-xs font-mono text-purple-900 flex items-center justify-center gap-3 animate-fade-in">
           <span>{txBanner.message}</span>
           {txBanner.hash && (
             <a
               href={txExplorerUrl(txBanner.hash)}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-purple-700 hover:text-purple-950 font-semibold underline flex items-center gap-1"
+              className="text-purple-700 hover:text-purple-950 font-semibold underline"
             >
-              <span>View Explorer</span>
-              <ExternalLink className="w-3 h-3" />
+              View on Explorer ↗
             </a>
           )}
         </div>
@@ -356,17 +352,17 @@ export default function App() {
             <section id="styles-grid" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8 pb-4 border-b border-zinc-200">
                 <div>
-                  <h2 className="text-xl font-bold text-zinc-950 tracking-tight">Active Creator Style Profiles</h2>
+                  <h2 className="text-xl font-bold text-zinc-950 tracking-tight">Active Protected Styles</h2>
                   <p className="text-xs text-zinc-600 mt-0.5">
-                    Registered visual identities with precommitted autonomous enforcement thresholds.
+                    Registered visual identities with precommitted similarity thresholds.
                   </p>
                 </div>
 
                 <button
                   onClick={() => setActiveTab('artist')}
-                  className="text-xs font-mono text-purple-700 hover:text-purple-900 font-semibold flex items-center gap-1 transition-colors bg-purple-50 hover:bg-purple-100 px-3 py-1.5 rounded-lg border border-purple-200"
+                  className="text-xs font-mono text-purple-700 hover:text-purple-900 font-semibold transition-colors bg-purple-50 hover:bg-purple-100 px-3 py-1.5 rounded-lg border border-purple-200"
                 >
-                  <span>+ Register Your Style</span>
+                  + Register Style
                 </button>
               </div>
 
@@ -423,7 +419,7 @@ export default function App() {
 
       </main>
 
-      {/* Evidence Submission Modal */}
+      {/* Submission Modal */}
       <SubmitModal
         isOpen={isSubmitOpen}
         onClose={() => setIsSubmitOpen(false)}
@@ -433,16 +429,16 @@ export default function App() {
         isSubmitting={isSubmitting}
       />
 
-      {/* Minimal Footer */}
+      {/* Footer */}
       <footer className="border-t border-zinc-200 py-8 px-4 text-center text-xs font-mono text-zinc-500 bg-white">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <span className="font-bold text-zinc-950">STYLELOCK PROTOCOL</span>
+            <span className="font-bold text-zinc-950">STYLELOCK</span>
             <span>•</span>
-            <span>Autonomous Creator Protection on GenLayer</span>
+            <span>On-Chain Style Protection</span>
           </div>
-          <div className="text-zinc-500 text-[11px]">
-            Decentralized evidence assessment, not legal determination.
+          <div className="text-zinc-400 text-[11px]">
+            Decentralized evidence assessment on GenLayer.
           </div>
         </div>
       </footer>

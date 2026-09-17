@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { PlusCircle, Shield, ArrowRight, Zap, CheckCircle2 } from 'lucide-react';
 import { genToWei } from '../config';
 
 export default function ArtistStudio({ styles, onCreateStyle, isCreating }) {
@@ -40,13 +39,12 @@ export default function ArtistStudio({ styles, onCreateStyle, isCreating }) {
       {/* Header Tabs */}
       <div className="flex items-center justify-between pb-6 border-b border-zinc-200 mb-8">
         <div>
-          <div className="flex items-center gap-2 text-xs font-mono text-purple-600 mb-1 font-semibold">
-            <Shield className="w-4 h-4" />
-            <span>Artist Identity Studio</span>
-          </div>
-          <h1 className="text-2xl font-bold text-zinc-950 tracking-tight">Register & Protect Visual Style</h1>
+          <span className="text-xs font-mono text-purple-600 uppercase tracking-wider font-semibold block mb-1">
+            Creator Registration
+          </span>
+          <h1 className="text-2xl font-bold text-zinc-950 tracking-tight">Register Visual Style</h1>
           <p className="text-xs text-zinc-600 mt-1">
-            Commit your style parameters to the blockchain. GenLayer AI validators evaluate matching commercial derivatives autonomously.
+            Define your visual identity once on-chain. GenLayer validators reference this data when evaluating suspect listings.
           </p>
         </div>
 
@@ -65,18 +63,18 @@ export default function ArtistStudio({ styles, onCreateStyle, isCreating }) {
               activeTab === 'manage' ? 'bg-purple-600 text-white font-semibold' : 'text-zinc-600 hover:text-zinc-950'
             }`}
           >
-            Manage Profiles ({styles.length})
+            Registered ({styles.length})
           </button>
         </div>
       </div>
 
       {activeTab === 'register' ? (
-        <form onSubmit={handleSubmit} className="space-y-6 bg-white border border-zinc-200 p-6 sm:p-8 rounded-2xl shadow-xs">
+        <form onSubmit={handleSubmit} className="space-y-6 bg-white border border-zinc-200 p-6 sm:p-8 rounded-2xl">
           
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-mono text-zinc-700 mb-1.5 font-medium">
-                Artist Public Pseudonym
+                Artist Name / Pseudonym
               </label>
               <input
                 type="text"
@@ -90,7 +88,7 @@ export default function ArtistStudio({ styles, onCreateStyle, isCreating }) {
 
             <div>
               <label className="block text-xs font-mono text-zinc-700 mb-1.5 font-medium">
-                Style Profile Name
+                Style Name
               </label>
               <input
                 type="text"
@@ -105,21 +103,21 @@ export default function ArtistStudio({ styles, onCreateStyle, isCreating }) {
 
           <div>
             <label className="block text-xs font-mono text-zinc-700 mb-1.5 font-medium">
-              Visual Style Descriptor
+              Style Description
             </label>
             <textarea
               rows={3}
               required
               value={descriptor}
               onChange={(e) => setDescriptor(e.target.value)}
-              placeholder="Describe your visual style: line behavior, palettes, negative space, recurring composition patterns, brush strokes..."
+              placeholder="Describe your visual style: line weight, color palette, recurring composition patterns, brush strokes..."
               className="w-full bg-zinc-50 border border-zinc-300 rounded-lg px-3.5 py-2.5 text-xs text-zinc-950 outline-none focus:border-purple-600 focus:bg-white"
             />
           </div>
 
           <div>
             <label className="block text-xs font-mono text-zinc-700 mb-1.5 font-medium">
-              Protected Traits (Semicolon separated)
+              Distinctive Traits (Semicolon separated)
             </label>
             <input
               type="text"
@@ -192,24 +190,23 @@ export default function ArtistStudio({ styles, onCreateStyle, isCreating }) {
             <button
               type="submit"
               disabled={isCreating}
-              className="w-full bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white font-semibold text-sm py-3 rounded-lg border border-purple-500/20 flex items-center justify-center gap-2 transition-all shadow-sm active:scale-95"
+              className="w-full bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white font-semibold text-sm py-3 rounded-lg transition-all shadow-sm active:scale-95"
             >
-              <PlusCircle className="w-4 h-4" />
-              <span>{isCreating ? 'Registering On-Chain...' : 'Register Style on GenLayer'}</span>
+              {isCreating ? 'Registering On-Chain...' : 'Register Style on GenLayer'}
             </button>
           </div>
 
         </form>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-3">
           {styles.map(s => (
-            <div key={s.style_id} className="p-4 rounded-xl bg-white border border-zinc-200 flex items-center justify-between shadow-xs">
+            <div key={s.style_id} className="p-4 rounded-xl bg-white border border-zinc-200 flex items-center justify-between">
               <div>
                 <h3 className="font-bold text-zinc-950 text-base">Style #{s.style_id}: {s.style_name}</h3>
                 <p className="text-xs text-zinc-500 mt-0.5">Threshold: {s.similarity_threshold}% | Bounty: {bountyGen} GEN</p>
               </div>
-              <span className="text-xs font-mono px-2 py-1 rounded bg-purple-50 text-purple-700 border border-purple-200 font-semibold">
-                Active Policy
+              <span className="text-xs font-mono px-2 py-1 rounded bg-zinc-100 text-zinc-700 border border-zinc-200 font-medium">
+                Active
               </span>
             </div>
           ))}

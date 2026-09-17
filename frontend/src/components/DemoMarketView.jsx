@@ -1,5 +1,4 @@
 import React from 'react';
-import { ShoppingBag, Zap } from 'lucide-react';
 import { DEMO_PRESETS } from '../data/demoFixtures';
 
 export default function DemoMarketView({ onReportPreset }) {
@@ -8,13 +7,12 @@ export default function DemoMarketView({ onReportPreset }) {
       
       {/* Header */}
       <div className="pb-6 border-b border-zinc-200 mb-8">
-        <div className="flex items-center gap-2 text-xs font-mono text-purple-600 mb-1 font-semibold">
-          <ShoppingBag className="w-4 h-4" />
-          <span>Deterministic Test Environment</span>
-        </div>
-        <h1 className="text-2xl font-bold text-zinc-950 tracking-tight">Simulated AI Marketplaces & Storefronts</h1>
+        <span className="text-xs font-mono text-purple-600 uppercase tracking-wider font-semibold block mb-1">
+          Marketplace Simulation
+        </span>
+        <h1 className="text-2xl font-bold text-zinc-950 tracking-tight">Test Listings & Storefronts</h1>
         <p className="text-xs text-zinc-600 mt-1">
-          Preconfigured test listings. Click "Test with StyleLock AI" to submit directly for on-chain consensus.
+          Preconfigured sample listings. Click "Run Evaluation" to submit directly for consensus.
         </p>
       </div>
 
@@ -23,7 +21,7 @@ export default function DemoMarketView({ onReportPreset }) {
         {DEMO_PRESETS.map((item) => (
           <div
             key={item.id}
-            className="bg-white border border-zinc-200 rounded-xl overflow-hidden flex flex-col justify-between hover:border-purple-300 hover:shadow-md transition-all shadow-xs"
+            className="bg-white border border-zinc-200 rounded-xl overflow-hidden flex flex-col justify-between hover:border-purple-300 transition-all shadow-xs"
           >
             <div>
               <div className="relative h-44 w-full bg-zinc-100 overflow-hidden">
@@ -40,7 +38,7 @@ export default function DemoMarketView({ onReportPreset }) {
                       ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
                       : 'bg-amber-100 text-amber-800 border border-amber-200'
                   }`}>
-                    Expected: {item.expectedVerdict}
+                    {item.expectedVerdict}
                   </span>
                 </div>
               </div>
@@ -61,16 +59,15 @@ export default function DemoMarketView({ onReportPreset }) {
 
             <div className="p-4 pt-0">
               <div className="p-2 rounded bg-zinc-50 border border-zinc-200 text-[11px] font-mono text-zinc-600 mb-3">
-                <span className="block text-zinc-400">License:</span>
+                <span className="text-zinc-400">License: </span>
                 <span className="text-zinc-800 font-medium">{item.license}</span>
               </div>
 
               <button
                 onClick={() => onReportPreset(item)}
-                className="w-full py-2 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-semibold text-xs border border-purple-500/20 flex items-center justify-center gap-1.5 transition-all shadow-xs active:scale-95"
+                className="w-full py-2.5 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-semibold text-xs transition-all text-center"
               >
-                <Zap className="w-3.5 h-3.5" />
-                <span>Test with StyleLock AI</span>
+                Run Evaluation
               </button>
             </div>
 

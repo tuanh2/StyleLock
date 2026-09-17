@@ -7,6 +7,7 @@ import CaseView from './components/CaseView';
 import HunterBoard from './components/HunterBoard';
 import ArtistStudio from './components/ArtistStudio';
 import DemoMarketView from './components/DemoMarketView';
+import SplashScreen from './components/SplashScreen';
 import { INITIAL_STYLES, DEMO_PRESETS } from './data/demoFixtures';
 import {
   connectWallet,
@@ -19,6 +20,7 @@ import {
 } from './config';
 
 export default function App() {
+  const [showSplash, setShowSplash] = useState(true);
   const [activeTab, setActiveTab] = useState('explore');
   const [styles, setStyles] = useState(INITIAL_STYLES);
   const [cases, setCases] = useState([]);
@@ -305,6 +307,9 @@ export default function App() {
   return (
     <div className="min-h-screen bg-[#FAFAFC] text-zinc-900 flex flex-col font-sans selection:bg-purple-600 selection:text-white">
       
+      {/* 2-Second Initial Intro Splash Screen */}
+      {showSplash && <SplashScreen onFinish={() => setShowSplash(false)} />}
+
       {/* Top Navigation with custom logo */}
       <Navbar
         activeTab={activeTab}

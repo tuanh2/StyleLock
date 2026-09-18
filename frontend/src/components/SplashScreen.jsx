@@ -7,7 +7,7 @@ export default function SplashScreen({ onFinish }) {
 
   useEffect(() => {
     const startTime = Date.now();
-    const duration = 2000; // 2 seconds
+    const duration = 800; // 0.8 seconds
 
     const interval = setInterval(() => {
       const elapsed = Date.now() - startTime;
@@ -25,16 +25,16 @@ export default function SplashScreen({ onFinish }) {
         setFadeOut(true);
         setTimeout(() => {
           if (onFinish) onFinish();
-        }, 400);
+        }, 250);
       }
-    }, 25);
+    }, 20);
 
     return () => clearInterval(interval);
   }, [onFinish]);
 
   return (
     <div
-      className={`fixed inset-0 z-[9999] bg-[#FAFAFC] de1-grid flex flex-col items-center justify-center select-none transition-all duration-400 ease-out ${
+      className={`fixed inset-0 z-[9999] bg-[#FAFAFC] de1-grid flex flex-col items-center justify-center select-none transition-all duration-250 ease-out ${
         fadeOut ? 'opacity-0 pointer-events-none scale-102' : 'opacity-100 scale-100'
       }`}
     >

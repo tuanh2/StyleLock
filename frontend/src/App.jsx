@@ -9,6 +9,7 @@ import HunterBoard from './components/HunterBoard';
 import ArtistStudio from './components/ArtistStudio';
 import SplashScreen from './components/SplashScreen';
 import DonateModal from './components/DonateModal';
+import ChainSelectModal from './components/ChainSelectModal';
 import { INITIAL_STYLES, INITIAL_CASES } from './data/demoFixtures';
 import {
   connectWallet,
@@ -77,6 +78,8 @@ export default function App() {
   const [donateModalStyle, setDonateModalStyle] = useState(null);
   const [isDonating, setIsDonating] = useState(false);
   const [txBanner, setTxBanner] = useState(null);
+  const [chainModalOpen, setChainModalOpen] = useState(false);
+  const [connectedChain, setConnectedChain] = useState(null);
   const lastFetchRef = useRef(0); // timestamp ms of last fetchOnChainData
 
   // 1. Fetch on-chain data in parallel across all styles and cases
@@ -238,25 +241,80 @@ export default function App() {
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
-  // 2. Connect Wallet
-  const handleConnect = async () => {
+  // 2. Connect Wallet — opens chain selector modal
+  const handleConnect = () => {
+    setChainModalOpen(true);
+  };
+
+  // 2a. Handle chain selection from modal
+  const handleChainSelect = async (chain) => {
     setIsConnecting(true);
     try {
-      const addr = await connectWallet();
-      setAccount(addr);
+      if (chain.type === 'solana') {
+        // Solana: use Phantom wallet
+        const phantom = window.solana || window.phantom?.solana;
+        if (!phantom?.isPhantom) {
+          window.open('https://phantom.app/', '_blank');
+          throw new Error('Phantom wallet not found. Please install Phantom and retry.');
+        }
+        const resp = await phantom.connect();
+        const solAddr = resp.publicKey.toString();
+        setAccount(solAddr);
+        setConnectedChain(chain);
+        setChainModalOpen(false);
+        return;
+      }
+
+      // EVM chains: MetaMask
+      if (!window.ethereum) {
+        throw new Error('MetaMask not found. Please install MetaMask extension.');
+      }
+
+      // Switch or add chain
       try {
-        const client = getReadClient();
-        const rew = await client.readContract({
-          address: CONTRACT_ADDRESS,
-          functionName: 'get_claimable_reward',
-          args: [addr]
+        await window.ethereum.request({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: chain.chainIdHex }],
         });
-        setClaimableReward(String(rew || '0'));
-      } catch (e) {
-        console.warn('Error reading claimable reward:', e);
+      } catch (err) {
+        if (err.code === 4902 || err.code === -32603) {
+          await window.ethereum.request({
+            method: 'wallet_addEthereumChain',
+            params: [{
+              chainId: chain.chainIdHex,
+              chainName: chain.name,
+              nativeCurrency: chain.currency,
+              rpcUrls: [chain.rpc],
+              blockExplorerUrls: [chain.explorer],
+            }],
+          });
+        } else {
+          throw err;
+        }
+      }
+
+      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+      const addr = accounts[0];
+      setAccount(addr);
+      setConnectedChain(chain);
+      setChainModalOpen(false);
+
+      // Fetch claimable reward only if on GenLayer
+      if (chain.key === 'genlayer') {
+        try {
+          const client = getReadClient();
+          const rew = await client.readContract({
+            address: CONTRACT_ADDRESS,
+            functionName: 'get_claimable_reward',
+            args: [addr]
+          });
+          setClaimableReward(String(rew || '0'));
+        } catch (e) {
+          console.warn('Error reading claimable reward:', e);
+        }
       }
     } catch (err) {
-      alert(err.message || 'Failed to connect MetaMask');
+      alert(err.message || 'Failed to connect wallet');
     } finally {
       setIsConnecting(false);
     }
@@ -266,6 +324,7 @@ export default function App() {
   const handleDisconnect = () => {
     setAccount('');
     setClaimableReward('0');
+    setConnectedChain(null);
   };
 
   useEffect(() => {
@@ -590,6 +649,7 @@ export default function App() {
         activeTab={activeTab}
         setActiveTab={changeTab}
         account={account}
+        connectedChain={connectedChain}
         onConnect={handleConnect}
         onDisconnect={handleDisconnect}
         isConnecting={isConnecting}
@@ -811,6 +871,14 @@ export default function App() {
         style={donateModalStyle}
         onDonate={handleDonate}
         isDonating={isDonating}
+      />
+
+      {/* Chain Selector Modal */}
+      <ChainSelectModal
+        isOpen={chainModalOpen}
+        onClose={() => setChainModalOpen(false)}
+        onSelect={handleChainSelect}
+        isConnecting={isConnecting}
       />
 
       {/* Footer */}

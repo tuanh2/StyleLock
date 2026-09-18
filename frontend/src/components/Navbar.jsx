@@ -1,7 +1,7 @@
 import React from 'react';
 import { CONTRACT_ADDRESS, addressExplorerUrl } from '../config';
 
-export default function Navbar({ activeTab, setActiveTab, account, onConnect, onDisconnect, isConnecting }) {
+export default function Navbar({ activeTab, setActiveTab, account, connectedChain, onConnect, onDisconnect, isConnecting }) {
   const shortAddr = (a) => a ? `${a.slice(0, 6)}...${a.slice(-4)}` : '';
 
   return (
@@ -80,8 +80,14 @@ export default function Navbar({ activeTab, setActiveTab, account, onConnect, on
           {account ? (
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-2 bg-zinc-100 border border-zinc-200 px-3 py-1.5 rounded-lg text-xs font-mono text-zinc-800">
+                {connectedChain && (
+                  <span className="text-sm leading-none">{connectedChain.icon}</span>
+                )}
                 <span className="w-2 h-2 rounded-full bg-purple-600"></span>
                 <span className="font-medium">{shortAddr(account)}</span>
+                {connectedChain && (
+                  <span className="text-zinc-400 hidden sm:inline">{connectedChain.name}</span>
+                )}
               </div>
               <button
                 onClick={onDisconnect}

@@ -3,13 +3,14 @@ import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import StyleCard from './components/StyleCard';
 import ReportView from './components/ReportView';
-import StyleDetailsModal from './components/StyleDetailsModal';
+import StyleDetailView from './components/StyleDetailView';
 import CaseView from './components/CaseView';
 import HunterBoard from './components/HunterBoard';
 import ArtistStudio from './components/ArtistStudio';
 import SplashScreen from './components/SplashScreen';
 import DonateModal from './components/DonateModal';
 import ChainSelectModal, { CHAINS } from './components/ChainSelectModal';
+import { playTingTing, playCoin, initGlobalClickSound } from './utils/soundEffects';
 import { INITIAL_STYLES, INITIAL_CASES } from './data/demoFixtures';
 import {
   connectWallet,
@@ -31,6 +32,7 @@ const getTabFromUrl = () => {
   if (target === 'artist' || target === 'register' || target === 'studio') return 'artist';
   if (target.startsWith('case')) return 'case';
   if (target.startsWith('report')) return 'report';
+  if (target.startsWith('style')) return 'style';
   return 'explore';
 };
 
@@ -344,6 +346,12 @@ export default function App() {
     }
   }, []);
 
+  // Global click sound feedback for interactive buttons & links
+  useEffect(() => {
+    const cleanup = initGlobalClickSound();
+    return cleanup;
+  }, []);
+
   // 3. Open Report View
   const handleOpenSubmit = (style = null) => {
     const target = style || styles[0];
@@ -351,10 +359,10 @@ export default function App() {
     changeTab('report');
   };
 
-  // 4. Open Style Details Modal
+  // 4. Open Style Details Full Page View (Dedicated page, no popup)
   const handleOpenDetails = (style) => {
     setSelectedStyleForDetails(style);
-    setIsDetailsOpen(true);
+    changeTab('style');
   };
 
   // Ensure the user's active wallet is on GenLayer Studio Next (Chain ID 61997)
@@ -455,6 +463,7 @@ export default function App() {
       setCases(prev => [newCase, ...prev]);
       setSelectedCase(newCase);
       changeTab('case');
+      playTingTing();
       setTxBanner({ message: 'Consensus Finalized On-Chain', hash: hashStr, loading: false });
       setTimeout(() => setTxBanner(null), 6000);
       setIsSubmitting(false);
@@ -486,6 +495,7 @@ export default function App() {
         functionName: 'claim_reward',
         args: []
       });
+      playCoin();
       alert(`Bounty claimed! Tx: ${hash}`);
       setClaimableReward('0');
     } catch (e) {
@@ -555,6 +565,7 @@ export default function App() {
         });
       }
 
+      playTingTing();
       setTxBanner({
         message: `Successfully boosted Style #${styleId} Bounty Pool by +${amountGen} GEN!`,
         hash: hashStr,
@@ -630,6 +641,7 @@ export default function App() {
           interval: 3000
         });
 
+        playTingTing();
         setTxBanner({
           message: 'Style profile successfully registered on Studio Next!',
           hash: hashStr,
@@ -843,12 +855,31 @@ export default function App() {
         {activeTab === 'hunt' && (
           <HunterBoard
             styles={styles}
+            cases={cases}
             onSelectStyle={(s) => handleOpenDetails(s)}
             onOpenSubmit={(s) => handleOpenSubmit(s)}
+            onSelectCase={(c) => {
+              setSelectedCase(c);
+              changeTab('case');
+            }}
             onDonate={(s) => handleOpenDonate(s)}
             claimableReward={claimableReward}
             onClaimReward={handleClaimReward}
             isClaiming={isClaiming}
+          />
+        )}
+
+        {activeTab === 'style' && (
+          <StyleDetailView
+            style={selectedStyleForDetails || styles[0]}
+            cases={cases}
+            onBack={() => changeTab('hunt')}
+            onReport={(st) => handleOpenSubmit(st)}
+            onDonate={(st) => handleOpenDonate(st)}
+            onSelectCase={(c) => {
+              setSelectedCase(c);
+              changeTab('case');
+            }}
           />
         )}
 
@@ -880,27 +911,6 @@ export default function App() {
         )}
 
       </main>
-
-      {/* Style Details Modal (With Adjudication History) */}
-      <StyleDetailsModal
-        isOpen={isDetailsOpen}
-        onClose={() => setIsDetailsOpen(false)}
-        style={selectedStyleForDetails}
-        cases={cases}
-        onReport={(st) => {
-          setIsDetailsOpen(false);
-          handleOpenSubmit(st);
-        }}
-        onDonate={(st) => {
-          setIsDetailsOpen(false);
-          handleOpenDonate(st);
-        }}
-        onSelectCase={(c) => {
-          setIsDetailsOpen(false);
-          setSelectedCase(c);
-          changeTab('case');
-        }}
-      />
 
       {/* Donate / Boost Bounty Pool Modal */}
       <DonateModal

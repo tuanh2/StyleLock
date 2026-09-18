@@ -1,9 +1,8 @@
 import React, { useState, useRef } from 'react';
-import { genToWei, weiToGen } from '../config';
+import { genToWei } from '../config';
 
 export default function ArtistStudio({ styles, onCreateStyle, isCreating }) {
-  const [activeTab, setActiveTab] = useState('register');
-  
+
   const [artistName, setArtistName] = useState('');
   const [styleName, setStyleName] = useState('');
   const [descriptor, setDescriptor] = useState('');
@@ -101,7 +100,7 @@ export default function ArtistStudio({ styles, onCreateStyle, isCreating }) {
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 animate-fade-in">
       
-      {/* Header Tabs */}
+      {/* Header */}
       <div className="flex items-center justify-between pb-6 border-b border-zinc-200 mb-8">
         <div>
           <span className="text-xs font-mono text-purple-600 uppercase tracking-wider font-semibold block mb-1">
@@ -112,28 +111,9 @@ export default function ArtistStudio({ styles, onCreateStyle, isCreating }) {
             Define your visual identity once on-chain. GenLayer validators reference this data when evaluating suspect listings.
           </p>
         </div>
-
-        <div className="flex items-center gap-1 bg-zinc-100 p-1 rounded-lg border border-zinc-200">
-          <button
-            onClick={() => setActiveTab('register')}
-            className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
-              activeTab === 'register' ? 'bg-purple-600 text-white font-semibold' : 'text-zinc-600 hover:text-zinc-950'
-            }`}
-          >
-            Register Style
-          </button>
-          <button
-            onClick={() => setActiveTab('registered')}
-            className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
-              activeTab === 'registered' ? 'bg-purple-600 text-white font-semibold' : 'text-zinc-600 hover:text-zinc-950'
-            }`}
-          >
-            Registered Styles ({styles.length})
-          </button>
-        </div>
       </div>
 
-      {activeTab === 'register' ? (
+
         <form onSubmit={handleSubmit} className="space-y-6 bg-white border border-zinc-200 p-6 rounded-2xl relative shadow-xs">
           
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -405,23 +385,6 @@ export default function ArtistStudio({ styles, onCreateStyle, isCreating }) {
           </div>
 
         </form>
-      ) : (
-        <div className="space-y-3">
-          {styles.map(s => (
-            <div key={s.style_id} className="p-4 rounded-xl bg-white border border-zinc-200 flex items-center justify-between">
-              <div>
-                <h3 className="font-bold text-zinc-950 text-base">Style #{s.style_id}: {s.style_name}</h3>
-                <p className="text-xs text-zinc-500 mt-0.5">
-                  Threshold: {s.similarity_threshold}% | Bounty: {weiToGen(s.bounty_per_case_wei)} GEN | Pool: {weiToGen(s.available_bounty_pool)} GEN
-                </p>
-              </div>
-              <span className="text-xs font-mono px-2 py-1 rounded bg-zinc-100 text-zinc-700 border border-zinc-200 font-medium">
-                Active
-              </span>
-            </div>
-          ))}
-        </div>
-      )}
 
     </div>
   );

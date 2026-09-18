@@ -5,7 +5,6 @@ export const CHAINS = [
     key: "genlayer",
     name: "GenLayer Studio",
     subtitle: "Studio Next Devnet",
-    icon: "⚙️",
     color: "purple",
     type: "evm",
     chainId: 61997,
@@ -18,7 +17,6 @@ export const CHAINS = [
     key: "arc",
     name: "Arc Mainnet",
     subtitle: "Circle L1 · USDC Native",
-    icon: "🔵",
     color: "blue",
     type: "evm",
     chainId: 5042,
@@ -31,7 +29,6 @@ export const CHAINS = [
     key: "bnb",
     name: "BNB Chain",
     subtitle: "Binance Smart Chain",
-    icon: "🟡",
     color: "yellow",
     type: "evm",
     chainId: 56,
@@ -44,7 +41,6 @@ export const CHAINS = [
     key: "solana",
     name: "Solana",
     subtitle: "Mainnet · Phantom",
-    icon: "🟣",
     color: "violet",
     type: "solana",
   },
@@ -104,7 +100,7 @@ export default function ChainSelectModal({ isOpen, onClose, onSelect, isConnecti
         </div>
 
         {/* Chain List */}
-        <div className="p-4 space-y-2.5">
+        <div className="p-4 space-y-2">
           {CHAINS.map((chain) => {
             const c = colorMap[chain.color];
             const isCurrent = connectedChain?.key === chain.key;
@@ -113,16 +109,13 @@ export default function ChainSelectModal({ isOpen, onClose, onSelect, isConnecti
                 key={chain.key}
                 onClick={() => onSelect(chain)}
                 disabled={isConnecting}
-                className={`w-full flex items-center gap-3.5 p-3.5 rounded-xl border transition-all text-left cursor-pointer active:scale-[0.98] disabled:opacity-50 ${
-                  isCurrent ? 'border-purple-600 bg-purple-50/40 ring-1 ring-purple-500/20' : `border-zinc-200 ${c.hover}`
+                className={`w-full flex items-center justify-between p-3.5 rounded-xl border transition-all text-left cursor-pointer active:scale-[0.98] disabled:opacity-50 ${
+                  isCurrent ? 'border-purple-600 bg-purple-50/40 ring-1 ring-purple-500/20 shadow-xs' : `border-zinc-200 bg-white ${c.hover}`
                 }`}
               >
-                <div className={`w-10 h-10 rounded-xl ${c.bg} flex items-center justify-center text-xl shrink-0 border border-zinc-100`}>
-                  {chain.icon}
-                </div>
-                <div className="flex-1 min-w-0">
+                <div className="min-w-0 pr-2">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-semibold text-zinc-950">{chain.name}</span>
+                    <span className="text-sm font-semibold text-zinc-950 tracking-tight">{chain.name}</span>
                     {chain.key === "genlayer" && (
                       <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded font-semibold ${c.badge}`}>
                         Contract
@@ -136,7 +129,7 @@ export default function ChainSelectModal({ isOpen, onClose, onSelect, isConnecti
                   </div>
                   <p className="text-xs text-zinc-500 mt-0.5 font-mono">{chain.subtitle}</p>
                 </div>
-                <div className={`w-2.5 h-2.5 rounded-full shrink-0 ${isCurrent ? 'bg-emerald-500 ring-4 ring-emerald-100' : c.dot}`} />
+                <div className={`w-2 h-2 rounded-full shrink-0 ${isCurrent ? 'bg-emerald-500 ring-4 ring-emerald-100' : c.dot}`} />
               </button>
             );
           })}

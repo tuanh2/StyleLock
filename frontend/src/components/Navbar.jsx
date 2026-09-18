@@ -84,9 +84,6 @@ export default function Navbar({ activeTab, setActiveTab, account, connectedChai
                 className="flex items-center gap-2 bg-zinc-100 hover:bg-purple-50 hover:border-purple-200 border border-zinc-200 px-3 py-1.5 rounded-lg text-xs font-mono text-zinc-800 transition-colors cursor-pointer group"
                 title="Click to switch chain or network"
               >
-                {connectedChain && (
-                  <span className="text-sm leading-none">{connectedChain.icon}</span>
-                )}
                 <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
                 <span className="font-medium">{shortAddr(account)}</span>
                 {connectedChain && (

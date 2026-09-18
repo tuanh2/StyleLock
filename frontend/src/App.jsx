@@ -182,11 +182,6 @@ export default function App() {
 
   useEffect(() => {
     fetchOnChainData();
-    // Auto-refresh every 20 seconds so all users see new styles created by other wallets
-    const interval = setInterval(() => {
-      fetchOnChainData();
-    }, 20000);
-    return () => clearInterval(interval);
   }, [fetchOnChainData]);
 
   // Tab Navigation with URL sync

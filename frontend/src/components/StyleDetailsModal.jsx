@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { weiToGen, txExplorerUrl } from '../config';
 
-export default function StyleDetailsModal({ isOpen, onClose, style, cases = [], onReport, onSelectCase }) {
+export default function StyleDetailsModal({ isOpen, onClose, style, cases = [], onReport, onSelectCase, onDonate }) {
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
@@ -108,10 +108,22 @@ export default function StyleDetailsModal({ isOpen, onClose, style, cases = [], 
             <span className="text-[10px] text-zinc-500 font-mono">Hunter payout</span>
           </div>
 
-          <div className="p-3 rounded-xl bg-purple-50/70 border border-purple-200">
-            <span className="text-[10px] font-mono text-purple-700 uppercase block font-medium">Style Escrow Pool</span>
+          <div className="p-3 rounded-xl bg-purple-50/70 border border-purple-200 relative group">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-mono text-purple-700 uppercase block font-medium">Style Escrow Pool</span>
+              {onDonate && (
+                <button
+                  type="button"
+                  onClick={() => onDonate(style)}
+                  className="text-[10px] font-mono font-bold text-purple-700 hover:text-purple-900 bg-purple-100 hover:bg-purple-200 px-1.5 py-0.5 rounded cursor-pointer transition-colors"
+                  title="Donate to boost this style's bounty pool"
+                >
+                  + Boost
+                </button>
+              )}
+            </div>
             <span className="text-lg font-bold text-purple-950 font-mono mt-0.5 block">{weiToGen(style.available_bounty_pool)} GEN</span>
-            <span className="text-[10px] text-purple-700 font-mono">Funded pool</span>
+            <span className="text-[10px] text-purple-700 font-mono">Funded bounty pool</span>
           </div>
         </div>
 
@@ -245,25 +257,40 @@ export default function StyleDetailsModal({ isOpen, onClose, style, cases = [], 
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center justify-end gap-3 pt-2 border-t border-zinc-100">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-2.5 text-xs font-medium text-zinc-600 hover:text-zinc-900 transition-colors"
-          >
-            Close
-          </button>
+        <div className="flex items-center justify-between gap-3 pt-2 border-t border-zinc-100">
+          <div>
+            {onDonate && (
+              <button
+                type="button"
+                onClick={() => onDonate(style)}
+                className="bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 font-semibold text-xs px-4 py-2.5 rounded-lg transition-all shadow-xs active:scale-95 flex items-center gap-1.5 cursor-pointer"
+              >
+                <span>❤️</span>
+                <span>Donate to Bounty Pool</span>
+              </button>
+            )}
+          </div>
 
-          <button
-            type="button"
-            onClick={() => {
-              onClose();
-              if (onReport) onReport(style);
-            }}
-            className="bg-purple-600 hover:bg-purple-700 text-white font-semibold text-xs px-5 py-2.5 rounded-lg transition-all shadow-xs active:scale-95"
-          >
-            Report Suspect Copy ({weiToGen(style.bounty_per_case_wei)} GEN Bounty)
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2.5 text-xs font-medium text-zinc-600 hover:text-zinc-900 transition-colors cursor-pointer"
+            >
+              Close
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                onClose();
+                if (onReport) onReport(style);
+              }}
+              className="bg-purple-600 hover:bg-purple-700 text-white font-semibold text-xs px-5 py-2.5 rounded-lg transition-all shadow-xs active:scale-95 cursor-pointer"
+            >
+              Report Suspect Copy ({weiToGen(style.bounty_per_case_wei)} GEN Bounty)
+            </button>
+          </div>
         </div>
 
       </div>

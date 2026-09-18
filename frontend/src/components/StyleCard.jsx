@@ -1,7 +1,7 @@
 import React from 'react';
 import { weiToGen } from '../config';
 
-export default function StyleCard({ style, onSelect, onReport }) {
+export default function StyleCard({ style, onSelect, onReport, onDonate }) {
   const traits = (style.protected_traits || '').split(';').map(t => t.trim()).filter(Boolean);
 
   return (
@@ -71,7 +71,22 @@ export default function StyleCard({ style, onSelect, onReport }) {
         {/* Metrics */}
         <div className="pt-3 border-t border-zinc-100 flex items-center justify-between text-xs font-mono text-zinc-500 mb-3">
           <span>Threshold: <strong className="text-zinc-800">{style.similarity_threshold}%</strong></span>
-          <span>Pool: <strong className="text-purple-600">{weiToGen(style.available_bounty_pool)} GEN</strong></span>
+          <div className="flex items-center gap-1.5">
+            <span>Pool: <strong className="text-purple-600">{weiToGen(style.available_bounty_pool)} GEN</strong></span>
+            {onDonate && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDonate(style);
+                }}
+                className="text-[10px] font-bold text-purple-700 bg-purple-50 hover:bg-purple-100 border border-purple-200 px-1.5 py-0.5 rounded cursor-pointer transition-colors"
+                title="Donate to boost bounty pool"
+              >
+                +Donate
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Actions - View Details opens StyleDetailsModal; Report Copy opens SubmitModal */}

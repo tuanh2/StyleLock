@@ -8,6 +8,7 @@ import CaseView from './components/CaseView';
 import HunterBoard from './components/HunterBoard';
 import ArtistStudio from './components/ArtistStudio';
 import SplashScreen from './components/SplashScreen';
+import DonateModal from './components/DonateModal';
 import { INITIAL_STYLES, INITIAL_CASES } from './data/demoFixtures';
 import {
   connectWallet,
@@ -16,7 +17,8 @@ import {
   CONTRACT_ADDRESS,
   extractExecution,
   txExplorerUrl,
-  weiToGen
+  weiToGen,
+  genToWei
 } from './config';
 
 const getTabFromUrl = () => {
@@ -72,6 +74,8 @@ export default function App() {
   const [claimableReward, setClaimableReward] = useState('0');
   const [isClaiming, setIsClaiming] = useState(false);
   const [isCreatingStyle, setIsCreatingStyle] = useState(false);
+  const [donateModalStyle, setDonateModalStyle] = useState(null);
+  const [isDonating, setIsDonating] = useState(false);
   const [txBanner, setTxBanner] = useState(null);
 
   // 1. Fetch on-chain data in parallel across all styles and cases
@@ -365,6 +369,91 @@ export default function App() {
     }
   };
 
+  // 6b. Donate / Fund Style Bounty Pool
+  const handleOpenDonate = (style) => {
+    setDonateModalStyle(style);
+  };
+
+  const handleDonate = async (styleId, amountGen) => {
+    let activeAccount = account;
+    if (!activeAccount) {
+      try {
+        activeAccount = await handleConnect();
+      } catch (err) {
+        alert('Please connect your Web3 wallet to donate to the artist bounty pool.');
+        return;
+      }
+    }
+
+    if (!activeAccount) {
+      alert('Please connect your Web3 wallet to donate to the artist bounty pool.');
+      return;
+    }
+
+    setIsDonating(true);
+    const amountWei = genToWei(amountGen);
+
+    try {
+      const client = getWriteClient(activeAccount);
+      const fees = await client.estimateTransactionFees({});
+      const hash = await client.writeContract({
+        address: CONTRACT_ADDRESS,
+        functionName: 'fund_style',
+        args: [String(styleId)],
+        value: BigInt(amountWei),
+        fees
+      });
+
+      const hashStr = typeof hash === 'string' ? hash : String(hash);
+      setTxBanner({
+        message: `Donating ${amountGen} GEN to Style #${styleId} Bounty Pool on GenLayer...`,
+        hash: hashStr,
+        loading: true
+      });
+
+      const receipt = await client.waitForTransactionReceipt({
+        hash: hashStr,
+        status: 'ACCEPTED',
+        retries: 80,
+        interval: 3000
+      });
+
+      // Update local state immediately
+      setStyles(prev => prev.map(s => {
+        if (String(s.style_id) === String(styleId)) {
+          const prevPool = BigInt(s.available_bounty_pool || '0');
+          const newPool = (prevPool + BigInt(amountWei)).toString();
+          return { ...s, available_bounty_pool: newPool };
+        }
+        return s;
+      }));
+
+      // If details modal is open for this style, update it too
+      if (selectedStyleForDetails && String(selectedStyleForDetails.style_id) === String(styleId)) {
+        setSelectedStyleForDetails(prev => {
+          const prevPool = BigInt(prev.available_bounty_pool || '0');
+          return { ...prev, available_bounty_pool: (prevPool + BigInt(amountWei)).toString() };
+        });
+      }
+
+      setTxBanner({
+        message: `Successfully boosted Style #${styleId} Bounty Pool by +${amountGen} GEN!`,
+        hash: hashStr,
+        loading: false
+      });
+      setTimeout(() => setTxBanner(null), 6000);
+      setDonateModalStyle(null);
+      await fetchOnChainData();
+    } catch (err) {
+      console.error('Donate error:', err);
+      alert(`Donation error: ${err.message}`);
+      setTxBanner({ message: `Donation failed: ${err.message}`, loading: false });
+      setTimeout(() => setTxBanner(null), 5000);
+    } finally {
+      setIsDonating(false);
+    }
+  };
+
   // 7. Create Style
   const handleCreateStyle = async (styleData) => {
     setIsCreatingStyle(true);
@@ -535,6 +624,7 @@ export default function App() {
                     style={s}
                     onSelect={(st) => handleOpenDetails(st)}
                     onReport={(st) => handleOpenSubmit(st)}
+                    onDonate={(st) => handleOpenDonate(st)}
                   />
                 ))}
               </div>
@@ -588,7 +678,7 @@ export default function App() {
                         <div className="flex items-center gap-3 text-[11px] font-mono text-zinc-500 mt-1">
                           <span>Threshold: <strong className="text-zinc-800">{s.similarity_threshold}%</strong></span>
                           <span>•</span>
-                          <span>Escrow Pool: <strong className="text-purple-600">{weiToGen(s.available_bounty_pool && s.available_bounty_pool !== '0' ? s.available_bounty_pool : '2000000000000000000')} GEN</strong></span>
+                          <span>Escrow Pool: <strong className="text-purple-600">{weiToGen(s.available_bounty_pool)} GEN</strong></span>
                         </div>
                       </div>
                     </div>
@@ -599,12 +689,22 @@ export default function App() {
                         <span className="text-sm font-bold text-zinc-950 font-mono">{weiToGen(s.bounty_per_case_wei)} GEN</span>
                       </div>
 
-                      <button
-                        onClick={() => handleOpenSubmit(s)}
-                        className="bg-[#302738] hover:bg-[#493d53] text-white font-medium text-xs px-4 py-2 rounded-xl transition-all shadow-xs active:scale-95 cursor-pointer"
-                      >
-                        Report Copy
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => handleOpenDonate(s)}
+                          className="bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 font-medium text-xs px-3 py-2 rounded-xl transition-all active:scale-95 flex items-center gap-1 cursor-pointer"
+                          title="Donate to boost this style's bounty pool"
+                        >
+                          <span>❤️</span>
+                          <span>Donate</span>
+                        </button>
+                        <button
+                          onClick={() => handleOpenSubmit(s)}
+                          className="bg-[#302738] hover:bg-[#493d53] text-white font-medium text-xs px-4 py-2 rounded-xl transition-all shadow-xs active:scale-95 cursor-pointer"
+                        >
+                          Report Copy
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -618,6 +718,7 @@ export default function App() {
             styles={styles}
             onSelectStyle={(s) => handleOpenDetails(s)}
             onOpenSubmit={(s) => handleOpenSubmit(s)}
+            onDonate={(s) => handleOpenDonate(s)}
             claimableReward={claimableReward}
             onClaimReward={handleClaimReward}
             isClaiming={isClaiming}
@@ -663,11 +764,24 @@ export default function App() {
           setIsDetailsOpen(false);
           handleOpenSubmit(st);
         }}
+        onDonate={(st) => {
+          setIsDetailsOpen(false);
+          handleOpenDonate(st);
+        }}
         onSelectCase={(c) => {
           setIsDetailsOpen(false);
           setSelectedCase(c);
           changeTab('case');
         }}
+      />
+
+      {/* Donate / Boost Bounty Pool Modal */}
+      <DonateModal
+        isOpen={Boolean(donateModalStyle)}
+        onClose={() => setDonateModalStyle(null)}
+        style={donateModalStyle}
+        onDonate={handleDonate}
+        isDonating={isDonating}
       />
 
       {/* Footer */}

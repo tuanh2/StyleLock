@@ -1,7 +1,7 @@
 import React from 'react';
 import { weiToGen } from '../config';
 
-export default function HunterBoard({ styles, onSelectStyle, onOpenSubmit, claimableReward, onClaimReward, isClaiming }) {
+export default function HunterBoard({ styles, onSelectStyle, onOpenSubmit, claimableReward, onClaimReward, isClaiming, onDonate }) {
   return (
     <div className="max-w-5xl mx-auto px-4 py-8 animate-fade-in">
       
@@ -65,7 +65,7 @@ export default function HunterBoard({ styles, onSelectStyle, onOpenSubmit, claim
                 <div className="flex items-center gap-3 text-[11px] font-mono text-zinc-500 mt-1">
                   <span>Threshold: <strong className="text-zinc-800">{s.similarity_threshold}%</strong></span>
                   <span>•</span>
-                  <span>Escrow Pool: <strong className="text-purple-600">{weiToGen(s.available_bounty_pool && s.available_bounty_pool !== '0' ? s.available_bounty_pool : '2000000000000000000')} GEN</strong></span>
+                  <span>Escrow Pool: <strong className="text-purple-600">{weiToGen(s.available_bounty_pool)} GEN</strong></span>
                 </div>
               </div>
             </div>
@@ -76,12 +76,25 @@ export default function HunterBoard({ styles, onSelectStyle, onOpenSubmit, claim
                 <span className="text-sm font-bold text-zinc-950 font-mono">{weiToGen(s.bounty_per_case_wei)} GEN</span>
               </div>
 
-              <button
-                onClick={() => onOpenSubmit(s)}
-                className="bg-purple-600 hover:bg-purple-700 text-white font-medium text-xs px-4 py-2 rounded-lg transition-all shadow-xs active:scale-95"
-              >
-                Submit URL
-              </button>
+              <div className="flex items-center gap-2">
+                {onDonate && (
+                  <button
+                    onClick={() => onDonate(s)}
+                    className="bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 font-medium text-xs px-3 py-2 rounded-lg transition-all active:scale-95 flex items-center gap-1 cursor-pointer"
+                    title="Donate to boost this style's bounty pool"
+                  >
+                    <span>❤️</span>
+                    <span>Donate</span>
+                  </button>
+                )}
+
+                <button
+                  onClick={() => onOpenSubmit(s)}
+                  className="bg-purple-600 hover:bg-purple-700 text-white font-medium text-xs px-4 py-2 rounded-lg transition-all shadow-xs active:scale-95 cursor-pointer"
+                >
+                  Submit URL
+                </button>
+              </div>
             </div>
           </div>
         ))}

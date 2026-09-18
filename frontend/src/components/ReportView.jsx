@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { weiToGen } from '../config';
 
-export default function ReportView({ selectedStyle, styles, onBack, onSubmit, isSubmitting }) {
+export default function ReportView({ selectedStyle, styles, onBack, onSubmit, isSubmitting, currency = 'GEN' }) {
   const [styleId, setStyleId] = useState(selectedStyle?.style_id || '1');
   const [suspectUrl, setSuspectUrl] = useState('');
   const [claimText, setClaimText] = useState('');
@@ -146,11 +146,11 @@ export default function ReportView({ selectedStyle, styles, onBack, onSubmit, is
                   Style #{currentStyle.style_id} — {currentStyle.style_name}
                 </h3>
                 <span className="text-xs font-mono font-bold text-purple-700 bg-purple-100/80 px-2.5 py-1 rounded-full shrink-0">
-                  {weiToGen(currentStyle.bounty_per_case_wei)} GEN Bounty
+                  {weiToGen(currentStyle.bounty_per_case_wei)} {currency} Bounty
                 </span>
               </div>
               <p className="text-xs text-zinc-500 font-mono mt-1">
-                Artist: <strong className="text-zinc-800">{currentStyle.artist_display_name}</strong> • Threshold: <strong className="text-zinc-800">{currentStyle.similarity_threshold}%</strong> • Pool: <strong className="text-purple-700">{weiToGen(currentStyle.available_bounty_pool)} GEN</strong>
+                Artist: <strong className="text-zinc-800">{currentStyle.artist_display_name}</strong> • Threshold: <strong className="text-zinc-800">{currentStyle.similarity_threshold}%</strong> • Pool: <strong className="text-purple-700">{weiToGen(currentStyle.available_bounty_pool)} {currency}</strong>
               </p>
               <div className="flex flex-wrap gap-1.5 mt-2.5">
                 {traits.map((t, idx) => (
@@ -244,7 +244,7 @@ export default function ReportView({ selectedStyle, styles, onBack, onSubmit, is
 
           <div className="p-4 rounded-2xl bg-purple-50/70 border border-purple-200/80 text-xs text-purple-950 leading-relaxed">
             <strong className="font-semibold block mb-0.5 font-mono text-[11px] uppercase">Autonomous Escrow Guarantee:</strong>
-            If validators reach consensus that this evidence matches <strong className="font-semibold">{currentStyle?.style_name}</strong> above the {currentStyle?.similarity_threshold}% threshold with commercial intent, the <strong>{weiToGen(currentStyle?.bounty_per_case_wei)} GEN</strong> bounty will be credited directly to your connected wallet!
+            If validators reach consensus that this evidence matches <strong className="font-semibold">{currentStyle?.style_name}</strong> above the {currentStyle?.similarity_threshold}% threshold with commercial intent, the <strong>{weiToGen(currentStyle?.bounty_per_case_wei)} {currency}</strong> bounty will be credited directly to your connected wallet!
           </div>
 
           <div className="pt-2 flex items-center justify-between gap-4 flex-wrap">
@@ -268,7 +268,7 @@ export default function ReportView({ selectedStyle, styles, onBack, onSubmit, is
                   <span>Evaluating Evidence on GenLayer...</span>
                 </>
               ) : (
-                <span>Submit Report to GenLayer ({weiToGen(currentStyle?.bounty_per_case_wei)} GEN)</span>
+                <span>Submit Report to GenLayer ({weiToGen(currentStyle?.bounty_per_case_wei)} {currency})</span>
               )}
             </button>
           </div>

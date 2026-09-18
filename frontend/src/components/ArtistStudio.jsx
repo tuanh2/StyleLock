@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { genToWei } from '../config';
 
-export default function ArtistStudio({ styles, onCreateStyle, isCreating }) {
+export default function ArtistStudio({ styles, onCreateStyle, isCreating, currency = 'GEN' }) {
 
   const [artistName, setArtistName] = useState('');
   const [styleName, setStyleName] = useState('');
@@ -205,7 +205,7 @@ export default function ArtistStudio({ styles, onCreateStyle, isCreating }) {
 
             <div>
               <label className="block text-xs font-mono text-zinc-700 mb-1.5 font-medium">
-                Hunter Bounty (GEN)
+                Hunter Bounty ({currency})
               </label>
               <input
                 type="text"

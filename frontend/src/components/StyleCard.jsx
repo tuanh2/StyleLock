@@ -1,7 +1,7 @@
 import React from 'react';
 import { weiToGen } from '../config';
 
-export default function StyleCard({ style, onSelect, onReport, onDonate }) {
+export default function StyleCard({ style, onSelect, onReport, onDonate, currency = 'GEN' }) {
   const traits = (style.protected_traits || '').split(';').map(t => t.trim()).filter(Boolean);
 
   return (
@@ -34,7 +34,7 @@ export default function StyleCard({ style, onSelect, onReport, onDonate }) {
         {/* Bounty Tag */}
         <div className="absolute top-3 right-3">
           <span className="px-2 py-0.5 rounded text-[11px] font-mono font-semibold bg-purple-600 text-white backdrop-blur-sm shadow-xs">
-            {weiToGen(style.bounty_per_case_wei)} GEN Bounty
+            {weiToGen(style.bounty_per_case_wei)} {currency} Bounty
           </span>
         </div>
 
@@ -72,7 +72,7 @@ export default function StyleCard({ style, onSelect, onReport, onDonate }) {
         <div className="pt-3 border-t border-zinc-100 flex items-center justify-between text-xs font-mono text-zinc-500 mb-3">
           <span>Threshold: <strong className="text-zinc-800">{style.similarity_threshold}%</strong></span>
           <div className="flex items-center gap-1.5">
-            <span>Pool: <strong className="text-purple-600">{weiToGen(style.available_bounty_pool)} GEN</strong></span>
+            <span>Pool: <strong className="text-purple-600">{weiToGen(style.available_bounty_pool)} {currency}</strong></span>
             {onDonate && (
               <button
                 type="button"

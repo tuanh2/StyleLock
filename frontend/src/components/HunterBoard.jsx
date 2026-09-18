@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { weiToGen, txExplorerUrl } from '../config';
 
-export default function HunterBoard({ styles, cases = [], onSelectStyle, onOpenSubmit, onSelectCase, claimableReward, onClaimReward, isClaiming, onDonate }) {
+export default function HunterBoard({ styles, cases = [], onSelectStyle, onOpenSubmit, onSelectCase, claimableReward, onClaimReward, isClaiming, onDonate, currency = 'GEN' }) {
   const [activeSubTab, setActiveSubTab] = useState('bounties'); // 'bounties' | 'history'
 
   return (
@@ -23,7 +23,7 @@ export default function HunterBoard({ styles, cases = [], onSelectStyle, onOpenS
         <div className="p-3.5 rounded-xl bg-purple-50/70 border border-purple-200 flex items-center gap-4">
           <div>
             <span className="text-[10px] font-mono text-purple-700 block uppercase font-medium">Your Claimable Balance</span>
-            <span className="text-lg font-bold text-purple-950 font-mono">{weiToGen(claimableReward || '0')} GEN</span>
+            <span className="text-lg font-bold text-purple-950 font-mono">{weiToGen(claimableReward || '0')} {currency}</span>
           </div>
           <button
             onClick={onClaimReward}
@@ -98,7 +98,7 @@ export default function HunterBoard({ styles, cases = [], onSelectStyle, onOpenS
                   <div className="flex items-center gap-3 text-[11px] font-mono text-zinc-500 mt-1">
                     <span>Threshold: <strong className="text-zinc-800">{s.similarity_threshold}%</strong></span>
                     <span>•</span>
-                    <span>Escrow Pool: <strong className="text-purple-600">{weiToGen(s.available_bounty_pool)} GEN</strong></span>
+                    <span>Escrow Pool: <strong className="text-purple-600">{weiToGen(s.available_bounty_pool)} {currency}</strong></span>
                   </div>
                 </div>
               </div>
@@ -106,17 +106,19 @@ export default function HunterBoard({ styles, cases = [], onSelectStyle, onOpenS
               <div className="flex items-center gap-4 shrink-0 w-full sm:w-auto justify-between sm:justify-end">
                 <div className="text-right sm:block hidden">
                   <span className="text-[10px] font-mono text-zinc-400 uppercase block">Reward per Case</span>
-                  <span className="text-sm font-bold text-zinc-950 font-mono">{weiToGen(s.bounty_per_case_wei)} GEN</span>
+                  <span className="text-sm font-bold text-zinc-950 font-mono">{weiToGen(s.bounty_per_case_wei)} {currency}</span>
                 </div>
 
                 <div className="flex items-center gap-2">
                   {onDonate && (
                     <button
                       onClick={() => onDonate(s)}
-                      className="bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 font-medium text-xs px-3 py-2 rounded-lg transition-all active:scale-95 flex items-center gap-1 cursor-pointer"
+                      className="bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 font-medium text-xs px-3 py-2 rounded-lg transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer"
                       title="Donate to boost this style's bounty pool"
                     >
-                      <span>❤️</span>
+                      <svg className="w-3.5 h-3.5 text-purple-600" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                      </svg>
                       <span>Donate</span>
                     </button>
                   )}
@@ -225,7 +227,7 @@ export default function HunterBoard({ styles, cases = [], onSelectStyle, onOpenS
                       )}
                       {c.bounty_amount_wei && c.bounty_amount_wei !== '0' && (
                         <span className="text-emerald-600 font-semibold">
-                          Bounty: +{weiToGen(c.bounty_amount_wei)} GEN
+                          Bounty: +{weiToGen(c.bounty_amount_wei)} {currency}
                         </span>
                       )}
                     </div>

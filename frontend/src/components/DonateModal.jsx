@@ -1,16 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { weiToGen } from '../config';
 
-export default function DonateModal({ isOpen, onClose, style, onDonate, isDonating }) {
-  const [amount, setAmount] = useState('0.5');
+export default function DonateModal({ isOpen, onClose, style, onDonate, isDonating, currency = 'GEN' }) {
+  const isStable = currency === 'USDC' || currency === 'USDT';
+  const presets = isStable ? ['5', '10', '25', '50', '100'] : ['0.1', '0.25', '0.5', '1.0', '2.0'];
+  const defaultAmount = isStable ? '10' : '0.5';
+  const [amount, setAmount] = useState(defaultAmount);
   const [error, setError] = useState('');
 
   useEffect(() => {
     if (isOpen) {
-      setAmount('0.5');
+      setAmount(defaultAmount);
       setError('');
     }
-  }, [isOpen, style]);
+  }, [isOpen, style, defaultAmount]);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -87,11 +90,13 @@ export default function DonateModal({ isOpen, onClose, style, onDonate, isDonati
         {/* Explanation Card */}
         <div className="p-3.5 rounded-xl bg-purple-50/60 border border-purple-200/80 mb-5 text-xs text-purple-950 leading-relaxed">
           <div className="flex items-center gap-1.5 font-semibold text-purple-800 mb-1">
-            <span>🛡️</span>
+            <svg className="w-3.5 h-3.5 text-purple-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+            </svg>
             <span>Boost Hunter Bounty Pool</span>
           </div>
           <p className="text-[11px] text-purple-900/90 leading-normal">
-            Your donation directly increases this style's <strong>on-chain Escrow Pool</strong>. This funds bounty payouts for hunters who detect and report copyright infringements, protecting the artist's work.
+            Your donation directly increases this style's <strong>on-chain Escrow Pool</strong> in <strong>{currency}</strong>. This funds bounty payouts for hunters who detect and report copyright infringements, protecting the artist's work.
           </p>
         </div>
 
@@ -99,11 +104,11 @@ export default function DonateModal({ isOpen, onClose, style, onDonate, isDonati
         <div className="grid grid-cols-2 gap-2.5 mb-5 font-mono text-xs">
           <div className="p-2.5 rounded-lg bg-zinc-50 border border-zinc-200">
             <span className="text-[10px] text-zinc-400 uppercase block">Current Escrow Pool</span>
-            <span className="text-base font-bold text-purple-600 block mt-0.5">{currentPoolGen} GEN</span>
+            <span className="text-base font-bold text-purple-600 block mt-0.5">{currentPoolGen} {currency}</span>
           </div>
           <div className="p-2.5 rounded-lg bg-zinc-50 border border-zinc-200">
             <span className="text-[10px] text-zinc-400 uppercase block">Reward Per Case</span>
-            <span className="text-base font-bold text-zinc-800 block mt-0.5">{bountyPerCaseGen} GEN</span>
+            <span className="text-base font-bold text-zinc-800 block mt-0.5">{bountyPerCaseGen} {currency}</span>
           </div>
         </div>
 
@@ -111,12 +116,12 @@ export default function DonateModal({ isOpen, onClose, style, onDonate, isDonati
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-xs font-mono font-medium text-zinc-700 mb-1.5">
-              Donation Amount (GEN)
+              Donation Amount ({currency})
             </label>
             
             {/* Quick Presets */}
             <div className="flex gap-1.5 mb-2.5">
-              {['0.1', '0.25', '0.5', '1.0', '2.0'].map((val) => (
+              {presets.map((val) => (
                 <button
                   key={val}
                   type="button"
@@ -137,8 +142,8 @@ export default function DonateModal({ isOpen, onClose, style, onDonate, isDonati
             <div className="relative">
               <input
                 type="number"
-                step="0.01"
-                min="0.01"
+                step={isStable ? "1" : "0.01"}
+                min={isStable ? "1" : "0.01"}
                 disabled={isDonating}
                 value={amount}
                 onChange={(e) => {
@@ -146,11 +151,11 @@ export default function DonateModal({ isOpen, onClose, style, onDonate, isDonati
                   setError('');
                 }}
                 className="w-full px-3.5 py-2.5 bg-zinc-50 border border-zinc-200 rounded-lg text-sm font-mono text-zinc-900 focus:outline-hidden focus:ring-2 focus:ring-purple-500 focus:bg-white transition-all pr-14"
-                placeholder="0.5"
+                placeholder={defaultAmount}
                 required
               />
               <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-mono text-zinc-400 font-semibold">
-                GEN
+                {currency}
               </span>
             </div>
             {error && <p className="text-xs text-red-600 mt-1 font-mono">{error}</p>}
@@ -181,8 +186,10 @@ export default function DonateModal({ isOpen, onClose, style, onDonate, isDonati
                 </>
               ) : (
                 <>
-                  <span>❤️</span>
-                  <span>Donate {amount || '0'} GEN</span>
+                  <svg className="w-3.5 h-3.5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                  </svg>
+                  <span>Donate {amount || '0'} {currency}</span>
                 </>
               )}
             </button>

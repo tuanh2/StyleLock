@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { weiToGen } from '../config';
 
-export default function SubmitModal({ isOpen, onClose, selectedStyle, styles, onSubmit, isSubmitting }) {
+export default function SubmitModal({ isOpen, onClose, selectedStyle, styles, onSubmit, isSubmitting, currency = 'GEN' }) {
   const [styleId, setStyleId] = useState('1');
   const [suspectUrl, setSuspectUrl] = useState('');
   const [claimText, setClaimText] = useState('');
@@ -98,7 +98,7 @@ export default function SubmitModal({ isOpen, onClose, selectedStyle, styles, on
                   Style #{currentStyle.style_id} — {currentStyle.style_name}
                 </h3>
                 <span className="text-[11px] font-mono font-bold text-purple-600 bg-purple-100/70 px-2 py-0.5 rounded shrink-0">
-                  {weiToGen(currentStyle.bounty_per_case_wei)} GEN Bounty
+                  {weiToGen(currentStyle.bounty_per_case_wei)} {currency} Bounty
                 </span>
               </div>
               <p className="text-[11px] text-zinc-500 font-mono mt-0.5">
@@ -173,7 +173,7 @@ export default function SubmitModal({ isOpen, onClose, selectedStyle, styles, on
           </div>
 
           <div className="p-3 rounded-lg bg-purple-50/60 border border-purple-200 text-[11px] text-purple-900 leading-relaxed">
-            If validators reach consensus that this URL matches <strong className="font-semibold">{currentStyle?.style_name}</strong> above the {currentStyle?.similarity_threshold}% threshold with commercial intent, the <strong>{weiToGen(currentStyle?.bounty_per_case_wei)} GEN</strong> bounty will be automatically awarded to your wallet!
+            If validators reach consensus that this URL matches <strong className="font-semibold">{currentStyle?.style_name}</strong> above the {currentStyle?.similarity_threshold}% threshold with commercial intent, the <strong>{weiToGen(currentStyle?.bounty_per_case_wei)} {currency}</strong> bounty will be automatically awarded to your wallet!
           </div>
 
           <div className="pt-2 flex items-center justify-end gap-3">
@@ -197,7 +197,7 @@ export default function SubmitModal({ isOpen, onClose, selectedStyle, styles, on
                   <span>Evaluating on GenLayer...</span>
                 </>
               ) : (
-                <span>Submit Report ({weiToGen(currentStyle?.bounty_per_case_wei)} GEN)</span>
+                <span>Submit Report ({weiToGen(currentStyle?.bounty_per_case_wei)} {currency})</span>
               )}
             </button>
           </div>

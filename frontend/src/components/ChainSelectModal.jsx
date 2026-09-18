@@ -2,19 +2,6 @@ import React from "react";
 
 export const CHAINS = [
   {
-    key: "genlayer",
-    name: "GenLayer Studio",
-    subtitle: "Studio Next Devnet · GEN",
-    color: "purple",
-    type: "evm",
-    currencySymbol: "GEN",
-    chainId: 61997,
-    chainIdHex: "0xF22D",
-    rpc: "https://studio-next.genlayer.com/api",
-    currency: { name: "GEN Token", symbol: "GEN", decimals: 18 },
-    explorer: "https://explorer-studio-dev.genlayer.com",
-  },
-  {
     key: "arc",
     name: "Arc Mainnet",
     subtitle: "Circle L1 · USDC Native",
@@ -47,6 +34,20 @@ export const CHAINS = [
     color: "violet",
     type: "solana",
     currencySymbol: "USDC",
+  },
+  {
+    key: "genlayer",
+    name: "GenLayer Studio",
+    subtitle: "Studio Next Testnet · GEN",
+    color: "purple",
+    type: "evm",
+    currencySymbol: "GEN",
+    chainId: 61997,
+    chainIdHex: "0xF22D",
+    rpc: "https://studio-next.genlayer.com/api",
+    currency: { name: "GEN Token", symbol: "GEN", decimals: 18 },
+    explorer: "https://explorer-studio-dev.genlayer.com",
+    isTestnet: true,
   },
 ];
 
@@ -120,14 +121,18 @@ export default function ChainSelectModal({ isOpen, onClose, onSelect, isConnecti
                 <div className="min-w-0 pr-2">
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-semibold text-zinc-950 tracking-tight">{chain.name}</span>
-                    {chain.key === "genlayer" && (
-                      <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded font-semibold ${c.badge}`}>
-                        Contract
+                    {chain.isTestnet ? (
+                      <span className="text-[10px] font-mono px-1.5 py-0.5 rounded font-semibold bg-amber-100 text-amber-800 border border-amber-200">
+                        Testnet · GEN
+                      </span>
+                    ) : (
+                      <span className="text-[10px] font-mono px-1.5 py-0.5 rounded font-semibold bg-zinc-100 text-zinc-700 border border-zinc-200">
+                        {chain.currencySymbol}
                       </span>
                     )}
                     {isCurrent && (
                       <span className="text-[10px] font-mono px-1.5 py-0.5 rounded font-semibold bg-emerald-100 text-emerald-700 border border-emerald-200">
-                        Connected
+                        Active
                       </span>
                     )}
                   </div>

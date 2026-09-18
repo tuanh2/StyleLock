@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { weiToGen, txExplorerUrl } from '../config';
 
-export default function StyleDetailsModal({ isOpen, onClose, style, cases = [], onReport, onSelectCase, onDonate }) {
+export default function StyleDetailsModal({ isOpen, onClose, style, cases = [], onReport, onSelectCase, onDonate, currency = 'GEN' }) {
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
@@ -104,7 +104,7 @@ export default function StyleDetailsModal({ isOpen, onClose, style, cases = [], 
 
           <div className="p-3 rounded-xl bg-zinc-50 border border-zinc-200">
             <span className="text-[10px] font-mono text-zinc-400 uppercase block">Bounty Per Case</span>
-            <span className="text-lg font-bold text-zinc-950 font-mono mt-0.5 block">{weiToGen(style.bounty_per_case_wei)} GEN</span>
+            <span className="text-lg font-bold text-zinc-950 font-mono mt-0.5 block">{weiToGen(style.bounty_per_case_wei)} {currency}</span>
             <span className="text-[10px] text-zinc-500 font-mono">Hunter payout</span>
           </div>
 
@@ -122,7 +122,7 @@ export default function StyleDetailsModal({ isOpen, onClose, style, cases = [], 
                 </button>
               )}
             </div>
-            <span className="text-lg font-bold text-purple-950 font-mono mt-0.5 block">{weiToGen(style.available_bounty_pool)} GEN</span>
+            <span className="text-lg font-bold text-purple-950 font-mono mt-0.5 block">{weiToGen(style.available_bounty_pool)} {currency}</span>
             <span className="text-[10px] text-purple-700 font-mono">Funded bounty pool</span>
           </div>
         </div>
@@ -154,7 +154,7 @@ export default function StyleDetailsModal({ isOpen, onClose, style, cases = [], 
                 }}
                 className="text-xs font-semibold text-purple-600 hover:text-purple-700 hover:underline cursor-pointer"
               >
-                + Be the first to report an infringement ({weiToGen(style.bounty_per_case_wei)} GEN Bounty)
+                + Be the first to report an infringement ({weiToGen(style.bounty_per_case_wei)} {currency} Bounty)
               </button>
             </div>
           ) : (
@@ -290,7 +290,7 @@ export default function StyleDetailsModal({ isOpen, onClose, style, cases = [], 
               }}
               className="bg-purple-600 hover:bg-purple-700 text-white font-semibold text-xs px-5 py-2.5 rounded-lg transition-all shadow-xs active:scale-95 cursor-pointer"
             >
-              Report Suspect Copy ({weiToGen(style.bounty_per_case_wei)} GEN Bounty)
+              Report Suspect Copy ({weiToGen(style.bounty_per_case_wei)} {currency} Bounty)
             </button>
           </div>
         </div>

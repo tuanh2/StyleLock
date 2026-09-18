@@ -77,11 +77,23 @@ export default function App() {
   const [claimableReward, setClaimableReward] = useState('0');
   const [isClaiming, setIsClaiming] = useState(false);
   const [isCreatingStyle, setIsCreatingStyle] = useState(false);
+  const getInitialChain = () => {
+    if (typeof window === 'undefined') return CHAINS[0];
+    try {
+      const savedKey = localStorage.getItem('stylelock_chain_key');
+      if (savedKey) {
+        const found = CHAINS.find(c => c.key === savedKey);
+        if (found) return found;
+      }
+    } catch (e) {}
+    return CHAINS[0]; // Arc Mainnet (USDC)
+  };
+
   const [donateModalStyle, setDonateModalStyle] = useState(null);
   const [isDonating, setIsDonating] = useState(false);
   const [txBanner, setTxBanner] = useState(null);
   const [chainModalOpen, setChainModalOpen] = useState(false);
-  const [connectedChain, setConnectedChain] = useState(null);
+  const [connectedChain, setConnectedChain] = useState(getInitialChain);
   const lastFetchRef = useRef(0); // timestamp ms of last fetchOnChainData
 
   const activeCurrency = connectedChain?.currencySymbol || (
@@ -255,75 +267,78 @@ export default function App() {
 
   // 2a. Handle chain selection from modal
   const handleChainSelect = async (chain) => {
-    setIsConnecting(true);
+    // 1. Immediately switch the active network & currency view
+    setConnectedChain(chain);
     try {
-      if (chain.type === 'solana') {
-        // Solana: use Phantom wallet
-        const phantom = window.solana || window.phantom?.solana;
-        if (!phantom?.isPhantom) {
-          window.open('https://phantom.app/', '_blank');
-          throw new Error('Phantom wallet not found. Please install Phantom and retry.');
-        }
-        const resp = await phantom.connect();
-        const solAddr = resp.publicKey.toString();
-        setAccount(solAddr);
-        setConnectedChain(chain);
-        setChainModalOpen(false);
-        return;
-      }
+      localStorage.setItem('stylelock_chain_key', chain.key);
+    } catch (e) {}
+    setChainModalOpen(false);
 
-      // EVM chains: MetaMask
-      if (!window.ethereum) {
-        throw new Error('MetaMask not found. Please install MetaMask extension.');
-      }
-
-      // Switch or add chain
-      try {
-        await window.ethereum.request({
-          method: 'wallet_switchEthereumChain',
-          params: [{ chainId: chain.chainIdHex }],
-        });
-      } catch (err) {
-        if (err.code === 4902 || err.code === -32603) {
-          await window.ethereum.request({
-            method: 'wallet_addEthereumChain',
-            params: [{
-              chainId: chain.chainIdHex,
-              chainName: chain.name,
-              nativeCurrency: chain.currency,
-              rpcUrls: [chain.rpc],
-              blockExplorerUrls: [chain.explorer],
-            }],
-          });
-        } else {
-          throw err;
-        }
-      }
-
-      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-      const addr = accounts[0];
-      setAccount(addr);
-      setConnectedChain(chain);
-      setChainModalOpen(false);
-
-      // Fetch claimable reward only if on GenLayer
-      if (chain.key === 'genlayer') {
+    // 2. Attempt wallet connect/switch if provider exists
+    if (chain.type === 'solana') {
+      const phantom = window.solana || window.phantom?.solana;
+      if (phantom?.isPhantom) {
         try {
-          const client = getReadClient();
-          const rew = await client.readContract({
-            address: CONTRACT_ADDRESS,
-            functionName: 'get_claimable_reward',
-            args: [addr]
-          });
-          setClaimableReward(String(rew || '0'));
+          setIsConnecting(true);
+          const resp = await phantom.connect();
+          const solAddr = resp.publicKey.toString();
+          setAccount(solAddr);
         } catch (e) {
-          console.warn('Error reading claimable reward:', e);
+          console.warn('Phantom connect notice:', e.message);
+        } finally {
+          setIsConnecting(false);
         }
       }
-    } catch (err) {
-      alert(err.message || 'Failed to connect wallet');
-    } finally {
-      setIsConnecting(false);
+      return;
+    }
+
+    // EVM chains: MetaMask
+    if (window.ethereum) {
+      setIsConnecting(true);
+      try {
+        try {
+          await window.ethereum.request({
+            method: 'wallet_switchEthereumChain',
+            params: [{ chainId: chain.chainIdHex }],
+          });
+        } catch (err) {
+          if (err.code === 4902 || err.code === -32603) {
+            await window.ethereum.request({
+              method: 'wallet_addEthereumChain',
+              params: [{
+                chainId: chain.chainIdHex,
+                chainName: chain.name,
+                nativeCurrency: chain.currency,
+                rpcUrls: [chain.rpc],
+                blockExplorerUrls: [chain.explorer],
+              }],
+            });
+          }
+        }
+
+        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        const addr = accounts?.[0];
+        if (addr) {
+          setAccount(addr);
+          if (chain.key === 'genlayer') {
+            try {
+              const client = getReadClient();
+              const rew = await client.readContract({
+                address: CONTRACT_ADDRESS,
+                functionName: 'get_claimable_reward',
+                args: [addr]
+              });
+              setClaimableReward(String(rew || '0'));
+            } catch (e) {
+              console.warn('Error reading claimable reward:', e);
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('EVM wallet notice:', err.message);
+      } finally {
+        setIsConnecting(false);
+      }
     }
   };
 
@@ -331,7 +346,6 @@ export default function App() {
   const handleDisconnect = () => {
     setAccount('');
     setClaimableReward('0');
-    setConnectedChain(null);
   };
 
   useEffect(() => {
@@ -540,7 +554,7 @@ export default function App() {
 
       const hashStr = typeof hash === 'string' ? hash : String(hash);
       setTxBanner({
-        message: `Donating ${amountGen} GEN to Style #${styleId} Bounty Pool on GenLayer...`,
+        message: `Donating ${amountGen} ${activeCurrency} to Style #${styleId} Bounty Pool...`,
         hash: hashStr,
         loading: true
       });
@@ -572,7 +586,7 @@ export default function App() {
 
       playTingTing();
       setTxBanner({
-        message: `Successfully boosted Style #${styleId} Bounty Pool by +${amountGen} GEN!`,
+        message: `Successfully boosted Style #${styleId} Bounty Pool by +${amountGen} ${activeCurrency}!`,
         hash: hashStr,
         loading: false
       });
@@ -708,6 +722,7 @@ export default function App() {
         onConnect={handleConnect}
         onDisconnect={handleDisconnect}
         isConnecting={isConnecting}
+        onOpenChainModal={() => setChainModalOpen(true)}
       />
 
       {/* Transaction Banner */}
@@ -905,6 +920,7 @@ export default function App() {
         {activeTab === 'case' && selectedCase && (
           <CaseView
             caseData={selectedCase}
+            currency={activeCurrency}
             onBack={() => changeTab('explore')}
             onClaimReward={handleClaimReward}
             isClaiming={isClaiming}
@@ -931,6 +947,7 @@ export default function App() {
         style={donateModalStyle}
         onDonate={handleDonate}
         isDonating={isDonating}
+        currency={activeCurrency}
       />
 
       {/* Chain Selector Modal */}

@@ -1,7 +1,7 @@
 import React from 'react';
 import { CONTRACT_ADDRESS, addressExplorerUrl } from '../config';
 
-export default function Navbar({ activeTab, setActiveTab, account, connectedChain, onConnect, onDisconnect, isConnecting }) {
+export default function Navbar({ activeTab, setActiveTab, account, connectedChain, onConnect, onDisconnect, isConnecting, onOpenChainModal }) {
   const shortAddr = (a) => a ? `${a.slice(0, 6)}...${a.slice(-4)}` : '';
 
   return (
@@ -64,18 +64,28 @@ export default function Navbar({ activeTab, setActiveTab, account, connectedChai
           </button>
         </nav>
 
-        {/* Contract Link & Wallet Connect */}
-        <div className="flex items-center gap-3">
-          <a
-            href={addressExplorerUrl(CONTRACT_ADDRESS)}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hidden lg:flex items-center gap-1.5 text-xs font-mono text-zinc-500 hover:text-zinc-900 transition-colors bg-zinc-100 hover:bg-zinc-200/70 px-2.5 py-1.5 rounded-md border border-zinc-200"
-            title="View contract on GenLayer explorer"
+        {/* Network Selector & Wallet Connect */}
+        <div className="flex items-center gap-2 sm:gap-3">
+          {/* Active Network Selector Button */}
+          <button
+            onClick={onOpenChainModal || onConnect}
+            className="flex items-center gap-1.5 sm:gap-2 bg-zinc-100 hover:bg-zinc-200/80 border border-zinc-200 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-mono text-zinc-800 transition-colors cursor-pointer group"
+            title="Click to switch network (Arc USDC / BNB USDT / Solana USDC / GenLayer GEN)"
           >
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-            <span>Studio Next</span>
-          </a>
+            <span className={`w-2 h-2 rounded-full shrink-0 ${
+              connectedChain?.key === 'arc' ? 'bg-blue-500' :
+              connectedChain?.key === 'bnb' ? 'bg-yellow-500' :
+              connectedChain?.key === 'solana' ? 'bg-violet-500' :
+              'bg-purple-500'
+            }`} />
+            <span className="font-semibold text-zinc-900 hidden xs:inline">{connectedChain?.name || 'Arc Mainnet'}</span>
+            <span className="font-bold text-[10px] px-1.5 py-0.5 rounded bg-white text-zinc-700 border border-zinc-200 shadow-2xs">
+              {connectedChain?.currencySymbol || 'USDC'}
+            </span>
+            <svg className="w-3 h-3 text-zinc-400 group-hover:text-zinc-700 transition-colors shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
 
           {account ? (
             <div className="flex items-center gap-2">

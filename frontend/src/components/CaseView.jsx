@@ -1,7 +1,7 @@
 import React from 'react';
-import { txExplorerUrl } from '../config';
+import { txExplorerUrl, weiToGen } from '../config';
 
-export default function CaseView({ caseData, onBack, onClaimReward, isClaiming }) {
+export default function CaseView({ caseData, onBack, onClaimReward, isClaiming, currency = 'GEN' }) {
   if (!caseData) return null;
 
   const isEnforced = caseData.status === 'ENFORCED';
@@ -102,7 +102,7 @@ export default function CaseView({ caseData, onBack, onClaimReward, isClaiming }
           </span>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-mono text-zinc-800">
             <div>• Enforcement Log: <strong>#{caseData.enforcement_record_id || 'SL-0001'}</strong></div>
-            <div>• Bounty Credited: <strong>0.25 GEN</strong></div>
+            <div>• Bounty Credited: <strong>{caseData.bounty_amount_wei ? weiToGen(caseData.bounty_amount_wei) : '0.25'} {currency}</strong></div>
             <div>• Style Counter: <strong>+1 Confirmed Infringement</strong></div>
             <div>• URL Flagged permanently in style registry</div>
           </div>

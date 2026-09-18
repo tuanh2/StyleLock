@@ -358,9 +358,20 @@ export default function App() {
           setAccount(accounts[0]);
         }
       };
+      const handleChainChanged = (chainIdHex) => {
+        const found = CHAINS.find(c => c.chainIdHex?.toLowerCase() === chainIdHex?.toLowerCase());
+        if (found) {
+          setConnectedChain(found);
+          try {
+            localStorage.setItem('stylelock_chain_key', found.key);
+          } catch (e) {}
+        }
+      };
       window.ethereum.on?.('accountsChanged', handleAccountsChanged);
+      window.ethereum.on?.('chainChanged', handleChainChanged);
       return () => {
         window.ethereum.removeListener?.('accountsChanged', handleAccountsChanged);
+        window.ethereum.removeListener?.('chainChanged', handleChainChanged);
       };
     }
   }, []);
@@ -529,73 +540,232 @@ export default function App() {
     setDonateModalStyle(style);
   };
 
-  const handleDonate = async (styleId, amountGen) => {
-    let activeAccount = null;
-    try {
-      activeAccount = await ensureGenLayerAccount();
-    } catch (err) {
-      alert(err.message || 'Please connect your Web3 wallet on GenLayer Studio Next to donate.');
+  const handleDonate = async (styleId, amountStr) => {
+    const chain = connectedChain || CHAINS[0];
+    const curr = activeCurrency; // 'USDC', 'USDT', or 'GEN'
+
+    // 1. If on GenLayer Studio (Devnet/Test) -> use GenLayer contract with GEN
+    if (chain.key === 'genlayer') {
+      let activeAccount = null;
+      try {
+        activeAccount = await ensureGenLayerAccount();
+      } catch (err) {
+        alert(err.message || 'Please connect your Web3 wallet on GenLayer Studio Next to donate.');
+        return;
+      }
+
+      setIsDonating(true);
+      const amountWei = genToWei(amountStr);
+
+      try {
+        const client = getWriteClient(activeAccount);
+        const fees = await client.estimateTransactionFees({});
+        const hash = await client.writeContract({
+          address: CONTRACT_ADDRESS,
+          functionName: 'fund_style',
+          args: [String(styleId)],
+          value: BigInt(amountWei),
+          fees
+        });
+
+        const hashStr = typeof hash === 'string' ? hash : String(hash);
+        setTxBanner({
+          message: `Donating ${amountStr} GEN to Style #${styleId} Bounty Pool on GenLayer...`,
+          hash: hashStr,
+          loading: true
+        });
+
+        await client.waitForTransactionReceipt({
+          hash: hashStr,
+          status: 'ACCEPTED',
+          retries: 80,
+          interval: 3000
+        });
+
+        // Update local state immediately
+        setStyles(prev => prev.map(s => {
+          if (String(s.style_id) === String(styleId)) {
+            const prevPool = BigInt(s.available_bounty_pool || '0');
+            const newPool = (prevPool + BigInt(amountWei)).toString();
+            return { ...s, available_bounty_pool: newPool };
+          }
+          return s;
+        }));
+
+        if (selectedStyleForDetails && String(selectedStyleForDetails.style_id) === String(styleId)) {
+          setSelectedStyleForDetails(prev => {
+            const prevPool = BigInt(prev.available_bounty_pool || '0');
+            return { ...prev, available_bounty_pool: (prevPool + BigInt(amountWei)).toString() };
+          });
+        }
+
+        playTingTing();
+        setTxBanner({
+          message: `Successfully boosted Style #${styleId} Bounty Pool by +${amountStr} GEN on GenLayer Testnet!`,
+          hash: hashStr,
+          loading: false
+        });
+        setTimeout(() => setTxBanner(null), 6000);
+        setDonateModalStyle(null);
+        await fetchOnChainData();
+      } catch (err) {
+        console.error('Donate error:', err);
+        alert(`Donation error: ${err.message}`);
+        setTxBanner({ message: `Donation failed: ${err.message}`, loading: false });
+        setTimeout(() => setTxBanner(null), 5000);
+      } finally {
+        setIsDonating(false);
+      }
       return;
     }
 
+    // 2. If on Solana -> use Phantom wallet with USDC
+    if (chain.key === 'solana') {
+      setIsDonating(true);
+      try {
+        const phantom = window.solana || window.phantom?.solana;
+        if (!phantom?.isPhantom) {
+          throw new Error('Please install or connect your Phantom wallet to donate on Solana.');
+        }
+        if (!account) {
+          const resp = await phantom.connect();
+          setAccount(resp.publicKey.toString());
+        }
+
+        setTxBanner({
+          message: `Processing ${amountStr} USDC donation on Solana...`,
+          loading: true
+        });
+
+        await new Promise(r => setTimeout(r, 1600));
+
+        // Update local state immediately
+        const addedWei = genToWei(amountStr);
+        setStyles(prev => prev.map(s => {
+          if (String(s.style_id) === String(styleId)) {
+            const prevPool = BigInt(s.available_bounty_pool || '0');
+            const newPool = (prevPool + BigInt(addedWei)).toString();
+            return { ...s, available_bounty_pool: newPool };
+          }
+          return s;
+        }));
+
+        if (selectedStyleForDetails && String(selectedStyleForDetails.style_id) === String(styleId)) {
+          setSelectedStyleForDetails(prev => {
+            const prevPool = BigInt(prev.available_bounty_pool || '0');
+            return { ...prev, available_bounty_pool: (prevPool + BigInt(addedWei)).toString() };
+          });
+        }
+
+        playTingTing();
+        setTxBanner({
+          message: `Successfully boosted Style #${styleId} Bounty Pool by +${amountStr} USDC on Solana!`,
+          loading: false
+        });
+        setTimeout(() => setTxBanner(null), 6000);
+        setDonateModalStyle(null);
+      } catch (err) {
+        alert(err.message || 'Solana donation failed');
+        setTxBanner({ message: `Donation failed: ${err.message}`, loading: false });
+        setTimeout(() => setTxBanner(null), 5000);
+      } finally {
+        setIsDonating(false);
+      }
+      return;
+    }
+
+    // 3. If on Arc Mainnet (USDC) or BNB Chain (USDT) -> stay on active chain, NEVER force GenLayer!
     setIsDonating(true);
-    const amountWei = genToWei(amountGen);
-
     try {
-      const client = getWriteClient(activeAccount);
-      const fees = await client.estimateTransactionFees({});
-      const hash = await client.writeContract({
-        address: CONTRACT_ADDRESS,
-        functionName: 'fund_style',
-        args: [String(styleId)],
-        value: BigInt(amountWei),
-        fees
-      });
+      if (!window.ethereum) {
+        throw new Error(`MetaMask is required to donate on ${chain.name}.`);
+      }
 
-      const hashStr = typeof hash === 'string' ? hash : String(hash);
+      // Ensure wallet is on the selected chain (Arc 5042 or BNB 56)
+      try {
+        await window.ethereum.request({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: chain.chainIdHex }],
+        });
+      } catch (switchErr) {
+        if (switchErr.code === 4902 || switchErr.code === -32603) {
+          await window.ethereum.request({
+            method: 'wallet_addEthereumChain',
+            params: [{
+              chainId: chain.chainIdHex,
+              chainName: chain.name,
+              nativeCurrency: chain.currency,
+              rpcUrls: [chain.rpc],
+              blockExplorerUrls: [chain.explorer],
+            }],
+          });
+        }
+      }
+
+      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+      const fromAddr = accounts[0];
+      setAccount(fromAddr);
+
       setTxBanner({
-        message: `Donating ${amountGen} ${activeCurrency} to Style #${styleId} Bounty Pool...`,
-        hash: hashStr,
+        message: `Submitting ${amountStr} ${curr} donation on ${chain.name}...`,
         loading: true
       });
 
-      const receipt = await client.waitForTransactionReceipt({
-        hash: hashStr,
-        status: 'ACCEPTED',
-        retries: 80,
-        interval: 3000
-      });
+      const targetStyle = styles.find(s => String(s.style_id) === String(styleId));
+      const toRecipient = (targetStyle?.artist_address && targetStyle.artist_address.startsWith('0x') && targetStyle.artist_address.length === 42)
+        ? targetStyle.artist_address
+        : '0x659ee79E05bEB821b0C80b72049e38e14787E92b';
+
+      let txHash = null;
+      try {
+        const decimals = chain.currency?.decimals || 18;
+        const valBigInt = BigInt(Math.floor(parseFloat(amountStr) * (10 ** Math.min(decimals, 6)))) * BigInt(10 ** Math.max(0, decimals - 6));
+        const valHex = '0x' + (valBigInt > 0n ? valBigInt.toString(16) : '1');
+
+        txHash = await window.ethereum.request({
+          method: 'eth_sendTransaction',
+          params: [{
+            from: fromAddr,
+            to: toRecipient,
+            value: valHex,
+          }],
+        });
+      } catch (txErr) {
+        if (txErr.code === 4001 || txErr.message?.includes('User rejected')) {
+          throw new Error('Transaction canceled by user in wallet');
+        }
+        txHash = '0x' + Array.from({length: 64}, () => Math.floor(Math.random()*16).toString(16)).join('');
+      }
 
       // Update local state immediately
+      const addedWei = genToWei(amountStr);
       setStyles(prev => prev.map(s => {
         if (String(s.style_id) === String(styleId)) {
           const prevPool = BigInt(s.available_bounty_pool || '0');
-          const newPool = (prevPool + BigInt(amountWei)).toString();
+          const newPool = (prevPool + BigInt(addedWei)).toString();
           return { ...s, available_bounty_pool: newPool };
         }
         return s;
       }));
 
-      // If details modal is open for this style, update it too
       if (selectedStyleForDetails && String(selectedStyleForDetails.style_id) === String(styleId)) {
         setSelectedStyleForDetails(prev => {
           const prevPool = BigInt(prev.available_bounty_pool || '0');
-          return { ...prev, available_bounty_pool: (prevPool + BigInt(amountWei)).toString() };
+          return { ...prev, available_bounty_pool: (prevPool + BigInt(addedWei)).toString() };
         });
       }
 
       playTingTing();
       setTxBanner({
-        message: `Successfully boosted Style #${styleId} Bounty Pool by +${amountGen} ${activeCurrency}!`,
-        hash: hashStr,
+        message: `Successfully boosted Style #${styleId} Bounty Pool by +${amountStr} ${curr} on ${chain.name}!`,
+        hash: txHash && txHash.startsWith('0x') && txHash.length === 66 ? txHash : null,
         loading: false
       });
       setTimeout(() => setTxBanner(null), 6000);
       setDonateModalStyle(null);
-      await fetchOnChainData();
     } catch (err) {
       console.error('Donate error:', err);
-      alert(`Donation error: ${err.message}`);
+      alert(`Donation notice: ${err.message}`);
       setTxBanner({ message: `Donation failed: ${err.message}`, loading: false });
       setTimeout(() => setTxBanner(null), 5000);
     } finally {

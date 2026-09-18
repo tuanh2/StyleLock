@@ -8,7 +8,7 @@ export const STUDIONET_CHAIN = studioDevnet;
 export const RPC_ENDPOINT = (import.meta).env?.VITE_GENLAYER_RPC || 'https://studio-next.genlayer.com/api';
 export const EXPLORER_URL = 'https://explorer-studio-dev.genlayer.com';
 
-const CHAIN_ID_HEX = '0x' + STUDIONET_CHAIN.id.toString(16); // 0xF1EF
+const CHAIN_ID_HEX = '0x' + STUDIONET_CHAIN.id.toString(16); // 0xF22D (61997)
 
 export async function connectWallet() {
   if (!window.ethereum) {

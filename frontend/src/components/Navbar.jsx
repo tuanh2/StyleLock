@@ -79,16 +79,23 @@ export default function Navbar({ activeTab, setActiveTab, account, connectedChai
 
           {account ? (
             <div className="flex items-center gap-2">
-              <div className="flex items-center gap-2 bg-zinc-100 border border-zinc-200 px-3 py-1.5 rounded-lg text-xs font-mono text-zinc-800">
+              <button
+                onClick={onConnect}
+                className="flex items-center gap-2 bg-zinc-100 hover:bg-purple-50 hover:border-purple-200 border border-zinc-200 px-3 py-1.5 rounded-lg text-xs font-mono text-zinc-800 transition-colors cursor-pointer group"
+                title="Click to switch chain or network"
+              >
                 {connectedChain && (
                   <span className="text-sm leading-none">{connectedChain.icon}</span>
                 )}
-                <span className="w-2 h-2 rounded-full bg-purple-600"></span>
+                <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
                 <span className="font-medium">{shortAddr(account)}</span>
                 {connectedChain && (
-                  <span className="text-zinc-400 hidden sm:inline">{connectedChain.name}</span>
+                  <span className="text-zinc-500 hidden sm:inline font-sans font-medium text-[11px] bg-white px-1.5 py-0.5 rounded border border-zinc-200">{connectedChain.name}</span>
                 )}
-              </div>
+                <svg className="w-3 h-3 text-zinc-400 group-hover:text-purple-600 ml-0.5 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
               <button
                 onClick={onDisconnect}
                 className="bg-zinc-100 hover:bg-red-50 hover:text-red-600 hover:border-red-200 border border-zinc-200 text-zinc-500 font-medium text-xs px-2.5 py-1.5 rounded-lg transition-all shadow-xs cursor-pointer flex items-center gap-1.5 active:scale-95"

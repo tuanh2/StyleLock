@@ -9,7 +9,7 @@ import HunterBoard from './components/HunterBoard';
 import ArtistStudio from './components/ArtistStudio';
 import SplashScreen from './components/SplashScreen';
 import DonateModal from './components/DonateModal';
-import ChainSelectModal from './components/ChainSelectModal';
+import ChainSelectModal, { CHAINS } from './components/ChainSelectModal';
 import { INITIAL_STYLES, INITIAL_CASES } from './data/demoFixtures';
 import {
   connectWallet,
@@ -357,27 +357,58 @@ export default function App() {
     setIsDetailsOpen(true);
   };
 
-  // 5. Submit Case (Direct to GenLayer on-chain validators)
-  const handleSubmitCase = async ({ styleId, suspectUrl, claimText }) => {
-    setIsSubmitting(true);
-    setTxBanner({ message: 'Submitting evidence to GenLayer validators...', loading: true });
+  // Ensure the user's active wallet is on GenLayer Studio Next (Chain ID 61997)
+  const ensureGenLayerAccount = async () => {
+    const genlayerChain = CHAINS.find(c => c.key === 'genlayer');
+    if (connectedChain?.key === 'genlayer' && account && account.startsWith('0x')) {
+      return account;
+    }
 
-    let activeAccount = account;
-    if (!activeAccount && window.ethereum) {
-      try {
-        activeAccount = await connectWallet();
-        setAccount(activeAccount);
-      } catch (e) {
-        console.warn('Wallet connection note:', e);
+    if (!window.ethereum) {
+      throw new Error('MetaMask is required to interact with GenLayer Intelligent Contracts.');
+    }
+
+    try {
+      await window.ethereum.request({
+        method: 'wallet_switchEthereumChain',
+        params: [{ chainId: genlayerChain.chainIdHex }],
+      });
+    } catch (err) {
+      if (err.code === 4902 || err.code === -32603) {
+        await window.ethereum.request({
+          method: 'wallet_addEthereumChain',
+          params: [{
+            chainId: genlayerChain.chainIdHex,
+            chainName: genlayerChain.name,
+            nativeCurrency: genlayerChain.currency,
+            rpcUrls: [genlayerChain.rpc],
+            blockExplorerUrls: [genlayerChain.explorer],
+          }],
+        });
+      } else {
+        throw err;
       }
     }
 
-    if (!activeAccount) {
-      setIsSubmitting(false);
-      setTxBanner(null);
-      alert('Please connect your MetaMask wallet to submit reports to GenLayer validators.');
+    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+    const evmAddr = accounts[0];
+    setAccount(evmAddr);
+    setConnectedChain(genlayerChain);
+    return evmAddr;
+  };
+
+  // 5. Submit Case (Direct to GenLayer on-chain validators)
+  const handleSubmitCase = async ({ styleId, suspectUrl, claimText }) => {
+    let activeAccount = null;
+    try {
+      activeAccount = await ensureGenLayerAccount();
+    } catch (e) {
+      alert(e.message || 'Please connect your MetaMask wallet on GenLayer Studio Next to submit reports.');
       return;
     }
+
+    setIsSubmitting(true);
+    setTxBanner({ message: 'Submitting evidence to GenLayer validators...', loading: true });
 
     try {
       const client = getWriteClient(activeAccount);
@@ -439,10 +470,17 @@ export default function App() {
 
   // 6. Claim Bounty
   const handleClaimReward = async () => {
-    if (!account) return;
+    let activeAccount = null;
+    try {
+      activeAccount = await ensureGenLayerAccount();
+    } catch (e) {
+      alert(e.message || 'Please connect MetaMask on GenLayer to claim reward.');
+      return;
+    }
+
     setIsClaiming(true);
     try {
-      const client = getWriteClient(account);
+      const client = getWriteClient(activeAccount);
       const hash = await client.writeContract({
         address: CONTRACT_ADDRESS,
         functionName: 'claim_reward',
@@ -463,18 +501,11 @@ export default function App() {
   };
 
   const handleDonate = async (styleId, amountGen) => {
-    let activeAccount = account;
-    if (!activeAccount) {
-      try {
-        activeAccount = await handleConnect();
-      } catch (err) {
-        alert('Please connect your Web3 wallet to donate to the artist bounty pool.');
-        return;
-      }
-    }
-
-    if (!activeAccount) {
-      alert('Please connect your Web3 wallet to donate to the artist bounty pool.');
+    let activeAccount = null;
+    try {
+      activeAccount = await ensureGenLayerAccount();
+    } catch (err) {
+      alert(err.message || 'Please connect your Web3 wallet on GenLayer Studio Next to donate.');
       return;
     }
 
@@ -546,8 +577,15 @@ export default function App() {
   const handleCreateStyle = async (styleData) => {
     setIsCreatingStyle(true);
     try {
-      if (account && window.ethereum) {
-        const client = getWriteClient(account);
+      let activeAccount = null;
+      try {
+        activeAccount = await ensureGenLayerAccount();
+      } catch (err) {
+        console.warn('GenLayer connection notice:', err);
+      }
+
+      if (activeAccount && window.ethereum) {
+        const client = getWriteClient(activeAccount);
         const fees = await client.estimateTransactionFees({});
         const hash = await client.writeContract({
           address: CONTRACT_ADDRESS,
@@ -576,7 +614,7 @@ export default function App() {
 
         const newStyle = {
           style_id: String(styles.length + 1),
-          artist_address: account,
+          artist_address: activeAccount,
           ...styleData,
           available_bounty_pool: '1000000000000000000',
           active: true,
@@ -879,6 +917,7 @@ export default function App() {
         onClose={() => setChainModalOpen(false)}
         onSelect={handleChainSelect}
         isConnecting={isConnecting}
+        connectedChain={connectedChain}
       />
 
       {/* Footer */}

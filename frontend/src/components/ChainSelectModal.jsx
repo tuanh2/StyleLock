@@ -77,7 +77,7 @@ const colorMap = {
   },
 };
 
-export default function ChainSelectModal({ isOpen, onClose, onSelect, isConnecting }) {
+export default function ChainSelectModal({ isOpen, onClose, onSelect, isConnecting, connectedChain }) {
   if (!isOpen) return null;
 
   return (
@@ -90,12 +90,12 @@ export default function ChainSelectModal({ isOpen, onClose, onSelect, isConnecti
         {/* Header */}
         <div className="px-5 pt-5 pb-4 border-b border-zinc-100 flex items-start justify-between">
           <div>
-            <h2 className="text-base font-bold text-zinc-950 tracking-tight">Connect Wallet</h2>
-            <p className="text-xs text-zinc-500 mt-0.5">Choose your network to continue</p>
+            <h2 className="text-base font-bold text-zinc-950 tracking-tight">Select Network</h2>
+            <p className="text-xs text-zinc-500 mt-0.5">Switch network or connect your wallet</p>
           </div>
           <button
             onClick={onClose}
-            className="text-zinc-400 hover:text-zinc-700 transition-colors p-1 rounded-lg hover:bg-zinc-100 -mt-0.5"
+            className="text-zinc-400 hover:text-zinc-700 transition-colors p-1 rounded-lg hover:bg-zinc-100 -mt-0.5 cursor-pointer"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -107,12 +107,15 @@ export default function ChainSelectModal({ isOpen, onClose, onSelect, isConnecti
         <div className="p-4 space-y-2.5">
           {CHAINS.map((chain) => {
             const c = colorMap[chain.color];
+            const isCurrent = connectedChain?.key === chain.key;
             return (
               <button
                 key={chain.key}
                 onClick={() => onSelect(chain)}
                 disabled={isConnecting}
-                className={`w-full flex items-center gap-3.5 p-3.5 rounded-xl border border-zinc-200 transition-all text-left cursor-pointer active:scale-[0.98] disabled:opacity-50 ${c.hover}`}
+                className={`w-full flex items-center gap-3.5 p-3.5 rounded-xl border transition-all text-left cursor-pointer active:scale-[0.98] disabled:opacity-50 ${
+                  isCurrent ? 'border-purple-600 bg-purple-50/40 ring-1 ring-purple-500/20' : `border-zinc-200 ${c.hover}`
+                }`}
               >
                 <div className={`w-10 h-10 rounded-xl ${c.bg} flex items-center justify-center text-xl shrink-0 border border-zinc-100`}>
                   {chain.icon}
@@ -125,10 +128,15 @@ export default function ChainSelectModal({ isOpen, onClose, onSelect, isConnecti
                         Contract
                       </span>
                     )}
+                    {isCurrent && (
+                      <span className="text-[10px] font-mono px-1.5 py-0.5 rounded font-semibold bg-emerald-100 text-emerald-700 border border-emerald-200">
+                        Connected
+                      </span>
+                    )}
                   </div>
                   <p className="text-xs text-zinc-500 mt-0.5 font-mono">{chain.subtitle}</p>
                 </div>
-                <div className={`w-2 h-2 rounded-full shrink-0 ${c.dot}`} />
+                <div className={`w-2.5 h-2.5 rounded-full shrink-0 ${isCurrent ? 'bg-emerald-500 ring-4 ring-emerald-100' : c.dot}`} />
               </button>
             );
           })}

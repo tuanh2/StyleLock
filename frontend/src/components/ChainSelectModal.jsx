@@ -1,4 +1,4 @@
-﻿import React from "react";
+import React from "react";
 
 export const CHAINS = [
   {
@@ -43,7 +43,7 @@ export const CHAINS = [
   {
     key: "solana",
     name: "Solana",
-    subtitle: "Mainnet Beta · Phantom",
+    subtitle: "Mainnet · Phantom",
     icon: "🟣",
     color: "violet",
     type: "solana",

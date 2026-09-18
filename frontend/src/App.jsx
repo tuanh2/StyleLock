@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import StyleCard from './components/StyleCard';
@@ -77,9 +77,11 @@ export default function App() {
   const [donateModalStyle, setDonateModalStyle] = useState(null);
   const [isDonating, setIsDonating] = useState(false);
   const [txBanner, setTxBanner] = useState(null);
+  const lastFetchRef = useRef(0); // timestamp ms of last fetchOnChainData
 
   // 1. Fetch on-chain data in parallel across all styles and cases
   const fetchOnChainData = useCallback(async () => {
+    lastFetchRef.current = Date.now();
     try {
       const client = getReadClient();
       const styleCountRaw = await client.readContract({
@@ -100,9 +102,15 @@ export default function App() {
             }).then(raw => {
               const parsed = JSON.parse(raw);
               if (parsed && !parsed.error) {
+                // Only fallback to INITIAL_STYLES if style_id matches a fixture
+                // (don't fake 2 GEN for new styles from other wallets)
                 if (!parsed.available_bounty_pool || parsed.available_bounty_pool === '0') {
                   const initialMatch = INITIAL_STYLES.find(s => String(s.style_id) === String(parsed.style_id));
-                  parsed.available_bounty_pool = initialMatch?.available_bounty_pool || '2000000000000000000';
+                  if (initialMatch?.available_bounty_pool && initialMatch.available_bounty_pool !== '0') {
+                    parsed.available_bounty_pool = initialMatch.available_bounty_pool;
+                  } else {
+                    parsed.available_bounty_pool = '0';
+                  }
                 }
                 return parsed;
               }
@@ -188,7 +196,28 @@ export default function App() {
     fetchOnChainData();
   }, [fetchOnChainData]);
 
-  // Tab Navigation with URL sync
+  // Auto-refresh when user returns to this tab or window — throttled to once per 60s
+  useEffect(() => {
+    const THROTTLE_MS = 60_000; // 60 seconds
+    const tryRefresh = () => {
+      const now = Date.now();
+      if (now - lastFetchRef.current >= THROTTLE_MS) {
+        fetchOnChainData();
+      }
+    };
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') tryRefresh();
+    };
+    const handleFocus = () => tryRefresh();
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [fetchOnChainData]);
+
+
   const changeTab = (tab, pushHistory = true) => {
     setActiveTab(tab);
     if (pushHistory && typeof window !== 'undefined') {

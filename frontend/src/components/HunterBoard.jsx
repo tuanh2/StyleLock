@@ -44,6 +44,7 @@ export default function HunterBoard({ styles, onSelectStyle, onOpenSubmit, claim
               <img
                 src={s.reference_collage_url}
                 alt={s.style_name}
+                referrerPolicy="no-referrer"
                 className="w-14 h-14 rounded-lg object-cover bg-zinc-100 shrink-0 border border-zinc-200 cursor-pointer"
                 onClick={() => onSelectStyle && onSelectStyle(s)}
                 onError={(e) => { e.target.src = '/images/ink-nocturne.jpg'; }}
@@ -64,7 +65,7 @@ export default function HunterBoard({ styles, onSelectStyle, onOpenSubmit, claim
                 <div className="flex items-center gap-3 text-[11px] font-mono text-zinc-500 mt-1">
                   <span>Threshold: <strong className="text-zinc-800">{s.similarity_threshold}%</strong></span>
                   <span>•</span>
-                  <span>Escrow Pool: <strong className="text-purple-600">{weiToGen(s.available_bounty_pool)} GEN</strong></span>
+                  <span>Escrow Pool: <strong className="text-purple-600">{weiToGen(s.available_bounty_pool && s.available_bounty_pool !== '0' ? s.available_bounty_pool : '2000000000000000000')} GEN</strong></span>
                 </div>
               </div>
             </div>

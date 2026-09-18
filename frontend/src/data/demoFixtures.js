@@ -108,16 +108,52 @@ export const INITIAL_STYLES = [
     artist_address: '0x659ee75C8a9A45b43781B81B29d930258ec9E92b',
     artist_display_name: 'dezzy',
     style_name: 'standX',
-    descriptor: 'A stylish monochromatic character illustration blending dynamic manga linework with futuristic urban streetwear aesthetics.',
-    protected_traits: 'monochromatic palette; dynamic manga linework; streetwear character silhouette; high-contrast ink shading',
-    license_terms: 'Unauthorized commercial merchandise, AI model fine-tuning, or derivative prints are prohibited.',
-    similarity_threshold: 80,
-    minimum_confidence: 70,
-    bounty_per_case_wei: '200000000000000000', // 0.20 GEN
+    descriptor: 'A Mid-Autumn Festival banner combining soft 3D characters with a dreamy lakeside landscape. A round black mascot with one large green eye and a leaf sits on an ornate mooncake beside a white rabbit. An oversized golden moon backlights the scene, framed by paper lanterns and flowering branches. Deep green, cream, and warm gold dominate the palette, with bold typography on the left and the character composition on the right.',
+    protected_traits: 'soft 3D character rendering; warm golden moonlight with deep green and cream tones; oversized glowing full moon behind the main character; round black one-eyed mascot with a green leaf; ornate mooncake pedestal beside a white rabbit',
+    license_terms: 'Commercial AI-generated derivatives using this registered style require prior authorization.',
+    similarity_threshold: 82,
+    minimum_confidence: 75,
+    bounty_per_case_wei: '250000000000000000', // 0.25 GEN
     available_bounty_pool: '2000000000000000000', // 2.0 GEN
-    reference_manifest_url: 'https://stylelock.art/manifests/standx.json',
-    reference_manifest_hash: '0x3a4b5c6d7e8f90123456789abcdef0123456789abcdef0123456789abcdef012',
+    reference_manifest_url: 'https://x.com/dezzyyy_eth/status/2100471264427311533',
+    reference_manifest_hash: '0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
     reference_collage_url: 'https://pbs.twimg.com/media/HSZfRwxaMAIogCf.jpg?name=orig',
+    active: true,
+    confirmed_cases: 0
+  },
+  {
+    style_id: '4',
+    artist_address: '0x659ee75C8a9A45b43781B81B29d930258ec9E92b',
+    artist_display_name: 'test',
+    style_name: 'arc meme',
+    descriptor: 'Eye contours and expressive caricature sketching with playful internet aesthetic motifs.',
+    protected_traits: 'eyee; expressive caricature sketching; playful meme aesthetics; distinctive contour lines',
+    license_terms: 'Commercial AI-generated derivatives using this registered style require prior authorization.',
+    similarity_threshold: 82,
+    minimum_confidence: 75,
+    bounty_per_case_wei: '100000000000000000', // 0.10 GEN
+    available_bounty_pool: '1000000000000000000', // 1.0 GEN
+    reference_manifest_url: 'https://stylelock.art/manifests/arc-meme-.json',
+    reference_manifest_hash: '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+    reference_collage_url: 'https://pbs.twimg.com/media/HSal5StXkAAQGmG.jpg?name=orig',
+    active: true,
+    confirmed_cases: 0
+  },
+  {
+    style_id: '5',
+    artist_address: '0x1cc5e66F0d75beADd6DD3cEFeeE87371aE29971f',
+    artist_display_name: 'Vatan Carlos',
+    style_name: 'Vatan_Carlos',
+    descriptor: 'Yellow Blue Jersey with strong birds composition, bold athletic textures and avian motifs.',
+    protected_traits: 'Yellow Blue Jersey with strong birds; bold athletic contours; vibrant yellow and royal blue color harmony',
+    license_terms: 'Commercial AI-generated derivatives using this registered style require prior authorization.',
+    similarity_threshold: 82,
+    minimum_confidence: 75,
+    bounty_per_case_wei: '250000000000000000', // 0.25 GEN
+    available_bounty_pool: '2500000000000000000', // 2.5 GEN
+    reference_manifest_url: 'https://stylelock.art/manifests/vatan_carlos.json',
+    reference_manifest_hash: '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+    reference_collage_url: 'https://pbs.twimg.com/media/HSa1gXOWsAECHU-.jpg?name=orig',
     active: true,
     confirmed_cases: 0
   }
@@ -165,5 +201,47 @@ export const INITIAL_CASES = [
     bounty_amount_wei: '0',
     enforcement_record_id: '',
     txHash: '0xcb5d147609b68e04a1fd6fea36b4e3985e5cc3fedfe543f64183fff3c7c5c19d'
+  },
+  {
+    case_id: '3',
+    style_id: '3',
+    style_name: 'standX',
+    hunter_address: '0x659ee75C8a9A45b43781B81B29d930258ec9E92b',
+    suspect_url: 'https://x.com/diaserdropes/status/2100549206637195668',
+    claim_text: 'Suspected unauthorized copy exploiting traits of standX (soft 3D character rendering, warm golden moonlight with deep green and cream tones).',
+    status: 'AMBIGUOUS',
+    verdict: 'AMBIGUOUS',
+    similarity: 10,
+    confidence: 93,
+    commercial_use: false,
+    commercial_confidence: 5,
+    matched_traits: [],
+    differences: ['No visible suspect artwork or page details were provided in the rendered evidence'],
+    reason: 'The suspect evidence is effectively inaccessible because the rendered webpage content was empty on raw twitter link, so there is no reliable basis to compare the registered standX trait combination. Requires an AMBIGUOUS verdict.',
+    reward_allocated: false,
+    bounty_amount_wei: '0',
+    enforcement_record_id: '',
+    txHash: '0x6e7cf5e510be867e916f1ce7468cbceb486628d9ceca2d550aa4e9bab948902a'
+  },
+  {
+    case_id: '4',
+    style_id: '4',
+    style_name: 'arc meme',
+    hunter_address: '0x659ee75C8a9A45b43781B81B29d930258ec9E92b',
+    suspect_url: 'https://fxtwitter.com/diaserdropes/status/2100549206637195668',
+    claim_text: 'The layout and interface are somewhat similar to the original version. — Evidence Details: [X Post by @diaserdropes: "🌕✨ Happy Mid-Autumn Festival...". Artwork Image: https://pbs.twimg.com/media/HSal5StXkAAQGmG.jpg?name=orig]',
+    status: 'CLEAN',
+    verdict: 'CLEAN',
+    similarity: 5,
+    confidence: 90,
+    commercial_use: false,
+    commercial_confidence: 95,
+    matched_traits: [],
+    differences: ['The suspect artwork is a realistic photograph of a moon with minimal stylistic elements, lacking the distinctive eyee visual traits of the registered arc meme style', 'No reproduction of protected traits', 'Noncommercial celebration post'],
+    reason: 'The suspect evidence is a photograph of the moon with no stylistic resemblance to the registered arc meme visual style. The image lacks any distinctive line work or compositional elements. Additionally, the post is noncommercial. Verdict is CLEAN.',
+    reward_allocated: false,
+    bounty_amount_wei: '0',
+    enforcement_record_id: '',
+    txHash: '0x992b1579a32c7482312ceea0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08'
   }
 ];

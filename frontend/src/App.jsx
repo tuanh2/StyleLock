@@ -31,17 +31,38 @@ const getTabFromUrl = () => {
   return 'explore';
 };
 
+const loadInitialStyles = () => {
+  if (typeof window === 'undefined') return INITIAL_STYLES;
+  try {
+    const saved = localStorage.getItem('stylelock_custom_styles');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        const merged = [...INITIAL_STYLES];
+        for (const s of parsed) {
+          if (!merged.some(m => String(m.style_id) === String(s.style_id))) {
+            merged.push(s);
+          }
+        }
+        return merged;
+      }
+    }
+  } catch (e) {
+    console.warn('Error reading cached styles:', e);
+  }
+  return INITIAL_STYLES;
+};
+
 export default function App() {
   const [showSplash, setShowSplash] = useState(true);
   const [activeTab, setActiveTab] = useState(getTabFromUrl);
-  const [styles, setStyles] = useState(INITIAL_STYLES);
+  const [styles, setStyles] = useState(loadInitialStyles);
   const [cases, setCases] = useState(INITIAL_CASES);
   const [selectedCase, setSelectedCase] = useState(INITIAL_CASES[0] || null);
   const [account, setAccount] = useState('');
   const [isConnecting, setIsConnecting] = useState(false);
   
   // Modals state
-  const [isSubmitOpen, setIsSubmitOpen] = useState(false);
   const [targetStyleForSubmit, setTargetStyleForSubmit] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
@@ -53,7 +74,7 @@ export default function App() {
   const [isCreatingStyle, setIsCreatingStyle] = useState(false);
   const [txBanner, setTxBanner] = useState(null);
 
-  // 1. Fetch on-chain data with consistent pool mapping
+  // 1. Fetch on-chain data in parallel across all styles and cases
   const fetchOnChainData = useCallback(async () => {
     try {
       const client = getReadClient();
@@ -64,32 +85,54 @@ export default function App() {
       });
       const count = parseInt(String(styleCountRaw || '0'), 10);
       if (count > 0) {
-        const fetchedStyles = [];
+        // Fetch all styles concurrently in parallel rather than sequentially
+        const stylePromises = [];
         for (let i = 1; i <= count; i++) {
-          try {
-            const raw = await client.readContract({
+          stylePromises.push(
+            client.readContract({
               address: CONTRACT_ADDRESS,
               functionName: 'get_style',
               args: [String(i)]
-            });
-            const parsed = JSON.parse(raw);
-            if (parsed && !parsed.error) {
-              // Ensure available_bounty_pool is non-zero fallback matching seed
-              if (!parsed.available_bounty_pool || parsed.available_bounty_pool === '0') {
-                const initialMatch = INITIAL_STYLES.find(s => String(s.style_id) === String(parsed.style_id));
-                parsed.available_bounty_pool = initialMatch?.available_bounty_pool || '2000000000000000000';
+            }).then(raw => {
+              const parsed = JSON.parse(raw);
+              if (parsed && !parsed.error) {
+                if (!parsed.available_bounty_pool || parsed.available_bounty_pool === '0') {
+                  const initialMatch = INITIAL_STYLES.find(s => String(s.style_id) === String(parsed.style_id));
+                  parsed.available_bounty_pool = initialMatch?.available_bounty_pool || '2000000000000000000';
+                }
+                return parsed;
               }
-              fetchedStyles.push(parsed);
-            }
-          } catch (e) {
-            console.warn('Error reading style', i, e);
-          }
+              return null;
+            }).catch(e => {
+              console.warn('Error reading style', i, e);
+              return null;
+            })
+          );
         }
-        if (fetchedStyles.length > 0) {
-          setStyles(fetchedStyles);
+
+        const settledStyles = await Promise.allSettled(stylePromises);
+        const validFetchedStyles = settledStyles
+          .filter(r => r.status === 'fulfilled' && r.value)
+          .map(r => r.value);
+
+        if (validFetchedStyles.length > 0) {
+          setStyles(prev => {
+            const merged = [...validFetchedStyles];
+            // Ensure any local/initial styles not yet indexed on-chain are preserved
+            for (const s of prev) {
+              if (!merged.some(m => String(m.style_id) === String(s.style_id))) {
+                merged.push(s);
+              }
+            }
+            try {
+              localStorage.setItem('stylelock_custom_styles', JSON.stringify(merged));
+            } catch (_) {}
+            return merged;
+          });
         }
       }
 
+      // Fetch all cases concurrently in parallel
       const caseCountRaw = await client.readContract({
         address: CONTRACT_ADDRESS,
         functionName: 'get_case_count',
@@ -97,23 +140,40 @@ export default function App() {
       });
       const caseCount = parseInt(String(caseCountRaw || '0'), 10);
       if (caseCount > 0) {
-        const fetchedCases = [];
+        const casePromises = [];
         for (let j = 1; j <= caseCount; j++) {
-          try {
-            const cRaw = await client.readContract({
+          casePromises.push(
+            client.readContract({
               address: CONTRACT_ADDRESS,
               functionName: 'get_case',
               args: [String(j)]
-            });
-            const cParsed = JSON.parse(cRaw);
-            if (cParsed && !cParsed.error) {
-              fetchedCases.push(cParsed);
-            }
-          } catch (e) {
-            console.warn('Error reading case', j, e);
-          }
+            }).then(cRaw => {
+              const cParsed = JSON.parse(cRaw);
+              if (cParsed && !cParsed.error) return cParsed;
+              return null;
+            }).catch(e => {
+              console.warn('Error reading case', j, e);
+              return null;
+            })
+          );
         }
-        setCases(fetchedCases);
+
+        const settledCases = await Promise.allSettled(casePromises);
+        const validCases = settledCases
+          .filter(r => r.status === 'fulfilled' && r.value)
+          .map(r => r.value);
+
+        if (validCases.length > 0) {
+          setCases(prev => {
+            const mergedCases = [...validCases];
+            for (const c of prev) {
+              if (!mergedCases.some(m => String(m.case_id) === String(c.case_id))) {
+                mergedCases.push(c);
+              }
+            }
+            return mergedCases.reverse();
+          });
+        }
       }
     } catch (err) {
       console.warn('Failed to load on-chain styles/cases:', err.message);
@@ -122,6 +182,11 @@ export default function App() {
 
   useEffect(() => {
     fetchOnChainData();
+    // Auto-refresh every 20 seconds so all users see new styles created by other wallets
+    const interval = setInterval(() => {
+      fetchOnChainData();
+    }, 20000);
+    return () => clearInterval(interval);
   }, [fetchOnChainData]);
 
   // Tab Navigation with URL sync
@@ -390,7 +455,8 @@ export default function App() {
 
   // Total escrow pool calculated dynamically from styles
   const totalEscrowNum = styles.reduce((acc, s) => {
-    const val = Number(weiToGen(s.available_bounty_pool || '0'));
+    const rawPool = s.available_bounty_pool && s.available_bounty_pool !== '0' ? s.available_bounty_pool : '2000000000000000000';
+    const val = Number(weiToGen(rawPool));
     return acc + (isNaN(val) ? 0 : val);
   }, 0);
 
@@ -527,7 +593,7 @@ export default function App() {
                         <div className="flex items-center gap-3 text-[11px] font-mono text-zinc-500 mt-1">
                           <span>Threshold: <strong className="text-zinc-800">{s.similarity_threshold}%</strong></span>
                           <span>•</span>
-                          <span>Escrow Pool: <strong className="text-purple-600">{weiToGen(s.available_bounty_pool)} GEN</strong></span>
+                          <span>Escrow Pool: <strong className="text-purple-600">{weiToGen(s.available_bounty_pool && s.available_bounty_pool !== '0' ? s.available_bounty_pool : '2000000000000000000')} GEN</strong></span>
                         </div>
                       </div>
                     </div>

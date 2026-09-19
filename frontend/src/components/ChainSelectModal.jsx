@@ -13,7 +13,6 @@ export const CHAINS = [
     rpc: "https://rpc.testnet.arc.network",
     currency: { name: "USD Coin", symbol: "USDC", decimals: 18 },
     explorer: "https://explorer.testnet.arc.io",
-    isTestnet: true,
   },
   {
     key: "bnb",
@@ -124,7 +123,7 @@ export default function ChainSelectModal({ isOpen, onClose, onSelect, isConnecti
                 <div className="min-w-0 pr-2">
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-semibold text-zinc-950 tracking-tight">{chain.name}</span>
-                    {chain.isTestnet ? (
+                    {chain.key === 'genlayer' ? (
                       <span className="text-[10px] font-mono px-1.5 py-0.5 rounded font-semibold bg-amber-100 text-amber-800 border border-amber-200">
                         Testnet · GEN
                       </span>

@@ -78,7 +78,7 @@ export default function Navbar({ activeTab, setActiveTab, account, connectedChai
               connectedChain?.key === 'solana' ? 'bg-violet-500' :
               'bg-purple-500'
             }`} />
-            <span className="font-semibold text-zinc-900 hidden xs:inline">{connectedChain?.name || 'Arc Mainnet'}</span>
+            <span className="font-semibold text-zinc-900 hidden xs:inline">{connectedChain?.name || 'Arc Network'}</span>
             <span className="font-bold text-[10px] px-1.5 py-0.5 rounded bg-white text-zinc-700 border border-zinc-200 shadow-2xs">
               {connectedChain?.currencySymbol || 'USDC'}
             </span>

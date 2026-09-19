@@ -80,25 +80,25 @@ export default function Hero({ onRegister, onOpenSubmit, onNavigateTab, stats })
           
           <div className="p-4 rounded-2xl bg-white/80 backdrop-blur-sm border border-[#eadfea] shadow-[0_6px_24px_rgba(72,48,84,0.04)]">
             <span className="text-[11px] text-zinc-400 font-mono block uppercase tracking-wider">Active Styles</span>
-            <span className="text-2xl font-bold text-zinc-950 font-mono mt-1 block">{stats.totalStyles || '3'}</span>
+            <span className="text-2xl font-bold text-zinc-950 font-mono mt-1 block">{stats.totalStyles ?? '0'}</span>
             <span className="text-[11px] text-zinc-500 font-mono mt-1 block">Registered on-chain</span>
           </div>
 
           <div className="p-4 rounded-2xl bg-white/80 backdrop-blur-sm border border-[#eadfea] shadow-[0_6px_24px_rgba(72,48,84,0.04)]">
             <span className="text-[11px] text-zinc-400 font-mono block uppercase tracking-wider">Cases Reviewed</span>
-            <span className="text-2xl font-bold text-zinc-950 font-mono mt-1 block">{stats.totalCases || '2'}</span>
+            <span className="text-2xl font-bold text-zinc-950 font-mono mt-1 block">{stats.totalCases ?? '0'}</span>
             <span className="text-[11px] text-zinc-500 font-mono mt-1 block">Consensus reached</span>
           </div>
 
           <div className="p-4 rounded-2xl bg-white/80 backdrop-blur-sm border border-[#eadfea] shadow-[0_6px_24px_rgba(72,48,84,0.04)]">
             <span className="text-[11px] text-zinc-400 font-mono block uppercase tracking-wider">Enforcements</span>
-            <span className="text-2xl font-bold text-zinc-950 font-mono mt-1 block">{stats.totalEnforcements || '0'}</span>
+            <span className="text-2xl font-bold text-zinc-950 font-mono mt-1 block">{stats.totalEnforcements ?? '0'}</span>
             <span className="text-[11px] text-zinc-500 font-mono mt-1 block">Public records</span>
           </div>
 
           <div className="p-4 rounded-2xl bg-purple-50/80 backdrop-blur-sm border border-purple-200 shadow-[0_6px_24px_rgba(72,48,84,0.04)]">
             <span className="text-[11px] text-purple-700 font-mono block uppercase tracking-wider font-medium">Total Escrow Pool</span>
-            <span className="text-2xl font-bold text-purple-950 font-mono mt-1 block">{stats.totalEscrow || '6.0 GEN'}</span>
+            <span className="text-2xl font-bold text-purple-950 font-mono mt-1 block">{stats.totalEscrow || '0.00'}</span>
             <span className="text-[11px] text-purple-700 font-mono mt-1 block">Funded balances</span>
           </div>
 

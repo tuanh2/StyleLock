@@ -37,25 +37,19 @@ const getTabFromUrl = () => {
 };
 
 const loadInitialStyles = () => {
-  if (typeof window === 'undefined') return INITIAL_STYLES;
+  if (typeof window === 'undefined') return INITIAL_STYLES.map(s => ({ ...s, available_bounty_pool: '0' }));
   try {
     const saved = localStorage.getItem('stylelock_custom_styles');
     if (saved) {
       const parsed = JSON.parse(saved);
       if (Array.isArray(parsed) && parsed.length > 0) {
-        const merged = [...INITIAL_STYLES];
-        for (const s of parsed) {
-          if (!merged.some(m => String(m.style_id) === String(s.style_id))) {
-            merged.push(s);
-          }
-        }
-        return merged;
+        return parsed;
       }
     }
   } catch (e) {
     console.warn('Error reading cached styles:', e);
   }
-  return INITIAL_STYLES;
+  return INITIAL_STYLES.map(s => ({ ...s, available_bounty_pool: '0' }));
 };
 
 export default function App() {
@@ -124,16 +118,8 @@ export default function App() {
             }).then(raw => {
               const parsed = JSON.parse(raw);
               if (parsed && !parsed.error) {
-                // Only fallback to INITIAL_STYLES if style_id matches a fixture
-                // (don't fake 2 GEN for new styles from other wallets)
-                if (!parsed.available_bounty_pool || parsed.available_bounty_pool === '0') {
-                  const initialMatch = INITIAL_STYLES.find(s => String(s.style_id) === String(parsed.style_id));
-                  if (initialMatch?.available_bounty_pool && initialMatch.available_bounty_pool !== '0') {
-                    parsed.available_bounty_pool = initialMatch.available_bounty_pool;
-                  } else {
-                    parsed.available_bounty_pool = '0';
-                  }
-                }
+                // Keep exact real on-chain pool value directly without mock/fallback overrides
+                parsed.available_bounty_pool = String(parsed.available_bounty_pool || '0');
                 return parsed;
               }
               return null;
@@ -216,6 +202,11 @@ export default function App() {
 
   useEffect(() => {
     fetchOnChainData();
+    // Auto-refresh real-time on-chain data every 10 seconds
+    const interval = setInterval(() => {
+      fetchOnChainData();
+    }, 10000);
+    return () => clearInterval(interval);
   }, [fetchOnChainData]);
 
   // Auto-refresh when user returns to this tab or window — throttled to once per 60s
@@ -816,7 +807,7 @@ export default function App() {
           style_id: String(styles.length + 1),
           artist_address: activeAccount,
           ...styleData,
-          available_bounty_pool: '1000000000000000000',
+          available_bounty_pool: '0',
           active: true,
           confirmed_cases: 0,
           txHash: hashStr
@@ -843,7 +834,7 @@ export default function App() {
           style_id: String(styles.length + 1),
           artist_address: account || '0x659e...E92b',
           ...styleData,
-          available_bounty_pool: '1000000000000000000',
+          available_bounty_pool: '0',
           active: true,
           confirmed_cases: 0,
           txHash: '0xce7cf5e510be867e916f1ce7468cbceb486628d9ceca2d550aa4e9bab948902a'
@@ -864,10 +855,9 @@ export default function App() {
     }
   };
 
-  // Total escrow pool calculated dynamically from styles
+  // Total escrow pool calculated dynamically from styles strictly on-chain
   const totalEscrowNum = styles.reduce((acc, s) => {
-    const rawPool = s.available_bounty_pool && s.available_bounty_pool !== '0' ? s.available_bounty_pool : '2000000000000000000';
-    const val = Number(weiToGen(rawPool));
+    const val = Number(weiToGen(s.available_bounty_pool || '0'));
     return acc + (isNaN(val) ? 0 : val);
   }, 0);
 
@@ -925,7 +915,7 @@ export default function App() {
                 totalStyles: styles.length,
                 totalCases: cases.length,
                 totalEnforcements: cases.filter(c => c.status === 'ENFORCED').length,
-                totalEscrow: totalEscrowNum.toFixed(1) + ' ' + activeCurrency
+                totalEscrow: totalEscrowNum.toFixed(2) + ' ' + activeCurrency
               }}
             />
 

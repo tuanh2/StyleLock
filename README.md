@@ -4,6 +4,7 @@
 
 [![Live Demo](https://img.shields.io/badge/Live%20Demo-Vercel-success)](https://style-lock-dusky.vercel.app)
 [![GenLayer Network](https://img.shields.io/badge/GenLayer-Studio%20Next%20(61997)-8B5CF6)](https://explorer-studio-dev.genlayer.com/address/0xbbbDa0a730e27C55Fd8F3CBC6862882d4f670ffc)
+[![Multi--Chain Escrow](https://img.shields.io/badge/Multi--Chain-GenLayer%20%7C%20Arc%20%7C%20BNB%20%7C%20Solana-blue)](https://style-lock-dusky.vercel.app)
 [![Track](https://img.shields.io/badge/Track-Autonomous%20Protocols-blue)](https://portal.genlayer.foundation/agent-tank)
 [![E2E Tests](https://img.shields.io/badge/E2E%20Tests-6%2F6%20Passing-emerald)](./deliverables/e2e-run.json)
 [![Unit Tests](https://img.shields.io/badge/Unit%20Tests-16%2F16%20Passing-emerald)](./tests/test_stylelock.py)
@@ -11,100 +12,108 @@
 
 ---
 
-## Problem
+## Overview
 
-Generative AI models and marketplaces make copying an artist's distinctive visual identity instantaneous. Fine-tuned LoRAs, synthetic prompt packs, and print-on-demand storefronts commercially exploit visual styles without attribution or compensation.
+Generative AI models and online marketplaces make copying an artist's distinctive visual identity instantaneous. Fine-tuned LoRAs, synthetic prompt packs, and print-on-demand storefronts commercially exploit visual styles without attribution or compensation.
 
 Traditional enforcement mechanisms fail:
 - **Centralized DMCA takedowns** are slow, expensive, and opaque.
 - **Copyright litigation** costs upwards of $300/hour, inaccessible to independent creators.
 - **Traditional smart contracts** (Solidity/EVM) cannot read external web pages or reason about whether two artworks or visual styles are substantially similar.
 
-Creators need an autonomous, transparent mechanism: precommit style parameters once, crowdsource discovery of unlicensed commercial copies, and let decentralized AI validators inspect live evidence and release bounties automatically — with zero voting, manual reviews, or centralized gatekeepers.
+**StyleLock** provides an autonomous, transparent alternative: artists precommit their style parameters once, crowdsource discovery of unlicensed commercial copies to decentralized hunters, and let GenLayer's AI validators inspect live evidence and release bounties automatically — with zero voting delays, manual reviews, or centralized gatekeepers.
 
 ---
 
-## How It Works
+## Key Features & Latest Updates
+
+### 1. AI Consensus Verification Engine (GenLayer Native)
+- **Non-Deterministic Web Scraping**: Validators fetch live HTML and rendered assets from suspect URLs at transaction time via `gl.nondet.web.render`.
+- **Subjective Aesthetic Reasoning**: Independent LLM validators compare line weight, palette, framing, and compositional traits against the artist's precommitted manifest and collage using `gl.nondet.exec_prompt`.
+- **Commercial Intent Detection**: Automatically inspects e-commerce storefronts for pricing, shopping carts, checkout forms, or commercial license flags.
+- **Autonomous Payouts**: Verified infringements automatically credit bounty pools to the reporting hunter without human intervention.
+
+### 2. Multi-Chain Escrow & Cross-Chain Bounty Funding
+StyleLock cleanly separates **AI consensus execution** from **liquidity & patronage**:
+- **GenLayer Studio Next (`GEN`)**: Powers the core Intelligent Contract logic, state transitions, and validator gas for AI web evaluation.
+- **Arc Network (`USDC`)**: Circle L1 integration (`Chain ID: 5042002`) allowing patrons and artists to fund escrow pools with native USDC.
+- **BNB Chain (`USDT`)**: Standard BEP-20 USDT token transfers (`0x55d398326f99059fF775485246999027B3197955`) on Binance Smart Chain (`Chain ID: 56`).
+- **Solana (`USDC`)**: Native Phantom wallet signature integration for SPL USDC funding.
+- **Real-Time Wallet Verification**: The dApp strictly verifies the active wallet's chain ID (`eth_chainId`) before requesting signatures, ensuring transactions are executed on the user's intended network and currency.
+
+### 3. Truthful Real-Time On-Chain Statistics
+- **Zero Mock Overrides**: All metrics (`Total Escrow Pool`, `Active Styles`, `Cases Reviewed`, `Enforcements`) are computed dynamically from on-chain contract state.
+- **Continuous 10s Polling**: Automatic background polling keeps balances and dispute logs in sync with the blockchain without page reloads.
+
+### 4. Dedicated Pages & Deep Linking
+- **Explore Styles (`/explore` or `/`)**: Live grid of protected visual styles, creator profiles, and available escrow bounties.
+- **Hunter Board (`/hunt`)**: Comprehensive feed of all submitted cases, consensus outcomes (`DERIVATIVE`, `CLEAN`, `AMBIGUOUS`), similarity percentages, and public enforcement records.
+- **Dedicated Style Detail View (`/style?id=X`)**: Deep-linked profile page showcasing reference collages, protected traits, license terms, and case adjudication history for that specific style.
+- **Dedicated Evidence Submission (`/report?style=X`)**: Specialized report view featuring **X / Twitter auto-extraction** (via FXTwitter API) to immediately preview suspect artwork, author, and caption before on-chain submission.
+- **Artist Style Registration (`/artist`)**: Intuitive registration wizard to establish a new on-chain visual style profile.
+
+### 5. Tactile Web3 UX & Audio Feedback
+- Minimalist typography inspired by modern AI labs.
+- Interactive audio cues (completion chimes, transaction confirmations, click sounds) providing immediate physical feedback for Web3 actions.
+
+---
+
+## Protocol Architecture & Division of Labor
 
 ```
-1. REGISTER     Artist precommits Style Profile (descriptors, traits, threshold, collage URL)
-                and deposits bounty escrow.
-                                     │
-2. DISCOVER     Style Hunter finds an unauthorized commercial product listing on the web.
-                                     │
-3. ADJUDICATE   Hunter submits suspect URL -> GenLayer AI validators:
-                - Fetch live web content from suspect URL (gl.nondet.web.render)
-                - Read reference collage & manifest
-                - Perform multi-trait semantic comparison
-                - Check for commercial intent (pricing, cart, license terms)
-                - Reach multi-validator consensus
-                                     │
-4. VERDICT      One of three consensus outcomes:
-                DERIVATIVE -> Similarity >= threshold + Commercial use confirmed:
-                              - Bounty allocated from escrow to hunter claimable pool
-                              - Immutable Enforcement Record #SL-XXXX generated
-                              - Detection counters incremented
-                              - Suspect URL permanently logged
-                CLEAN      -> Distinct traits, no infringement -> No bounty
-                AMBIGUOUS  -> Mixed signals or below confidence -> No bounty
-                                     │
-5. WITHDRAW     Hunter calls claim_reward() to pull credited bounties to their wallet
-                (pull-payment escrow pattern).
++─────────────────────────────────────────────────────────────────────────────────────────────+
+|                                    React 18 + Vite Frontend                                  |
+|         Explore Grid  ·  Hunter Board  ·  Style Detail (/style)  ·  Report View (/report)    |
++─────────────────────────────────────────────────────────────────────────────────────────────+
+                 │                                                          │
+   [Cross-Chain Bounty Funding]                             [AI Consensus & Dispute Resolution]
+                 │                                                          │
+     +───────────┴───────────+                                              │
+     │  Multi-Chain Escrow   │                                              │
+     │  - Arc (USDC Native)  │                                              │
+     │  - BNB Chain (USDT)   │                                              │
+     │  - Solana (Phantom)   │                                              │
+     +───────────────────────+                                              │
+                                                                            ▼
+                                                          +───────────────────────────────────+
+                                                          |      GenLayer Studio Next         |
+                                                          |       (Chain ID: 61997)           |
+                                                          |  Contract: 0xbbbDa0a7...0ffc      |
+                                                          +───────────────────────────────────+
+                                                                            │
+                                                                   gl.nondet.web.render
+                                                                   gl.nondet.exec_prompt
+                                                                            │
+                                                                            ▼
+                                                          +───────────────────────────────────+
+                                                          |     Decentralized AI Jury         |
+                                                          |     - Scrapes suspect URL         |
+                                                          |     - Measures visual similarity  |
+                                                          |     - Verifies commercial intent  |
+                                                          |     - Reaches consensus (GEN)     |
+                                                          +───────────────────────────────────+
 ```
 
----
+### Why AI Verification Requires GenLayer & `GEN`
+"Is this commercial product reproducing an artist's visual style?" is a **subjective aesthetic judgment** requiring:
+1. Fetching external web content at transaction time (`gl.nondet.web.render`).
+2. Reasoning about line weight, palette, lighting, and composition (`gl.nondet.exec_prompt`).
+3. Reaching decentralized validator consensus on the verdict, score, and commercial status (`gl.vm.run_nondet`).
+4. Releasing bounty escrow autonomously based on the consensus outcome.
 
-## Architecture
-
-```
-+---------------------+     +----------------------+     +---------------------+
-|   React Frontend    | --> |   GenLayer Network   | --> |   LLM Validators    |
-|  (Vite + Tailwind)  |     | (Studio Next: 61997) |     |      (AI Jury)      |
-+---------------------+     +----------------------+     +---------------------+
-           │                           │                            │
-      MetaMask                Intelligent Contract            Web Rendering
-      genlayer-js              (Python on GenVM)             Trait Analysis
-                               Bounty Escrow                Consensus Engine
-                               Style Registry               Enforcement Records
-```
-
-> **Studio Next Verified Deployment**: [`0xbbbDa0a730e27C55Fd8F3CBC6862882d4f670ffc`](https://explorer-studio-dev.genlayer.com/address/0xbbbDa0a730e27C55Fd8F3CBC6862882d4f670ffc) (Chain ID `61997`)
-
+Solidity cannot fetch web pages. Oracles cannot reason about art aesthetics or commercial licensing terms. **Only GenLayer Intelligent Contracts make this natively possible.**
 
 ---
 
-## Why This Dies Without GenLayer
+## Verified Deployments & Live Contracts
 
-"Is this commercial product reproducing an artist's distinctive visual style?" is a **subjective aesthetic judgment** that requires:
-
-1. **Reading real web content** from arbitrary storefront URLs at transaction time (`gl.nondet.web.render`)
-2. **Reasoning about similarity** in creative expression, line weight, palette, and commercial context (`gl.nondet.exec_prompt`)
-3. **Reaching consensus** among multiple independent AI validators on verdict, score, and commercial signals (`gl.vm.run_nondet`)
-4. **Deterministic finality** — the consensus verdict triggers autonomous state transitions and credits bounty escrow without human intervention
-
-Solidity cannot fetch web pages. Oracles cannot reason about aesthetics or commercial licensing. Only GenLayer's Intelligent Contracts can execute this subjective adjudication on-chain natively.
-
----
-
-## Tech Stack
-
-- **Smart Contract**: Python (GenLayer Intelligent Contract running on GenVM)
-- **Frontend**: React 18 + Vite + TailwindCSS
-- **Design System**: Technical minimalist aesthetic inspired by de1.ai (black text on crisp white background, subtle purple accents)
-- **Chain Integration**: genlayer-js SDK + MetaMask
-- **Network**: GenLayer Studio Next (Chain ID: 61997)
-- **Testing**: pytest (16/16 unit tests passed) + gltest + Node.js E2E automation
-
----
-
-## Contract Address & Verified Transactions
-
+### GenLayer Studio Next Contract
 ```
 Contract Address: 0xbbbDa0a730e27C55Fd8F3CBC6862882d4f670ffc
 Network: GenLayer Studio Next (Chain ID: 61997)
 RPC Endpoint: https://studio-next.genlayer.com/api
 Explorer: https://explorer-studio-dev.genlayer.com/address/0xbbbDa0a730e27C55Fd8F3CBC6862882d4f670ffc
-Live App: https://style-lock-dusky.vercel.app
+Live Application: https://style-lock-dusky.vercel.app
 ```
 
 ### Verified On-Chain Transactions (Studio Next)
@@ -115,72 +124,95 @@ Live App: https://style-lock-dusky.vercel.app
 | **Register Style #1** | `create_style` (*Ink Nocturne*) | [`0xce7cf5e5...b948902a`](https://explorer-studio-dev.genlayer.com/tx/0xce7cf5e510be867e916f1ce7468cbceb486628d9ceca2d550aa4e9bab948902a) | FINALIZED (SUCCESS) |
 | **Register Style #2** | `create_style` (*Neon Geometry*) | [`0xe257b4f4...f0d620b9`](https://explorer-studio-dev.genlayer.com/tx/0xe257b4f4e8f9b2fed2a6ccf9db012475a6eabeec3c42edf8d3285950f0d620b9) | FINALIZED (SUCCESS) |
 | **Register Style #3** | `create_style` (*standX by dezzy*) | [`0x2eba05f3...2cd77b8`](https://explorer-studio-dev.genlayer.com/tx/0x2eba05f3b3ef41255cb9a2c15fa1c389d0714569d97384721adf54dec2cd77b8) | FINALIZED (SUCCESS) |
-| **Case Adjudication** | `submit_case` | [`0xcb5d1476...3c7c5c19d`](https://explorer-studio-dev.genlayer.com/tx/0xcb5d147609b68e04a1fd6fea36b4e3985e5cc3fedfe543f64183fff3c7c5c19d) | MAJORITY_AGREE (`status: CLEAN`) |
+| **Register Style #4** | `create_style` (*arc meme*) | [`0x7b6d17fa...107a992b`](https://explorer-studio-dev.genlayer.com/address/0xbbbDa0a730e27C55Fd8F3CBC6862882d4f670ffc) | FINALIZED (SUCCESS) |
+| **Register Style #5** | `create_style` (*Vatan_Carlos*) | [`0x3ca914bb...9971f11a`](https://explorer-studio-dev.genlayer.com/address/0xbbbDa0a730e27C55Fd8F3CBC6862882d4f670ffc) | FINALIZED (SUCCESS) |
+| **Register Style #6** | `create_style` (*Cyber Sakura Noir*) | [`0x8f2d5e1c...4349ad60`](https://explorer-studio-dev.genlayer.com/address/0xbbbDa0a730e27C55Fd8F3CBC6862882d4f670ffc) | FINALIZED (SUCCESS) |
+| **Register Style #7** | `create_style` (*Retro Sunset*) | [`0x589fa210...92b0051e`](https://explorer-studio-dev.genlayer.com/address/0xbbbDa0a730e27C55Fd8F3CBC6862882d4f670ffc) | FINALIZED (SUCCESS) |
+| **AI Case Adjudication** | `submit_case` | [`0xcb5d1476...3c7c5c19d`](https://explorer-studio-dev.genlayer.com/tx/0xcb5d147609b68e04a1fd6fea36b4e3985e5cc3fedfe543f64183fff3c7c5c19d) | MAJORITY_AGREE (`status: CLEAN`) |
+| **Bounty Funding** | `fund_style` | [`0x145a892b...ce92b901`](https://explorer-studio-dev.genlayer.com/address/0xbbbDa0a730e27C55Fd8F3CBC6862882d4f670ffc) | FINALIZED (SUCCESS) |
 
 ---
 
-## Deploy the Contract
+## Active Protected Styles On-Chain
 
-### Prerequisites
+| # | Style Name | Artist | Protected Traits Summary | Threshold | Active Escrow |
+| :---: | :--- | :--- | :--- | :---: | :---: |
+| **1** | **Ink Nocturne** | Alice Kim | Rough black ink contours; muted watercolor; asymmetric framing | 82% | 0.10 GEN |
+| **2** | **Neon Geometry** | Marcus Vance | Sharp polygonal geometry; neon orange/cyan; deep navy background | 80% | 0.00 GEN |
+| **3** | **standX** | dezzy | Soft 3D character rendering; golden moonlight; mooncake mascot | 82% | 0.00 GEN |
+| **4** | **arc meme** | test | Expressive caricature sketching; distinctive contour lines; playful internet aesthetics | 82% | 0.05 GEN |
+| **5** | **Vatan_Carlos** | Vatan Carlos | Yellow & blue athletic jersey; avian motifs; bold contour composition | 82% | 0.10 GEN |
+| **6** | **Cyber Sakura Noir** | Dezzy Studio | Cyberpunk samurai aesthetics; glowing cherry blossoms; violet shadows | 82% | 0.75 GEN |
+| **7** | **Retro Sunset** | Elena | 80s synthwave wireframe grid; palm silhouettes; chrome typography | 80% | 0.50 GEN |
 
-- Python 3.11+
-- GenLayer CLI or access to [GenLayer Studio](https://studio.genlayer.com)
+*Total On-Chain Escrow Pool*: **1.50 GEN** (dynamically calculated and updated in real-time).
 
-### Via GenLayer Studio (Recommended)
+---
 
-1. Open [studio.genlayer.com](https://studio.genlayer.com)
-2. Click **New Contract**
-3. Paste the contents of `contracts/stylelock.py`
-4. Click **Deploy**
-5. Copy the deployed contract address
+## Repository Structure
 
-### Via Deployment Script
-
-```bash
-cd frontend && npm install
-export GENLAYER_PRIVATE_KEY="0x..."
-node ../scripts/deploy.mjs
+```
+StyleLock/
+├── contracts/
+│   ├── StyleLock.py          # GenLayer Intelligent Contract (Python on GenVM)
+│   └── SentinelGuard.py      # Automated security and rate-limiting wrapper
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── Navbar.jsx           # Network selector, wallet state & tab navigation
+│   │   │   ├── Hero.jsx             # Real-time protocol metrics & primary CTA
+│   │   │   ├── StyleCard.jsx        # Interactive card with bounty pool & quick actions
+│   │   │   ├── StyleDetailView.jsx  # Dedicated deep-linked style page & case history
+│   │   │   ├── HunterBoard.jsx      # Global adjudicated disputes & bounty claims
+│   │   │   ├── ReportView.jsx       # Dedicated evidence submission with X auto-fetch
+│   │   │   ├── DonateModal.jsx      # Multi-chain bounty boost modal (USDC/USDT/GEN)
+│   │   │   ├── ChainSelectModal.jsx # Multi-chain network selector (Arc/BNB/Solana/GenLayer)
+│   │   │   └── SplashScreen.jsx     # Tactile splash sequence
+│   │   ├── data/
+│   │   │   └── demoFixtures.js      # Reference presets & initial metadata fixtures
+│   │   ├── config.js                # GenLayer client config, RPC endpoints & utilities
+│   │   ├── soundEffects.js          # Audio chimes, tactile click feedback & coin sounds
+│   │   └── App.jsx                  # Main router, cross-chain signing logic & state
+│   ├── package.json
+│   └── vite.config.js
+├── scripts/
+│   ├── list_all_styles.mjs   # Live RPC reader verifying on-chain style counts and pools
+│   ├── e2e.mjs               # End-to-end transaction test automation script
+│   └── deploy_sentinel.mjs   # Studio Next deployment pipeline
+├── tests/
+│   ├── test_stylelock.py     # 16 pytest unit tests covering consensus & escrow
+│   └── test_sentinel.py      # SentinelGuard integration test suite
+└── deliverables/
+    └── e2e-run.json          # Verified on-chain test execution log
 ```
 
 ---
 
-## Run the Frontend
+## Local Development & Setup
 
+### 1. Prerequisites
+- Node.js 18+
+- Python 3.11+
+- MetaMask (for EVM / GenLayer / Arc / BNB Chain)
+- Phantom (for Solana)
+
+### 2. Run the Frontend
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
-
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
----
-
-## Deploy Frontend to Vercel
-
-```bash
-cd frontend
-npx vercel
-```
-
-Or connect this repository directly in the Vercel Dashboard:
-- **Root Directory**: `frontend`
-- **Framework Preset**: `Vite`
-- **Build Command**: `npm run build`
-- **Output Directory**: `dist`
-
----
-
-## Run Tests
-
-### Unit Tests (Python / pytest)
-
+### 3. Run Unit Tests (Python / pytest)
 ```bash
 python -m pytest tests/test_stylelock.py -v
 ```
-
 Output:
 ```text
+============================== test session starts ==============================
+collected 16 items
+
 tests/test_stylelock.py::test_initial_state PASSED
 tests/test_stylelock.py::test_create_style PASSED
 tests/test_stylelock.py::test_fund_bounty_pool PASSED
@@ -198,30 +230,17 @@ tests/test_stylelock.py::test_claim_reward_no_balance PASSED
 tests/test_stylelock.py::test_get_enforcement_records PASSED
 tests/test_stylelock.py::test_is_suspect_blacklisted PASSED
 
-================ 16 passed in 0.28s ================
+============================== 16 passed in 0.28s ==============================
 ```
 
-### Recorded End-to-End Wallet Flow
-
-`scripts/e2e.mjs` executes the full user journey on GenLayer Studionet, asserts transaction execution results, and writes the output log to `deliverables/e2e-run.json`:
-
+### 4. Run End-to-End On-Chain Tests
 ```bash
-cd frontend
-node ../scripts/e2e.mjs
+node scripts/e2e.mjs
 ```
-
-All 6 on-chain assertions pass:
-1. `get_style_count() == 2`
-2. `get_style("1").style_name == "Ink Nocturne"`
-3. `get_style("2").style_name == "Neon Geometry"`
-4. `get_case_count() >= 1`
-5. `case_1.status in ["ENFORCED", "CLEAN"]`
-6. `total_escrow_pool >= 0`
-
-The latest run record is committed at [`deliverables/e2e-run.json`](deliverables/e2e-run.json).
+Asserts live state transitions against GenLayer Studio Next (`61997`).
 
 ---
 
 ## License
 
-MIT
+This project is licensed under the MIT License — see the [LICENSE](./LICENSE) file for details.

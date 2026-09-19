@@ -121,31 +121,9 @@ Live Application: https://style-lock-dusky.vercel.app
 | Action | Function | Transaction Hash | Result |
 | :--- | :--- | :--- | :--- |
 | **Contract Deploy** | `deployContract` | [`0x19242ce7...be871861`](https://explorer-studio-dev.genlayer.com/tx/0x19242ce75519f4e9b023f72e20595608cec54137c16fc09b86965327be871861) | FINALIZED (SUCCESS) |
-| **Register Style #1** | `create_style` (*Ink Nocturne*) | [`0xce7cf5e5...b948902a`](https://explorer-studio-dev.genlayer.com/tx/0xce7cf5e510be867e916f1ce7468cbceb486628d9ceca2d550aa4e9bab948902a) | FINALIZED (SUCCESS) |
-| **Register Style #2** | `create_style` (*Neon Geometry*) | [`0xe257b4f4...f0d620b9`](https://explorer-studio-dev.genlayer.com/tx/0xe257b4f4e8f9b2fed2a6ccf9db012475a6eabeec3c42edf8d3285950f0d620b9) | FINALIZED (SUCCESS) |
-| **Register Style #3** | `create_style` (*standX by dezzy*) | [`0x2eba05f3...2cd77b8`](https://explorer-studio-dev.genlayer.com/tx/0x2eba05f3b3ef41255cb9a2c15fa1c389d0714569d97384721adf54dec2cd77b8) | FINALIZED (SUCCESS) |
-| **Register Style #4** | `create_style` (*arc meme*) | [`0x7b6d17fa...107a992b`](https://explorer-studio-dev.genlayer.com/address/0xbbbDa0a730e27C55Fd8F3CBC6862882d4f670ffc) | FINALIZED (SUCCESS) |
-| **Register Style #5** | `create_style` (*Vatan_Carlos*) | [`0x3ca914bb...9971f11a`](https://explorer-studio-dev.genlayer.com/address/0xbbbDa0a730e27C55Fd8F3CBC6862882d4f670ffc) | FINALIZED (SUCCESS) |
-| **Register Style #6** | `create_style` (*Cyber Sakura Noir*) | [`0x8f2d5e1c...4349ad60`](https://explorer-studio-dev.genlayer.com/address/0xbbbDa0a730e27C55Fd8F3CBC6862882d4f670ffc) | FINALIZED (SUCCESS) |
-| **Register Style #7** | `create_style` (*Retro Sunset*) | [`0x589fa210...92b0051e`](https://explorer-studio-dev.genlayer.com/address/0xbbbDa0a730e27C55Fd8F3CBC6862882d4f670ffc) | FINALIZED (SUCCESS) |
+| **Register Style Profile** | `create_style` | [`0xce7cf5e5...b948902a`](https://explorer-studio-dev.genlayer.com/tx/0xce7cf5e510be867e916f1ce7468cbceb486628d9ceca2d550aa4e9bab948902a) | FINALIZED (SUCCESS) |
 | **AI Case Adjudication** | `submit_case` | [`0xcb5d1476...3c7c5c19d`](https://explorer-studio-dev.genlayer.com/tx/0xcb5d147609b68e04a1fd6fea36b4e3985e5cc3fedfe543f64183fff3c7c5c19d) | MAJORITY_AGREE (`status: CLEAN`) |
-| **Bounty Funding** | `fund_style` | [`0x145a892b...ce92b901`](https://explorer-studio-dev.genlayer.com/address/0xbbbDa0a730e27C55Fd8F3CBC6862882d4f670ffc) | FINALIZED (SUCCESS) |
-
----
-
-## Active Protected Styles On-Chain
-
-| # | Style Name | Artist | Protected Traits Summary | Threshold | Active Escrow |
-| :---: | :--- | :--- | :--- | :---: | :---: |
-| **1** | **Ink Nocturne** | Alice Kim | Rough black ink contours; muted watercolor; asymmetric framing | 82% | 0.10 GEN |
-| **2** | **Neon Geometry** | Marcus Vance | Sharp polygonal geometry; neon orange/cyan; deep navy background | 80% | 0.00 GEN |
-| **3** | **standX** | dezzy | Soft 3D character rendering; golden moonlight; mooncake mascot | 82% | 0.00 GEN |
-| **4** | **arc meme** | test | Expressive caricature sketching; distinctive contour lines; playful internet aesthetics | 82% | 0.05 GEN |
-| **5** | **Vatan_Carlos** | Vatan Carlos | Yellow & blue athletic jersey; avian motifs; bold contour composition | 82% | 0.10 GEN |
-| **6** | **Cyber Sakura Noir** | Dezzy Studio | Cyberpunk samurai aesthetics; glowing cherry blossoms; violet shadows | 82% | 0.75 GEN |
-| **7** | **Retro Sunset** | Elena | 80s synthwave wireframe grid; palm silhouettes; chrome typography | 80% | 0.50 GEN |
-
-*Total On-Chain Escrow Pool*: **1.50 GEN** (dynamically calculated and updated in real-time).
+| **Bounty Escrow Funding** | `fund_style` | [`0x145a892b...ce92b901`](https://explorer-studio-dev.genlayer.com/address/0xbbbDa0a730e27C55Fd8F3CBC6862882d4f670ffc) | FINALIZED (SUCCESS) |
 
 ---
 

@@ -36,7 +36,7 @@ export default function StyleDetailsModal({ isOpen, onClose, style, cases = [], 
         <div className="mb-6">
           <div className="flex items-center gap-2 mb-1">
             <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-purple-50 text-purple-700 border border-purple-200 font-semibold">
-              Style #{style.style_id}
+              Protected Style
             </span>
             <span className="text-[11px] font-mono text-zinc-400">
               On-Chain Profile

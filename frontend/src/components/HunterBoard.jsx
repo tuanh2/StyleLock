@@ -179,7 +179,7 @@ export default function HunterBoard({ styles, cases = [], onSelectStyle, onOpenS
                         onClick={() => matchedStyle && onSelectStyle && onSelectStyle(matchedStyle)}
                         className="font-semibold text-purple-700 hover:text-purple-900 hover:underline cursor-pointer"
                       >
-                        {c.style_name || `Style #${c.style_id}`}
+                        {c.style_name || 'Protected Style'}
                       </button>
                     </div>
 

@@ -95,7 +95,7 @@ export default function SubmitModal({ isOpen, onClose, selectedStyle, styles, on
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between gap-2">
                 <h3 className="text-sm font-bold text-zinc-950 truncate">
-                  Style #{currentStyle.style_id} — {currentStyle.style_name}
+                  {currentStyle.style_name}
                 </h3>
                 <span className="text-[11px] font-mono font-bold text-purple-600 bg-purple-100/70 px-2 py-0.5 rounded shrink-0">
                   {weiToGen(currentStyle.bounty_per_case_wei)} {currency} Bounty
@@ -128,7 +128,7 @@ export default function SubmitModal({ isOpen, onClose, selectedStyle, styles, on
             >
               {styles.map(s => (
                 <option key={s.style_id} value={s.style_id}>
-                  Style #{s.style_id} — {s.style_name} ({s.artist_display_name})
+                  {s.style_name} ({s.artist_display_name})
                 </option>
               ))}
             </select>

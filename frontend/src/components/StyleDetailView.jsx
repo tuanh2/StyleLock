@@ -23,11 +23,11 @@ export default function StyleDetailView({ style, cases = [], onBack, onReport, o
         </button>
 
         <div className="flex items-center gap-2 font-mono text-xs text-zinc-500">
-          <span className="px-2 py-0.5 rounded bg-purple-50 text-purple-700 border border-purple-200 font-semibold">
-            Style #{style.style_id}
+          <span className="px-2.5 py-0.5 rounded bg-purple-50 text-purple-700 border border-purple-200 font-semibold">
+            Protected Style
           </span>
           <span className="text-zinc-300">•</span>
-          <span>On-Chain Verified Style</span>
+          <span>On-Chain Verified</span>
         </div>
       </div>
 

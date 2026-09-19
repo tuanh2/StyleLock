@@ -143,7 +143,7 @@ export default function ReportView({ selectedStyle, styles, onBack, onSubmit, is
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between gap-2 flex-wrap">
                 <h3 className="text-base sm:text-lg font-bold text-zinc-950 truncate">
-                  Style #{currentStyle.style_id} — {currentStyle.style_name}
+                  {currentStyle.style_name}
                 </h3>
                 <span className="text-xs font-mono font-bold text-purple-700 bg-purple-100/80 px-2.5 py-1 rounded-full shrink-0">
                   {weiToGen(currentStyle.bounty_per_case_wei)} {currency} Bounty

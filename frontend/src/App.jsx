@@ -534,6 +534,8 @@ export default function App() {
   const handleDonate = async (styleId, amountStr) => {
     const chain = connectedChain || CHAINS[0];
     const curr = activeCurrency; // 'USDC', 'USDT', or 'GEN'
+    const targetStyle = styles.find(s => String(s.style_id) === String(styleId));
+    const styleLabel = targetStyle?.style_name ? `"${targetStyle.style_name}"` : 'Artwork';
 
     // 1. If on GenLayer Studio (Devnet/Test) -> use GenLayer contract with GEN
     if (chain.key === 'genlayer') {
@@ -561,7 +563,7 @@ export default function App() {
 
         const hashStr = typeof hash === 'string' ? hash : String(hash);
         setTxBanner({
-          message: `Donating ${amountStr} GEN to Style #${styleId} Bounty Pool on GenLayer...`,
+          message: `Donating ${amountStr} GEN to ${styleLabel} Bounty Pool on GenLayer...`,
           hash: hashStr,
           loading: true
         });
@@ -592,7 +594,7 @@ export default function App() {
 
         playTingTing();
         setTxBanner({
-          message: `Successfully boosted Style #${styleId} Bounty Pool by +${amountStr} GEN on GenLayer Testnet!`,
+          message: `Successfully boosted ${styleLabel} Bounty Pool by +${amountStr} GEN on GenLayer Testnet!`,
           hash: hashStr,
           loading: false
         });
@@ -631,7 +633,7 @@ export default function App() {
         });
 
         // Request signature in Phantom for the USDC bounty donation
-        const messageText = `[StyleLock Protocol]\nBoost Style #${styleId} Bounty Pool\nAmount: ${amountStr} USDC\nNetwork: Solana Mainnet\nDate: ${new Date().toISOString()}`;
+        const messageText = `[StyleLock Protocol]\nBoost ${styleLabel} Bounty Pool\nAmount: ${amountStr} USDC\nNetwork: Solana Mainnet\nDate: ${new Date().toISOString()}`;
         const encoded = new TextEncoder().encode(messageText);
         try {
           await phantom.signMessage(encoded, 'utf8');
@@ -661,7 +663,7 @@ export default function App() {
 
         playTingTing();
         setTxBanner({
-          message: `Successfully boosted Style #${styleId} Bounty Pool by +${amountStr} USDC on Solana!`,
+          message: `Successfully boosted ${styleLabel} Bounty Pool by +${amountStr} USDC on Solana!`,
           loading: false
         });
         setTimeout(() => setTxBanner(null), 6000);
@@ -787,7 +789,7 @@ export default function App() {
 
       playTingTing();
       setTxBanner({
-        message: `Successfully boosted Style #${styleId} Bounty Pool by +${amountStr} ${curr} on ${chain.name}!`,
+        message: `Successfully boosted ${styleLabel} Bounty Pool by +${amountStr} ${curr} on ${chain.name}!`,
         hash: txHash && txHash.startsWith('0x') && txHash.length === 66 ? txHash : null,
         loading: false
       });

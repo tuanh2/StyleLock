@@ -46,7 +46,7 @@ export default function CaseView({ caseData, onBack, onClaimReward, isClaiming, 
               </span>
             </div>
             <p className="text-xs text-zinc-600 mt-0.5">
-              Subject: Style #{caseData.style_id} ({caseData.style_name})
+              Subject: {caseData.style_name}
             </p>
           </div>
 

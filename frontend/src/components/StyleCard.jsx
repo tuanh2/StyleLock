@@ -24,12 +24,6 @@ export default function StyleCard({ style, onSelect, onReport, onDonate, currenc
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
         
-        {/* Style ID Badge */}
-        <div className="absolute top-3 left-3">
-          <span className="px-2 py-0.5 rounded text-[11px] font-mono bg-white/90 border border-zinc-200 text-zinc-900 backdrop-blur-sm font-semibold">
-            Style #{style.style_id}
-          </span>
-        </div>
 
         {/* Bounty Tag */}
         <div className="absolute top-3 right-3">

@@ -74,7 +74,7 @@ export default function DonateModal({ isOpen, onClose, style, onDonate, isDonati
           <div>
             <div className="flex items-center gap-2">
               <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-purple-50 text-purple-700 border border-purple-200 font-semibold">
-                Style #{style.style_id}
+                Protected Artwork
               </span>
               <span className="text-xs font-mono text-zinc-400">Support Artist</span>
             </div>

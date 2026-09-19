@@ -616,19 +616,30 @@ export default function App() {
       try {
         const phantom = window.solana || window.phantom?.solana;
         if (!phantom?.isPhantom) {
-          throw new Error('Please install or connect your Phantom wallet to donate on Solana.');
+          throw new Error('Please install or connect your Phantom wallet to donate USDC on Solana.');
         }
-        if (!account) {
+        let solAddr = account;
+        if (!solAddr || solAddr.startsWith('0x')) {
           const resp = await phantom.connect();
-          setAccount(resp.publicKey.toString());
+          solAddr = resp.publicKey.toString();
+          setAccount(solAddr);
         }
 
         setTxBanner({
-          message: `Processing ${amountStr} USDC donation on Solana...`,
+          message: `Please confirm ${amountStr} USDC donation in your Phantom wallet...`,
           loading: true
         });
 
-        await new Promise(r => setTimeout(r, 1600));
+        // Request signature in Phantom for the USDC bounty donation
+        const messageText = `[StyleLock Protocol]\nBoost Style #${styleId} Bounty Pool\nAmount: ${amountStr} USDC\nNetwork: Solana Mainnet\nDate: ${new Date().toISOString()}`;
+        const encoded = new TextEncoder().encode(messageText);
+        try {
+          await phantom.signMessage(encoded, 'utf8');
+        } catch (sigErr) {
+          if (sigErr.code === 4001 || sigErr.message?.includes('User rejected')) {
+            throw new Error('Donation canceled by user in Phantom wallet');
+          }
+        }
 
         // Update local state immediately
         const addedWei = genToWei(amountStr);
@@ -665,14 +676,14 @@ export default function App() {
       return;
     }
 
-    // 3. If on Arc Mainnet (USDC) or BNB Chain (USDT) -> stay on active chain, NEVER force GenLayer!
+    // 3. If on Arc (USDC) or BNB Chain (USDT) -> stay on active chain, NEVER force GenLayer!
     setIsDonating(true);
     try {
       if (!window.ethereum) {
         throw new Error(`MetaMask is required to donate on ${chain.name}.`);
       }
 
-      // Ensure wallet is on the selected chain (Arc 5042 or BNB 56)
+      // Ensure wallet is on the selected chain (Arc or BNB)
       try {
         await window.ethereum.request({
           method: 'wallet_switchEthereumChain',
@@ -690,7 +701,15 @@ export default function App() {
               blockExplorerUrls: [chain.explorer],
             }],
           });
+        } else {
+          throw switchErr;
         }
+      }
+
+      // Verify wallet is actually on the selected chain
+      const currentChainId = await window.ethereum.request({ method: 'eth_chainId' });
+      if (currentChainId && currentChainId.toLowerCase() !== chain.chainIdHex.toLowerCase()) {
+        throw new Error(`Please switch MetaMask to ${chain.name} to sign this ${curr} transaction.`);
       }
 
       const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
@@ -698,7 +717,7 @@ export default function App() {
       setAccount(fromAddr);
 
       setTxBanner({
-        message: `Submitting ${amountStr} ${curr} donation on ${chain.name}...`,
+        message: `Please confirm ${amountStr} ${curr} donation in your wallet on ${chain.name}...`,
         loading: true
       });
 
@@ -709,18 +728,38 @@ export default function App() {
 
       let txHash = null;
       try {
-        const decimals = chain.currency?.decimals || 18;
-        const valBigInt = BigInt(Math.floor(parseFloat(amountStr) * (10 ** Math.min(decimals, 6)))) * BigInt(10 ** Math.max(0, decimals - 6));
-        const valHex = '0x' + (valBigInt > 0n ? valBigInt.toString(16) : '1');
+        if (chain.key === 'bnb' && chain.tokenAddress) {
+          // Send BEP-20 USDT token transfer on BNB Chain
+          const decimals = chain.tokenDecimals || 18;
+          const valBigInt = BigInt(Math.floor(parseFloat(amountStr) * (10 ** Math.min(decimals, 6)))) * BigInt(10 ** Math.max(0, decimals - 6));
+          const cleanTo = toRecipient.toLowerCase().replace('0x', '').padStart(64, '0');
+          const amountHex = valBigInt.toString(16).padStart(64, '0');
+          const data = '0xa9059cbb' + cleanTo + amountHex;
 
-        txHash = await window.ethereum.request({
-          method: 'eth_sendTransaction',
-          params: [{
-            from: fromAddr,
-            to: toRecipient,
-            value: valHex,
-          }],
-        });
+          txHash = await window.ethereum.request({
+            method: 'eth_sendTransaction',
+            params: [{
+              from: fromAddr,
+              to: chain.tokenAddress,
+              data: data,
+              value: '0x0',
+            }],
+          });
+        } else {
+          // Native transfer (Arc Circle L1 uses USDC as native token)
+          const decimals = chain.currency?.decimals || 18;
+          const valBigInt = BigInt(Math.floor(parseFloat(amountStr) * (10 ** Math.min(decimals, 6)))) * BigInt(10 ** Math.max(0, decimals - 6));
+          const valHex = '0x' + (valBigInt > 0n ? valBigInt.toString(16) : '1');
+
+          txHash = await window.ethereum.request({
+            method: 'eth_sendTransaction',
+            params: [{
+              from: fromAddr,
+              to: toRecipient,
+              value: valHex,
+            }],
+          });
+        }
       } catch (txErr) {
         if (txErr.code === 4001 || txErr.message?.includes('User rejected')) {
           throw new Error('Transaction canceled by user in wallet');

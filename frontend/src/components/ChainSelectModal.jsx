@@ -3,16 +3,17 @@ import React from "react";
 export const CHAINS = [
   {
     key: "arc",
-    name: "Arc Mainnet",
+    name: "Arc Network",
     subtitle: "Circle L1 · USDC Native",
     color: "blue",
     type: "evm",
     currencySymbol: "USDC",
-    chainId: 5042,
-    chainIdHex: "0x13B2",
-    rpc: "https://rpc.mainnet.arc.io",
-    currency: { name: "USD Coin", symbol: "USDC", decimals: 6 },
-    explorer: "https://explorer.arc.io",
+    chainId: 5042002,
+    chainIdHex: "0x4CEF52",
+    rpc: "https://rpc.testnet.arc.network",
+    currency: { name: "USD Coin", symbol: "USDC", decimals: 18 },
+    explorer: "https://explorer.testnet.arc.io",
+    isTestnet: true,
   },
   {
     key: "bnb",
@@ -24,8 +25,10 @@ export const CHAINS = [
     chainId: 56,
     chainIdHex: "0x38",
     rpc: "https://bsc-dataseed.binance.org/",
-    currency: { name: "Tether USD", symbol: "USDT", decimals: 18 },
+    currency: { name: "BNB", symbol: "BNB", decimals: 18 },
     explorer: "https://bscscan.com",
+    tokenAddress: "0x55d398326f99059fF775485246999027B3197955", // BSC USDT
+    tokenDecimals: 18,
   },
   {
     key: "solana",

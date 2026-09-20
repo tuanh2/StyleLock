@@ -1,11 +1,17 @@
 import React from 'react';
 import { txExplorerUrl, weiToGen } from '../config';
+import { getSimilarityDisplay, getCommercialDisplay, getConfidenceScope, isEvidenceUnreadable, isCommercialUnverified } from '../utils/caseEvaluation';
 
 export default function CaseView({ caseData, onBack, onClaimReward, isClaiming, currency = 'GEN' }) {
   if (!caseData) return null;
 
   const isEnforced = caseData.status === 'ENFORCED';
   const isClean = caseData.status === 'CLEAN';
+  const isAmbiguous = caseData.verdict === 'AMBIGUOUS' || caseData.status === 'AMBIGUOUS';
+
+  const simInfo = getSimilarityDisplay(caseData);
+  const commInfo = getCommercialDisplay(caseData);
+  const confInfo = getConfidenceScope(caseData);
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 animate-fade-in">
@@ -37,15 +43,18 @@ export default function CaseView({ caseData, onBack, onClaimReward, isClaiming, 
       }`}>
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <h2 className="text-lg font-bold text-zinc-950 font-mono">VERDICT: {caseData.verdict}</h2>
               <span className={`text-[10px] font-mono px-2 py-0.5 rounded font-bold ${
                 isEnforced ? 'bg-rose-200 text-rose-800' : isClean ? 'bg-emerald-200 text-emerald-800' : 'bg-amber-200 text-amber-800'
               }`}>
                 {caseData.status}
               </span>
+              <span className="text-[11px] font-mono text-zinc-500">
+                • {confInfo.scopeVi} ({confInfo.percentage}%)
+              </span>
             </div>
-            <p className="text-xs text-zinc-600 mt-0.5">
+            <p className="text-xs text-zinc-600 mt-1">
               Subject: {caseData.style_name}
             </p>
           </div>
@@ -55,7 +64,7 @@ export default function CaseView({ caseData, onBack, onClaimReward, isClaiming, 
               href={txExplorerUrl(caseData.txHash)}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-xs font-mono text-purple-700 hover:text-purple-900 bg-white px-3 py-1.5 rounded-md border border-purple-200 transition-colors"
+              className="text-xs font-mono text-purple-700 hover:text-purple-900 bg-white px-3 py-1.5 rounded-md border border-purple-200 transition-colors shrink-0"
             >
               View On-Chain Consensus ↗
             </a>
@@ -63,28 +72,74 @@ export default function CaseView({ caseData, onBack, onClaimReward, isClaiming, 
         </div>
       </div>
 
+      {/* Ambiguous Data Notice Banner */}
+      {isAmbiguous && (
+        <div className="p-3.5 rounded-xl bg-amber-50/90 border border-amber-200 text-xs font-mono text-amber-950 mb-6 flex items-start gap-2.5">
+          <svg className="w-4 h-4 text-amber-600 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <div className="leading-relaxed">
+            <span className="font-bold block text-amber-900 mb-0.5">Làm rõ về kết luận và độ tin cậy {confInfo.percentage}%:</span>
+            <span>
+              Độ tin cậy <strong>{confInfo.percentage}%</strong> ở đây phản ánh sự đồng thuận tuyệt đối của các node validator rằng <strong>bằng chứng chưa đủ dữ liệu hoặc không đọc được ảnh</strong> để đánh giá (KHÔNG PHẢI là xác định 95% có vi phạm). Tương tự, không đọc được ảnh được ghi nhận là <strong>N/A</strong> (không phải 0% tương đồng) và mục đích thương mại là <strong>Chưa xác minh</strong> (không thể khẳng định là không có).
+            </span>
+          </div>
+        </div>
+      )}
+
       {/* Metrics Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+        {/* Metric 1: Similarity / Style Match */}
         <div className="p-3.5 rounded-xl bg-white border border-zinc-200">
-          <span className="text-[11px] font-mono text-zinc-400 block uppercase">Style Match</span>
-          <span className="text-2xl font-bold text-zinc-950 font-mono mt-1 block">{caseData.similarity}%</span>
-          <span className="text-[10px] text-zinc-400 font-mono">Similarity score</span>
-        </div>
-
-        <div className="p-3.5 rounded-xl bg-white border border-zinc-200">
-          <span className="text-[11px] font-mono text-zinc-400 block uppercase">Commercial Use</span>
-          <span className={`text-2xl font-bold font-mono mt-1 block ${caseData.commercial_use ? 'text-rose-600' : 'text-emerald-600'}`}>
-            {caseData.commercial_use ? 'CONFIRMED' : 'NO'}
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-mono text-zinc-400 block uppercase">Style Match</span>
+            {simInfo.isUnreadable && (
+              <span className="text-[9px] font-mono px-1 py-0.2 bg-amber-100 text-amber-700 rounded font-semibold">
+                No Visual Data
+              </span>
+            )}
+          </div>
+          <span className={`text-2xl font-bold font-mono mt-1 block ${simInfo.isUnreadable ? 'text-amber-600' : 'text-zinc-950'}`}>
+            {simInfo.value}
           </span>
-          <span className="text-[10px] text-zinc-400 font-mono">Storefront check</span>
+          <span className="text-[10px] text-zinc-500 font-mono">
+            {simInfo.isUnreadable ? 'Không đọc được ảnh' : 'Similarity score'}
+          </span>
         </div>
 
+        {/* Metric 2: Commercial Intent */}
         <div className="p-3.5 rounded-xl bg-white border border-zinc-200">
-          <span className="text-[11px] font-mono text-zinc-400 block uppercase">Confidence</span>
-          <span className="text-2xl font-bold text-zinc-950 font-mono mt-1 block">{caseData.confidence}%</span>
-          <span className="text-[10px] text-zinc-400 font-mono">Validator agreement</span>
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-mono text-zinc-400 block uppercase">Commercial Use</span>
+            {commInfo.status === 'UNVERIFIED' && (
+              <span className="text-[9px] font-mono px-1 py-0.2 bg-amber-100 text-amber-700 rounded font-semibold">
+                Pending
+              </span>
+            )}
+          </div>
+          <span className={`text-2xl font-bold font-mono mt-1 block ${commInfo.textColor}`}>
+            {commInfo.label}
+          </span>
+          <span className="text-[10px] text-zinc-500 font-mono">
+            {commInfo.status === 'UNVERIFIED' ? 'Chưa đủ dữ liệu trang' : commInfo.status === 'CONFIRMED' ? 'Phát hiện bán/kiếm tiền' : 'Xác minh phi thương mại'}
+          </span>
         </div>
 
+        {/* Metric 3: Confidence Scope & Meaning */}
+        <div className="p-3.5 rounded-xl bg-white border border-zinc-200">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-mono text-zinc-400 block uppercase">Certainty</span>
+            <span className={`text-[9px] font-mono px-1 py-0.2 rounded font-semibold border ${confInfo.badgeBg}`}>
+              {caseData.verdict}
+            </span>
+          </div>
+          <span className="text-2xl font-bold text-zinc-950 font-mono mt-1 block">{confInfo.percentage}%</span>
+          <span className="text-[10px] text-zinc-600 font-mono block leading-tight truncate" title={confInfo.meaningVi}>
+            {confInfo.scopeVi}
+          </span>
+        </div>
+
+        {/* Metric 4: Bounty Allocation */}
         <div className="p-3.5 rounded-xl bg-white border border-zinc-200">
           <span className="text-[11px] font-mono text-zinc-400 block uppercase">Bounty</span>
           <span className={`text-xl font-bold font-mono mt-1.5 block ${caseData.reward_allocated ? 'text-emerald-600' : 'text-zinc-400'}`}>

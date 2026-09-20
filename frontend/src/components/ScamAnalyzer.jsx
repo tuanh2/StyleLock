@@ -365,8 +365,14 @@ export default function ScamAnalyzer({ account, setAccount, onAddReport }) {
                   <div>
                     <div className="flex items-center gap-2">
                       <span className="font-bold text-lg text-white font-mono">VERDICT: {lastReport.verdict}</span>
-                      <span className="text-xs font-mono px-2 py-0.5 rounded bg-slate-900 border border-slate-700 text-slate-300">
-                        {lastReport.confidence}% Confidence
+                      <span className="text-xs font-mono px-2 py-0.5 rounded bg-slate-900 border border-slate-700 text-slate-300" title="Consensus certainty regarding this specific security verdict">
+                        {lastReport.confidence}% {
+                          lastReport.verdict === 'SCAM_CONFIRMED'
+                            ? 'Threat Certainty'
+                            : lastReport.verdict === 'PAUSE_TARGET'
+                            ? 'Exploit Certainty'
+                            : 'Clean / Safe Certainty'
+                        }
                       </span>
                     </div>
                     <p className="text-xs text-slate-400 font-mono mt-0.5">Report ID #{lastReport.id} | Timestamp: {lastReport.timestamp}</p>

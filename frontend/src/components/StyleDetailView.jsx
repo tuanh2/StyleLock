@@ -1,5 +1,6 @@
 import React from 'react';
 import { weiToGen, txExplorerUrl } from '../config';
+import { getSimilarityDisplay, getCommercialDisplay, getConfidenceScope } from '../utils/caseEvaluation';
 
 export default function StyleDetailView({ style, cases = [], onBack, onReport, onDonate, onSelectCase, currency = 'GEN' }) {
   if (!style) return null;
@@ -232,43 +233,63 @@ export default function StyleDetailView({ style, cases = [], onBack, onReport, o
             {styleCases.map((c) => {
               const isDeriv = c.verdict === 'DERIVATIVE';
               const isClean = c.verdict === 'CLEAN';
+              const sim = getSimilarityDisplay(c);
+              const comm = getCommercialDisplay(c);
+              const conf = getConfidenceScope(c);
+
               return (
                 <div
                   key={c.case_id}
-                  className="p-4 sm:p-5 rounded-xl border border-zinc-200 bg-zinc-50/70 hover:bg-white hover:border-purple-300 transition-all text-xs shadow-2xs"
+                  onClick={() => onSelectCase && onSelectCase(c)}
+                  className="p-5 rounded-xl bg-zinc-50/80 border border-zinc-200 hover:border-purple-300 transition-all cursor-pointer group text-xs shadow-2xs"
                 >
-                  {/* Top Bar */}
-                  <div className="flex flex-wrap items-center justify-between gap-3 mb-3 pb-3 border-b border-zinc-200/80">
-                    <div className="flex items-center gap-3">
-                      <span className="font-mono font-bold text-zinc-950 text-sm">
-                        Case #{c.case_id}
-                      </span>
-                      <span
-                        className={`font-mono text-[11px] font-bold px-3 py-1 rounded-full ${
-                          isDeriv
-                            ? 'bg-red-100 text-red-700 border border-red-200'
-                            : isClean
-                            ? 'bg-emerald-100 text-emerald-700 border border-emerald-200'
-                            : 'bg-amber-100 text-amber-800 border border-amber-200'
-                        }`}
-                      >
-                        {c.verdict || 'AMBIGUOUS'}
-                      </span>
-                      {c.status && (
-                        <span className="font-mono text-[10px] px-2 py-0.5 rounded bg-zinc-100 text-zinc-600 border border-zinc-200">
-                          {c.status}
-                        </span>
-                      )}
-                    </div>
+                      {/* Top Bar */}
+                      <div className="flex flex-wrap items-center justify-between gap-3 mb-3 pb-3 border-b border-zinc-200/80">
+                        <div className="flex items-center gap-3">
+                          <span className="font-mono font-bold text-zinc-950 text-sm">
+                            Case #{c.case_id}
+                          </span>
+                          <span
+                            className={`font-mono text-[11px] font-bold px-3 py-1 rounded-full ${
+                              isDeriv
+                                ? 'bg-red-100 text-red-700 border border-red-200'
+                                : isClean
+                                ? 'bg-emerald-100 text-emerald-700 border border-emerald-200'
+                                : 'bg-amber-100 text-amber-800 border border-amber-200'
+                            }`}
+                          >
+                            {c.verdict || 'AMBIGUOUS'}
+                          </span>
+                          {c.status && (
+                            <span className="font-mono text-[10px] px-2 py-0.5 rounded bg-zinc-100 text-zinc-600 border border-zinc-200">
+                              {c.status}
+                            </span>
+                          )}
+                        </div>
 
-                    <div className="flex items-center gap-4 text-xs font-mono text-zinc-600">
-                      <span>Similarity: <strong className="text-zinc-900">{c.similarity}%</strong></span>
-                      <span>•</span>
-                      <span>Commercial Use: <strong className="text-zinc-900">{c.commercial_use ? 'Yes' : 'No'}</strong></span>
-                      <span>•</span>
-                      <span>Confidence: <strong className="text-zinc-900">{c.confidence}%</strong></span>
-                    </div>
-                  </div>
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs font-mono text-zinc-600">
+                          <span title={sim.detail}>
+                            Similarity:{' '}
+                            <strong className={sim.isUnreadable ? 'text-amber-600' : 'text-zinc-900'}>
+                              {sim.short}
+                            </strong>
+                          </span>
+                          <span>•</span>
+                          <span title={comm.detail}>
+                            Commercial:{' '}
+                            <strong className={comm.textColor}>
+                              {comm.short}
+                            </strong>
+                          </span>
+                          <span>•</span>
+                          <span title={conf.meaningVi}>
+                            Certainty:{' '}
+                            <strong className="text-zinc-900">
+                              {conf.short}
+                            </strong>
+                          </span>
+                        </div>
+                      </div>
 
                   {/* Suspect URL & Evidence */}
                   <div className="mb-3">

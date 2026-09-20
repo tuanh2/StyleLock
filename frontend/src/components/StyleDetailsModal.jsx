@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { weiToGen, txExplorerUrl } from '../config';
+import { getSimilarityDisplay, getCommercialDisplay, getConfidenceScope } from '../utils/caseEvaluation';
 
 export default function StyleDetailsModal({ isOpen, onClose, style, cases = [], onReport, onSelectCase, onDonate, currency = 'GEN' }) {
   useEffect(() => {
@@ -184,11 +185,20 @@ export default function StyleDetailsModal({ isOpen, onClose, style, cases = [], 
                           {c.verdict || 'AMBIGUOUS'}
                         </span>
                       </div>
-                      <div className="flex items-center gap-2 text-[11px] font-mono text-zinc-500">
-                        <span>Similarity: <strong className="text-zinc-900">{c.similarity}%</strong></span>
-                        <span>•</span>
-                        <span>Commercial: <strong className="text-zinc-900">{c.commercial_use ? 'Yes' : 'No'}</strong></span>
-                      </div>
+                      {(() => {
+                        const sim = getSimilarityDisplay(c);
+                        const comm = getCommercialDisplay(c);
+                        const conf = getConfidenceScope(c);
+                        return (
+                          <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[11px] font-mono text-zinc-500">
+                            <span title={sim.detail}>Similarity: <strong className={sim.isUnreadable ? 'text-amber-600' : 'text-zinc-900'}>{sim.short}</strong></span>
+                            <span>•</span>
+                            <span title={comm.detail}>Commercial: <strong className={comm.textColor}>{comm.short}</strong></span>
+                            <span>•</span>
+                            <span title={conf.meaningVi}>Certainty: <strong className="text-zinc-900">{conf.short}</strong></span>
+                          </div>
+                        );
+                      })()}
                     </div>
 
                     <div className="mb-2">

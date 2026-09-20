@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { weiToGen, txExplorerUrl } from '../config';
+import { getSimilarityDisplay, getCommercialDisplay, getConfidenceScope } from '../utils/caseEvaluation';
 
 export default function HunterBoard({ styles, cases = [], onSelectStyle, onOpenSubmit, onSelectCase, claimableReward, onClaimReward, isClaiming, onDonate, currency = 'GEN' }) {
   const [activeSubTab, setActiveSubTab] = useState('bounties'); // 'bounties' | 'history'
@@ -153,6 +154,10 @@ export default function HunterBoard({ styles, cases = [], onSelectStyle, onOpenS
               const isDeriv = c.verdict === 'DERIVATIVE';
               const isClean = c.verdict === 'CLEAN';
               const matchedStyle = styles.find(s => String(s.style_id) === String(c.style_id));
+              const sim = getSimilarityDisplay(c);
+              const comm = getCommercialDisplay(c);
+              const conf = getConfidenceScope(c);
+
               return (
                 <div
                   key={c.case_id}
@@ -183,12 +188,27 @@ export default function HunterBoard({ styles, cases = [], onSelectStyle, onOpenS
                       </button>
                     </div>
 
-                    <div className="flex items-center gap-3 text-[11px] font-mono text-zinc-500">
-                      <span>Similarity: <strong className="text-zinc-900">{c.similarity}%</strong></span>
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-mono text-zinc-500">
+                      <span title={sim.detail}>
+                        Similarity:{' '}
+                        <strong className={sim.isUnreadable ? 'text-amber-600' : 'text-zinc-900'}>
+                          {sim.short}
+                        </strong>
+                      </span>
                       <span>•</span>
-                      <span>Commercial: <strong className="text-zinc-900">{c.commercial_use ? 'Yes' : 'No'}</strong></span>
+                      <span title={comm.detail}>
+                        Commercial:{' '}
+                        <strong className={comm.textColor}>
+                          {comm.short}
+                        </strong>
+                      </span>
                       <span>•</span>
-                      <span>Confidence: <strong className="text-zinc-900">{c.confidence}%</strong></span>
+                      <span title={conf.meaningVi}>
+                        Certainty:{' '}
+                        <strong className="text-zinc-900">
+                          {conf.short}
+                        </strong>
+                      </span>
                     </div>
                   </div>
 

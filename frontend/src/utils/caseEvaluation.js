@@ -126,7 +126,7 @@ export function getConfidenceScope(c) {
   if (verdict === 'DERIVATIVE') {
     return {
       percentage: conf,
-      scope: 'Infringement Certainty',
+      scope: 'Infringement Confirmed',
       meaning: 'Consensus confirms substantial copying of protected traits',
       badgeBg: 'bg-rose-50 text-rose-700 border-rose-200',
       textColor: 'text-rose-700',
@@ -137,7 +137,7 @@ export function getConfidenceScope(c) {
   if (verdict === 'CLEAN') {
     return {
       percentage: conf,
-      scope: 'Non-Infringement Certainty',
+      scope: 'No Infringement',
       meaning: 'Consensus confirms artwork is independent or distinct',
       badgeBg: 'bg-emerald-50 text-emerald-700 border-emerald-200',
       textColor: 'text-emerald-700',
@@ -148,8 +148,8 @@ export function getConfidenceScope(c) {
   // AMBIGUOUS / INSUFFICIENT DATA
   return {
     percentage: conf,
-    scope: 'Certainty of Insufficient Data',
-    meaning: 'Consensus confirms evidence is inconclusive or inaccessible to judge',
+    scope: 'Insufficient Data',
+    meaning: 'Consensus confirms evidence is inconclusive or unreadable',
     badgeBg: 'bg-amber-50 text-amber-800 border-amber-200',
     textColor: 'text-amber-700',
     short: `${conf}% (Insufficient Data)`

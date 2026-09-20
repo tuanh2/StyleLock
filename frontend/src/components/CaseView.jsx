@@ -79,9 +79,9 @@ export default function CaseView({ caseData, onBack, onClaimReward, isClaiming, 
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           <div className="leading-relaxed">
-            <span className="font-bold block text-amber-900 mb-0.5">Note on Insufficient Evidence ({confInfo.percentage}% Consensus):</span>
+            <span className="font-bold block text-amber-900 mb-0.5">Notice: Insufficient Data ({confInfo.percentage}% Consensus)</span>
             <span>
-              The <strong>{confInfo.percentage}%</strong> certainty reflects unanimous validator consensus that the submitted evidence contains <strong>insufficient data or unreadable media</strong> to evaluate (it does NOT indicate 95% infringement). Visual similarity is marked as <strong>N/A</strong> (not 0% similarity) and commercial use is marked as <strong>Unverified</strong>.
+              Validators confirmed that the submitted link has <strong>insufficient data or unreadable media</strong> to evaluate. Visual similarity is recorded as <strong>N/A</strong> and commercial intent as <strong>Unverified</strong>.
             </span>
           </div>
         </div>
@@ -121,7 +121,7 @@ export default function CaseView({ caseData, onBack, onClaimReward, isClaiming, 
             {commInfo.label}
           </span>
           <span className="text-[10px] text-zinc-500 font-mono">
-            {commInfo.status === 'UNVERIFIED' ? 'Insufficient page data' : commInfo.status === 'CONFIRMED' ? 'Monetization detected' : 'Non-commercial verified'}
+            {commInfo.status === 'UNVERIFIED' ? 'Insufficient data' : commInfo.status === 'CONFIRMED' ? 'Monetization detected' : 'Non-commercial verified'}
           </span>
         </div>
 

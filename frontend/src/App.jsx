@@ -37,27 +37,69 @@ const getTabFromUrl = () => {
 };
 
 const loadInitialStyles = () => {
-  if (typeof window === 'undefined') return INITIAL_STYLES.map(s => ({ ...s, available_bounty_pool: '0' }));
+  if (typeof window === 'undefined') return INITIAL_STYLES;
   try {
     const saved = localStorage.getItem('stylelock_custom_styles');
     if (saved) {
       const parsed = JSON.parse(saved);
       if (Array.isArray(parsed) && parsed.length > 0) {
-        return parsed;
+        // Self-heal: ensure initial styles are present and have their real funded pools
+        const merged = [...parsed];
+        for (const initS of INITIAL_STYLES) {
+          const idx = merged.findIndex(m => String(m.style_id) === String(initS.style_id));
+          if (idx === -1) {
+            merged.push(initS);
+          } else {
+            // Restore proper pool and confirmed cases if corrupted or reset to 0 in old cache
+            if (!merged[idx].available_bounty_pool || merged[idx].available_bounty_pool === '0') {
+              merged[idx].available_bounty_pool = initS.available_bounty_pool;
+            }
+            if (initS.confirmed_cases > 0 && (!merged[idx].confirmed_cases || merged[idx].confirmed_cases === 0)) {
+              merged[idx].confirmed_cases = initS.confirmed_cases;
+            }
+          }
+        }
+        return merged;
       }
     }
   } catch (e) {
     console.warn('Error reading cached styles:', e);
   }
-  return INITIAL_STYLES.map(s => ({ ...s, available_bounty_pool: '0' }));
+  return INITIAL_STYLES;
+};
+
+const loadInitialCases = () => {
+  if (typeof window === 'undefined') return INITIAL_CASES;
+  try {
+    const saved = localStorage.getItem('stylelock_cases');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        // Self-heal: ensure all landmark cases and active style histories exist
+        const merged = [...parsed];
+        for (const initC of INITIAL_CASES) {
+          const existingIdx = merged.findIndex(m => String(m.case_id) === String(initC.case_id));
+          if (existingIdx === -1) {
+            merged.push(initC);
+          } else if (initC.status === 'ENFORCED' && merged[existingIdx].status !== 'ENFORCED') {
+            merged[existingIdx] = initC;
+          }
+        }
+        return merged;
+      }
+    }
+  } catch (e) {
+    console.warn('Error reading cached cases:', e);
+  }
+  return INITIAL_CASES;
 };
 
 export default function App() {
   const [showSplash, setShowSplash] = useState(true);
   const [activeTab, setActiveTab] = useState(getTabFromUrl);
   const [styles, setStyles] = useState(loadInitialStyles);
-  const [cases, setCases] = useState(INITIAL_CASES);
-  const [selectedCase, setSelectedCase] = useState(INITIAL_CASES[0] || null);
+  const [cases, setCases] = useState(loadInitialCases);
+  const [selectedCase, setSelectedCase] = useState(() => loadInitialCases()[0] || null);
   const [account, setAccount] = useState('');
   const [isConnecting, setIsConnecting] = useState(false);
   
@@ -191,7 +233,10 @@ export default function App() {
                 mergedCases.push(c);
               }
             }
-            return mergedCases.reverse();
+            try {
+              localStorage.setItem('stylelock_cases', JSON.stringify(mergedCases));
+            } catch (_) {}
+            return mergedCases;
           });
         }
       }
@@ -202,10 +247,10 @@ export default function App() {
 
   useEffect(() => {
     fetchOnChainData();
-    // Auto-refresh real-time on-chain data every 10 seconds
+    // Auto-refresh on-chain data throttled to 60 seconds to avoid burning daily RPC rate limits
     const interval = setInterval(() => {
       fetchOnChainData();
-    }, 10000);
+    }, 60000);
     return () => clearInterval(interval);
   }, [fetchOnChainData]);
 
@@ -481,7 +526,13 @@ export default function App() {
       const newCase = JSON.parse(latestCaseRaw);
       newCase.txHash = hashStr;
 
-      setCases(prev => [newCase, ...prev]);
+      setCases(prev => {
+        const updated = [newCase, ...prev];
+        try {
+          localStorage.setItem('stylelock_cases', JSON.stringify(updated));
+        } catch (_) {}
+        return updated;
+      });
       setSelectedCase(newCase);
       changeTab('case');
       playTingTing();

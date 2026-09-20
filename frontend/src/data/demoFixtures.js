@@ -179,7 +179,7 @@ export const INITIAL_CASES = [
     reward_allocated: true,
     bounty_amount_wei: '250000000000000000', // 0.25 GEN
     enforcement_record_id: 'SL-0001',
-    txHash: '0x4d16853fc5a2a537d9954daffc6298818f97cf3c14a29a0ebf3c3a9d20c52a0a'
+    txHash: '0xcb5d147609b68e04a1fd6fea36b4e3985e5cc3fedfe543f64183fff3c7c5c19d'
   },
   {
     case_id: '2',
@@ -200,7 +200,7 @@ export const INITIAL_CASES = [
     reward_allocated: false,
     bounty_amount_wei: '0',
     enforcement_record_id: '',
-    txHash: '0xcb5d147609b68e04a1fd6fea36b4e3985e5cc3fedfe543f64183fff3c7c5c19d'
+    txHash: '0x10b569cd4b890d6ac87b8376c0bf931ae95e05dbfff4a920ec6cc4811e67e2bc'
   },
   {
     case_id: '3',
@@ -222,7 +222,7 @@ export const INITIAL_CASES = [
     reward_allocated: false,
     bounty_amount_wei: '0',
     enforcement_record_id: '',
-    txHash: '0x1045756a1167583b0ffce4383d93b3030fe9117e0a043ac18c1a354535fe7528'
+    txHash: '0x4fa7249b4531f2721452e715341830e5ef5deb5be44fa15fb204ffefc8000eb6'
   },
   {
     case_id: '4',
@@ -243,7 +243,7 @@ export const INITIAL_CASES = [
     reward_allocated: false,
     bounty_amount_wei: '0',
     enforcement_record_id: '',
-    txHash: '0x7e8125439a061b314b3ba4c07751adaac405d9096efbeaf1541623e149df7ef06'
+    txHash: null
   },
   {
     case_id: '5',
@@ -265,7 +265,7 @@ export const INITIAL_CASES = [
     reward_allocated: false,
     bounty_amount_wei: '0',
     enforcement_record_id: '',
-    txHash: '0x6e7cf5e510be867e916f1ce7468cbceb486628d9ceca2d550aa4e9bab948902a'
+    txHash: '0xed762f4cd1820432a2180f439ad644f62cc7d0b73b9e6709064d955996cfaf01'
   },
   {
     case_id: '6',
@@ -286,7 +286,7 @@ export const INITIAL_CASES = [
     reward_allocated: false,
     bounty_amount_wei: '0',
     enforcement_record_id: '',
-    txHash: '0x992b1579a32c7482312ceea0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08'
+    txHash: '0x4c73063cfcb73e6032e1e01bd3347822cf179f6361ee644f8f45d3a7233e1aa1'
   },
   {
     case_id: '7',
@@ -307,6 +307,6 @@ export const INITIAL_CASES = [
     reward_allocated: false,
     bounty_amount_wei: '0',
     enforcement_record_id: '',
-    txHash: '0x3a8128529b061b314b3ba4c07751adaac405d9096efbeaf1541623e149df7ab88'
+    txHash: '0xd683028682012d7908785dda82ed415dd3fa95d23481b04f40a5a795a68f1c52'
   }
 ];

@@ -47,8 +47,7 @@ export function getSimilarityDisplay(c) {
       value: 'N/A',
       isUnreadable: true,
       label: 'Unreadable Image',
-      labelVi: 'Không đọc được ảnh',
-      detail: 'Không thể đọc được ảnh để so khớp (không phải 0% tương đồng)',
+      detail: 'Image could not be parsed or loaded (not 0% similarity)',
       short: 'N/A (Unreadable)'
     };
   }
@@ -58,8 +57,7 @@ export function getSimilarityDisplay(c) {
     value: `${sim}%`,
     isUnreadable: false,
     label: 'Visual Similarity',
-    labelVi: 'Độ tương đồng phong cách',
-    detail: `${sim}% độ tương đồng so với phong cách đã đăng ký`,
+    detail: `${sim}% style similarity against registered traits`,
     short: `${sim}%`
   };
 }
@@ -85,7 +83,7 @@ export function getCommercialDisplay(c) {
       short: 'Unverified',
       textColor: 'text-amber-600',
       badgeBg: 'bg-amber-100 text-amber-800 border-amber-200',
-      detail: 'Chưa xác minh mục đích thương mại (thiếu dữ liệu)'
+      detail: 'Commercial intent unverified (insufficient data)'
     };
   }
 
@@ -96,7 +94,7 @@ export function getCommercialDisplay(c) {
       short: 'Unverified',
       textColor: 'text-amber-600',
       badgeBg: 'bg-amber-100 text-amber-800 border-amber-200',
-      detail: 'Chưa đủ dữ liệu trang để xác minh mục đích thương mại'
+      detail: 'Insufficient page data to verify commercial use'
     };
   }
 
@@ -107,17 +105,17 @@ export function getCommercialDisplay(c) {
       short: 'Yes (Commercial)',
       textColor: 'text-rose-600',
       badgeBg: 'bg-rose-100 text-rose-800 border-rose-200',
-      detail: 'Phát hiện mục đích thương mại (giá bán, cửa hàng, sản phẩm)'
+      detail: 'Commercial intent detected (monetization, store, or paid goods)'
     };
   }
 
   return {
     status: 'NON_COMMERCIAL',
     label: 'NO (Verified)',
-    short: 'No (Verified Non-Comm)',
+    short: 'No (Non-Commercial)',
     textColor: 'text-emerald-600',
     badgeBg: 'bg-emerald-100 text-emerald-800 border-emerald-200',
-    detail: 'Đã xác minh không có hoạt động thương mại / phi lợi nhuận'
+    detail: 'Verified non-commercial or personal fair use'
   };
 }
 
@@ -129,9 +127,7 @@ export function getConfidenceScope(c) {
     return {
       percentage: conf,
       scope: 'Infringement Certainty',
-      scopeVi: 'Chắc chắn về vi phạm',
       meaning: 'Consensus confirms substantial copying of protected traits',
-      meaningVi: 'Đồng thuận chắc chắn phát hiện sao chép phong cách',
       badgeBg: 'bg-rose-50 text-rose-700 border-rose-200',
       textColor: 'text-rose-700',
       short: `${conf}% (Infringement)`
@@ -142,9 +138,7 @@ export function getConfidenceScope(c) {
     return {
       percentage: conf,
       scope: 'Non-Infringement Certainty',
-      scopeVi: 'Chắc chắn không vi phạm',
       meaning: 'Consensus confirms artwork is independent or distinct',
-      meaningVi: 'Đồng thuận chắc chắn tác phẩm không vi phạm bản quyền phong cách',
       badgeBg: 'bg-emerald-50 text-emerald-700 border-emerald-200',
       textColor: 'text-emerald-700',
       short: `${conf}% (Clean)`
@@ -155,9 +149,7 @@ export function getConfidenceScope(c) {
   return {
     percentage: conf,
     scope: 'Certainty of Insufficient Data',
-    scopeVi: 'Chắc chắn chưa đủ dữ liệu',
     meaning: 'Consensus confirms evidence is inconclusive or inaccessible to judge',
-    meaningVi: 'Đồng thuận chắc chắn bằng chứng chưa đủ để đưa ra kết luận (không phải 95% vi phạm)',
     badgeBg: 'bg-amber-50 text-amber-800 border-amber-200',
     textColor: 'text-amber-700',
     short: `${conf}% (Insufficient Data)`

@@ -195,7 +195,7 @@ export default function StyleDetailsModal({ isOpen, onClose, style, cases = [], 
                             <span>•</span>
                             <span title={comm.detail}>Commercial: <strong className={comm.textColor}>{comm.short}</strong></span>
                             <span>•</span>
-                            <span title={conf.meaningVi}>Certainty: <strong className="text-zinc-900">{conf.short}</strong></span>
+                            <span title={conf.meaning}>Certainty: <strong className="text-zinc-900">{conf.short}</strong></span>
                           </div>
                         );
                       })()}

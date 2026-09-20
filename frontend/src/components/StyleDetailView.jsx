@@ -282,7 +282,7 @@ export default function StyleDetailView({ style, cases = [], onBack, onReport, o
                             </strong>
                           </span>
                           <span>•</span>
-                          <span title={conf.meaningVi}>
+                          <span title={conf.meaning}>
                             Certainty:{' '}
                             <strong className="text-zinc-900">
                               {conf.short}

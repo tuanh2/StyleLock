@@ -51,7 +51,7 @@ export default function CaseView({ caseData, onBack, onClaimReward, isClaiming, 
                 {caseData.status}
               </span>
               <span className="text-[11px] font-mono text-zinc-500">
-                • {confInfo.scopeVi} ({confInfo.percentage}%)
+                • {confInfo.scope} ({confInfo.percentage}%)
               </span>
             </div>
             <p className="text-xs text-zinc-600 mt-1">
@@ -79,9 +79,9 @@ export default function CaseView({ caseData, onBack, onClaimReward, isClaiming, 
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           <div className="leading-relaxed">
-            <span className="font-bold block text-amber-900 mb-0.5">Làm rõ về kết luận và độ tin cậy {confInfo.percentage}%:</span>
+            <span className="font-bold block text-amber-900 mb-0.5">Note on Insufficient Evidence ({confInfo.percentage}% Consensus):</span>
             <span>
-              Độ tin cậy <strong>{confInfo.percentage}%</strong> ở đây phản ánh sự đồng thuận tuyệt đối của các node validator rằng <strong>bằng chứng chưa đủ dữ liệu hoặc không đọc được ảnh</strong> để đánh giá (KHÔNG PHẢI là xác định 95% có vi phạm). Tương tự, không đọc được ảnh được ghi nhận là <strong>N/A</strong> (không phải 0% tương đồng) và mục đích thương mại là <strong>Chưa xác minh</strong> (không thể khẳng định là không có).
+              The <strong>{confInfo.percentage}%</strong> certainty reflects unanimous validator consensus that the submitted evidence contains <strong>insufficient data or unreadable media</strong> to evaluate (it does NOT indicate 95% infringement). Visual similarity is marked as <strong>N/A</strong> (not 0% similarity) and commercial use is marked as <strong>Unverified</strong>.
             </span>
           </div>
         </div>
@@ -103,7 +103,7 @@ export default function CaseView({ caseData, onBack, onClaimReward, isClaiming, 
             {simInfo.value}
           </span>
           <span className="text-[10px] text-zinc-500 font-mono">
-            {simInfo.isUnreadable ? 'Không đọc được ảnh' : 'Similarity score'}
+            {simInfo.isUnreadable ? 'Unreadable media' : 'Similarity score'}
           </span>
         </div>
 
@@ -121,7 +121,7 @@ export default function CaseView({ caseData, onBack, onClaimReward, isClaiming, 
             {commInfo.label}
           </span>
           <span className="text-[10px] text-zinc-500 font-mono">
-            {commInfo.status === 'UNVERIFIED' ? 'Chưa đủ dữ liệu trang' : commInfo.status === 'CONFIRMED' ? 'Phát hiện bán/kiếm tiền' : 'Xác minh phi thương mại'}
+            {commInfo.status === 'UNVERIFIED' ? 'Insufficient page data' : commInfo.status === 'CONFIRMED' ? 'Monetization detected' : 'Non-commercial verified'}
           </span>
         </div>
 
@@ -134,8 +134,8 @@ export default function CaseView({ caseData, onBack, onClaimReward, isClaiming, 
             </span>
           </div>
           <span className="text-2xl font-bold text-zinc-950 font-mono mt-1 block">{confInfo.percentage}%</span>
-          <span className="text-[10px] text-zinc-600 font-mono block leading-tight truncate" title={confInfo.meaningVi}>
-            {confInfo.scopeVi}
+          <span className="text-[10px] text-zinc-600 font-mono block leading-tight truncate" title={confInfo.meaning}>
+            {confInfo.scope}
           </span>
         </div>
 

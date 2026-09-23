@@ -156,6 +156,60 @@ export const INITIAL_STYLES = [
     reference_collage_url: 'https://pbs.twimg.com/media/HSa1gXOWsAECHU-.jpg?name=orig',
     active: true,
     confirmed_cases: 0
+    },
+  {
+    style_id: '6',
+    artist_address: '0x659ee75C8a9A45b43781B81B29d930258ec9E92b',
+    artist_display_name: 'Dezzy Studio',
+    style_name: 'Cyber Sakura Noir',
+    descriptor: 'Futuristic cyberpunk Japanese aesthetics blending glowing neon cherry blossom petals with gritty dark cybernetic textures and high-contrast violet shadows.',
+    protected_traits: 'neon cherry blossom petals; cybernetic metallic armor; violet and midnight black palette; holographic kanji elements',
+    license_terms: 'Commercial AI image generation or unauthorized merchandise prohibited without artist license.',
+    similarity_threshold: 82,
+    minimum_confidence: 75,
+    bounty_per_case_wei: '200000000000000000',
+    available_bounty_pool: '1500000000000000000',
+    reference_manifest_url: 'https://stylelock.art/manifests/cyber-sakura.json',
+    reference_manifest_hash: '0xcccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc',
+    reference_collage_url: 'https://images.unsplash.com/photo-1578632767115-351597cf2477?w=800&auto=format&fit=crop',
+    active: true,
+    confirmed_cases: 0
+  },
+  {
+    style_id: '7',
+    artist_address: '0x659ee75C8a9A45b43781B81B29d930258ec9E92b',
+    artist_display_name: 'Jade',
+    style_name: 'Tet Chibi Mascots',
+    descriptor: 'A playful 2D digital cartoon of three chibi animal mascots preparing Vietnamese banh chung outdoors. Thick dark outlines define oversized heads, glossy oval eyes, cream-and-tan faces, rosy cheeks, and small rounded bodies.',
+    protected_traits: 'thick dark cartoon outlines; oversized chibi heads with small rounded bodies; glossy oval cartoon eyes with rosy cheeks; three-character triangular composition; outdoor Tet banh chung cooking scene with firewood and pot',
+    license_terms: 'Commercial AI-generated derivatives using this registered style require prior authorization.',
+    similarity_threshold: 82,
+    minimum_confidence: 75,
+    bounty_per_case_wei: '250000000000000000',
+    available_bounty_pool: '1500000000000000000',
+    reference_manifest_url: 'https://stylelock.art/manifests/tet-chibi-mascots.json',
+    reference_manifest_hash: '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+    reference_collage_url: 'https://pbs.twimg.com/media/G6aw9ezakAAER5z.jpg?name=orig',
+    active: true,
+    confirmed_cases: 0
+  },
+  {
+    style_id: '8',
+    artist_address: '0x659ee75C8a9A45b43781B81B29d930258ec9E92b',
+    artist_display_name: 'XBON',
+    style_name: 'GG',
+    descriptor: 'KNOW NEED visual identity with distinctive typographic and minimalist vector signature accents.',
+    protected_traits: 'GED; KNOW NEED branding; minimalist monochrome typography; high-contrast modern vector layout',
+    license_terms: 'Commercial AI-generated derivatives using this registered style require prior authorization.',
+    similarity_threshold: 82,
+    minimum_confidence: 75,
+    bounty_per_case_wei: '250000000000000000',
+    available_bounty_pool: '0',
+    reference_manifest_url: 'https://stylelock.art/manifests/gg.json',
+    reference_manifest_hash: '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+    reference_collage_url: 'https://pbs.twimg.com/profile_images/1836758410290806784/Xz4x2hO-_400x400.jpg',
+    active: true,
+    confirmed_cases: 0
   }
 ];
 
@@ -308,5 +362,30 @@ export const INITIAL_CASES = [
     bounty_amount_wei: '0',
     enforcement_record_id: '',
     txHash: '0xd683028682012d7908785dda82ed415dd3fa95d23481b04f40a5a795a68f1c52'
+    },
+  {
+    case_id: '8',
+    style_id: '8',
+    style_name: 'GG',
+    hunter_address: '0x659ee75C8a9A45b43781B81B29d930258ec9E92b',
+    suspect_url: 'https://fxtwitter.com/GenLayer/status/2099532897828929958',
+    claim_text: 'Suspected unauthorized copy exploiting traits of GG (GED). — Evidence Details: [X Post by @GenLayer: "Promising projects are already showing up in Agent Tank: Mandate Court settles agent disputes over escrowed USDC. CiteFlow pays creators when an answer cites them. AutoProof releases bounties once the code meets the brief. Submissions close Thursday https://portal.genlayer.foundation/agent-tank/". Artwork Image: https://pbs.twimg.com/media/HSMJzoCWgAESCbc.jpg?name=orig]',
+    status: 'CLEAN',
+    verdict: 'CLEAN',
+    similarity: 5,
+    confidence: 81,
+    commercial_use: false,
+    commercial_confidence: 5,
+    matched_traits: [],
+    differences: [
+      'Suspect image is an official tweet by @GenLayer promoting Agent Tank hackathon',
+      'No reproduction of protected GG (GED) traits',
+      'Non-commercial ecosystem announcement'
+    ],
+    reason: 'The registered GG style is a distinct visual artwork with specific artistic traits (line contours, palette harmony, composition). The suspect image is an official tweet by @GenLayer showing promotional text for Agent Tank, which does not reproduce any of those traits. Visual content is unrelated, leading to a CLEAN verdict.',
+    reward_allocated: false,
+    bounty_amount_wei: '0',
+    enforcement_record_id: '',
+    txHash: '0xa65b6f0b223f97e7ede0b3a80d9758fccb709fc76738abc2745136aa2775b27b'
   }
 ];

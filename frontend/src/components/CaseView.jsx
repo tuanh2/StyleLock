@@ -7,7 +7,8 @@ export default function CaseView({ caseData, onBack, onClaimReward, isClaiming, 
 
   const isEnforced = caseData.status === 'ENFORCED';
   const isClean = caseData.status === 'CLEAN';
-  const isAmbiguous = caseData.verdict === 'AMBIGUOUS' || caseData.status === 'AMBIGUOUS';
+  const isEvaluating = caseData.status === 'EVALUATING' || caseData.verdict === 'PENDING';
+  const isAmbiguous = !isEvaluating && (caseData.verdict === 'AMBIGUOUS' || caseData.status === 'AMBIGUOUS');
 
   const simInfo = getSimilarityDisplay(caseData);
   const commInfo = getCommercialDisplay(caseData);
@@ -35,7 +36,9 @@ export default function CaseView({ caseData, onBack, onClaimReward, isClaiming, 
 
       {/* Consensus Banner */}
       <div className={`p-5 rounded-xl border mb-6 ${
-        isEnforced
+        isEvaluating
+          ? 'bg-purple-50/90 border-purple-200'
+          : isEnforced
           ? 'bg-rose-50 border-rose-200'
           : isClean
           ? 'bg-emerald-50 border-emerald-200'
@@ -44,14 +47,22 @@ export default function CaseView({ caseData, onBack, onClaimReward, isClaiming, 
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 flex-wrap">
-              <h2 className="text-lg font-bold text-zinc-950 font-mono">VERDICT: {caseData.verdict}</h2>
+              <h2 className="text-lg font-bold text-zinc-950 font-mono">
+                {isEvaluating ? 'STATUS: EVALUATING' : `VERDICT: ${caseData.verdict}`}
+              </h2>
               <span className={`text-[10px] font-mono px-2 py-0.5 rounded font-bold ${
-                isEnforced ? 'bg-rose-200 text-rose-800' : isClean ? 'bg-emerald-200 text-emerald-800' : 'bg-amber-200 text-amber-800'
+                isEvaluating
+                  ? 'bg-purple-200 text-purple-800 animate-pulse'
+                  : isEnforced
+                  ? 'bg-rose-200 text-rose-800'
+                  : isClean
+                  ? 'bg-emerald-200 text-emerald-800'
+                  : 'bg-amber-200 text-amber-800'
               }`}>
                 {caseData.status}
               </span>
               <span className="text-[11px] font-mono text-zinc-500">
-                • {confInfo.scope} ({confInfo.percentage}%)
+                • {confInfo.scope} {confInfo.percentage > 0 ? `(${confInfo.percentage}%)` : ''}
               </span>
             </div>
             <p className="text-xs text-zinc-600 mt-1">

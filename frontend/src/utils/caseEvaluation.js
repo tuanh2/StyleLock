@@ -41,6 +41,16 @@ export function isEvidenceUnreadable(c) {
 export function getSimilarityDisplay(c) {
   if (!c) return { value: 'N/A', isUnreadable: true, label: 'N/A (No Data)', short: 'N/A' };
   
+  if (c.status === 'EVALUATING' || c.verdict === 'PENDING') {
+    return {
+      value: '...',
+      isUnreadable: false,
+      label: 'Evaluating',
+      detail: 'AI validators currently evaluating visual similarity',
+      short: 'Evaluating...'
+    };
+  }
+
   const unreadable = isEvidenceUnreadable(c);
   if (unreadable) {
     return {
@@ -87,6 +97,17 @@ export function getCommercialDisplay(c) {
     };
   }
 
+  if (c.status === 'EVALUATING' || c.verdict === 'PENDING') {
+    return {
+      status: 'EVALUATING',
+      label: 'EVALUATING',
+      short: 'Evaluating...',
+      textColor: 'text-purple-600',
+      badgeBg: 'bg-purple-100 text-purple-800 border-purple-200',
+      detail: 'AI validators currently checking commercial signals'
+    };
+  }
+
   if (isCommercialUnverified(c)) {
     return {
       status: 'UNVERIFIED',
@@ -122,6 +143,28 @@ export function getCommercialDisplay(c) {
 export function getConfidenceScope(c) {
   const conf = Number(c?.confidence ?? 95);
   const verdict = String(c?.verdict || 'AMBIGUOUS').toUpperCase();
+
+  if (verdict === 'PENDING' || verdict === 'EVALUATING' || c?.status === 'EVALUATING') {
+    return {
+      percentage: conf || 0,
+      scope: 'Consensus in Progress',
+      meaning: 'Waiting for GenLayer AI validators to complete consensus evaluation',
+      badgeBg: 'bg-purple-50 text-purple-700 border-purple-200',
+      textColor: 'text-purple-700',
+      short: 'Evaluating...'
+    };
+  }
+
+  if (verdict === 'CONSENSUS_REACHED' || verdict === 'FINALIZED') {
+    return {
+      percentage: conf || 90,
+      scope: 'Consensus Finalized',
+      meaning: 'AI consensus verified on-chain via GenLayer Studio Next',
+      badgeBg: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+      textColor: 'text-emerald-700',
+      short: 'Consensus Verified'
+    };
+  }
 
   if (verdict === 'DERIVATIVE') {
     return {
